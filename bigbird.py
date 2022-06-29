@@ -227,32 +227,19 @@ def generate_all_table():
 
 def _bigbird_block_rand_mask2(
         from_seq_length, to_seq_length, from_block_size, to_block_size, num_rand_blocks, last_idx=-1
-    ):
-    pass   
+    ): 
     rand_attn = [ [] for _ in range(63) ]
-    n0_14 = np.random.randint(1716, size=2)
-    rand_attn[0] = all_tables[0][n0_14[0]]
-    one_13 = np.random.randint(1320, size=13)
-    for x in range(1, 14):
-        rand_attn[x] = all_tables[x][one_13[x-1]]
-    rand_attn[14] = all_tables[14][n0_14[1]]
-    rand_attn[15] = all_tables[15][np.random.randint(2184)]
-    # n16_61 = np.random.randint(2730, size=46)
-    # for x in range(16, 62):
-    #     rand_attn[x] = all_tables[x][n16_61[x-16]]
-    # return rand_attn
-
-    for x in range(16, 62):
-        index = np.random.randint(2730)
-        rand_attn[x] = all_tables[x][index]
+    for i in range(62):
+        rand_i = np.random.randint(len(all_tables[i]))
+        rand_attn[i] = all_tables[i][rand_i]
     return rand_attn
 
 t0 = time.time_ns()
 for i in range(432):
     
     a=_bigbird_block_rand_mask(4096, 4096, 64, 64, 3, 1024)
-    if i == 1:
-        print(a)
+    # if i == 1:
+    #     print(a)
 t1 = time.time_ns()
 print('{:<20} {:>20}'.format("Total Wall Time:", "%.3f milliseconds" % ((t1 - t0) / 1_000_000)), sep='')
 
@@ -271,8 +258,8 @@ generate_all_table()
 t1 = time.time_ns()
 for i in range(432):
     a = _bigbird_block_rand_mask2(4096, 4096, 64, 64, 3, 1024)
-    if i == 1:
-        print(a)
+    # if i == 1:
+    #     print(a)
 
 
 
@@ -295,8 +282,8 @@ t0 = time.time_ns()
 for i in range(432):
     
     a=_bigbird_block_rand_mask_3(4096, 4096, 64, 64, 3, 1024)
-    if i == 1:
-        print(a)
+    # if i == 1:
+    #     print(a)
 t1 = time.time_ns()
 print('{:<20} {:>20}'.format("Total Wall Time:", "%.3f milliseconds" % ((t1 - t0) / 1_000_000)), sep='')
 
@@ -305,7 +292,7 @@ t0 = time.time_ns()
 for i in range(432):
     
     a=_bigbird_block_rand_mask_4(4096, 4096, 64, 64, 3, 1024)
-    if i == 1:
-        print(a)
+    # if i == 1:
+    #     print(a)
 t1 = time.time_ns()
 print('{:<20} {:>20}'.format("Total Wall Time:", "%.3f milliseconds" % ((t1 - t0) / 1_000_000)), sep='')
