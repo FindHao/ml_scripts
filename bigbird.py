@@ -245,6 +245,18 @@ print('{:<20} {:>20}'.format("Total Wall Time:", "%.3f milliseconds" % ((t1 - t0
 
 
 
+def _bigbird_block_rand_mask_fast(from_seq_length, to_seq_length, from_block_size, to_block_size, num_rand_blocks, last_idx, n_heads
+    ): 
+    global all_tables
+    rand_attn_tables = all_tables
+    rand_attn = [ np.zeros((from_seq_length // from_block_size - 2, num_rand_blocks), dtype=np.int32) for _ in range(n_heads)]
+    for i in range(1, from_seq_length // from_block_size - 1):
+        rand_i = np.random.randint(len(rand_attn_tables[i-1]), size=n_heads)
+        for j, rand_index in enumerate(rand_i):
+            rand_attn[j][i-1] = rand_attn_tables[i-1][rand_index]
+    return rand_attn
+
+
 
 t0 = time.time_ns()
 # for i in range(100):
@@ -296,3 +308,12 @@ for i in range(432):
     #     print(a)
 t1 = time.time_ns()
 print('{:<20} {:>20}'.format("Total Wall Time:", "%.3f milliseconds" % ((t1 - t0) / 1_000_000)), sep='')
+
+
+
+
+
+rand_attn_origin = [_bigbird_block_rand_mask(4096, 4096, 64, 64, 3, 1024)[:62] for _ in range(10)]
+rand_attn_opt = _bigbird_block_rand_mask_fast(4096, 4096, 64, 64, 3, 1024, 10)
+
+print(rand_attn_opt)
