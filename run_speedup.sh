@@ -2,15 +2,13 @@
 
 
 
-model=detectron2_maskrcnn_r_50_c4
+model=speech_transformer
 output=/tmp/run.log
 echo "" > $output
 cd /home/yhao/d/benchmark
 func(){
-
     for i in {1..20} ; do
-    # !!!!!!!!!!!!!!change to train
-        python run.py -d cuda -t eval  $model >> $output 2>&1
+        python run.py -d cuda -t train  $model >> $output 2>&1
     done
 }
 
