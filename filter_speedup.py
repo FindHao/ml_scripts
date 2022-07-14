@@ -52,6 +52,8 @@ def work_multi_models(input_file, wo_tflops=0):
     for amodel in content_s:
         model_name = amodel.strip().split()[0].strip()
         amodel_s = [ _  for _ in amodel.split("@Yueming Hao optimize") if _.strip()]
+        if len(amodel_s) != 2:
+            continue
         origin_raw = amodel_s[0]
         opt_raw = amodel_s[1]
         origin_gpu_time, origin_cpu_time, origin_tflops = filter_time_bs(origin_raw, w_gpu, w_tflops)
