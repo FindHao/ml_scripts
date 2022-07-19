@@ -8,7 +8,7 @@ echo "" > $output
 cd /home/yhao/d/benchmark
 func(){
     for i in {1..20} ; do
-        python run.py -d cuda -t train  $model >> $output 2>&1
+        python run.py -d cuda -t train --precision fp32  $model >> $output 2>&1
     done
 }
 
