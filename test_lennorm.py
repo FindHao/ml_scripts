@@ -2,19 +2,11 @@ import torch
 from torch import profiler
 import numpy as np
 
-def _len_norm(x, epsilon=1e-6):
-    """
-    length normalization
-    """
-    variance = torch.mean(x**2, -1, keepdim=True)
-    norm_x = x * torch.rsqrt(variance + epsilon)
-    return norm_x
 
 def _len_and_dim_norm(vectors):
     """
     length and attention head size dim normalization
     """
-    vectors = _len_norm(vectors)
     vectors = vectors * torch.rsqrt(
         torch.tensor(64, device=vectors.device, dtype=vectors.dtype)
     )
@@ -24,7 +16,6 @@ def _len_and_dim_norm2(vectors):
     """
     length and attention head size dim normalization
     """
-    vectors = _len_norm(vectors)
     # tmp = torch.tensor(64, device=vectors.device, dtype=vectors.dtype)
     vectors = vectors / np.sqrt(64)
     return vectors
@@ -39,8 +30,6 @@ def profile():
 
     input_shape = [8, 12, 64, 64, 64]
     input = torch.ones(input_shape, dtype=torch.float32, device='cuda')
-
-    
     
     with profiler.profile(
         schedule=profiler.schedule(wait=0, warmup=0, active=1),
