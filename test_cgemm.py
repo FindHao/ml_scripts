@@ -18,10 +18,10 @@ def work():
     tmp = [None, (2, 2), (1, 1), (1, 1), 2]
 
 
-    # input_shape = (32, 224, 112, 112)
+    input_shape = (32, 224, 112, 112)
 
 
-    input_shape = (32, 224, 56, 56)
+    # input_shape = (32, 224, 56, 56)
     tmp = [None, (1, 1), (1, 1), (1, 1), 2]
 
     
