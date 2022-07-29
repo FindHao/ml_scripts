@@ -4,16 +4,15 @@
 
 
 # model=detectron2_maskrcnn_r_50_c4
-output=/home/yhao/d/tmp/run.log
+output=/home/yhao/d/tmp/run_tflops.log
 echo "" > $output
 cd /home/yhao/d/benchmark
 
-max_iter=5
+max_iter=20
 func(){
-    for (( i = 0 ; i <= $max_iter; i++ ))
-    do
+    for i in {1..$max_iter} ; do
         # python run.py -d cuda -m jit -t train $model --precision fp32 --torchdynamo nvfuser  >> $output 2>&1
-        python run.py -d cuda -t train  --profile --profile-detailed --profile-devices cpu,cuda --profile-folder ./logs/$model  $model  --precision fp32  >> $output 2>&1
+        python run.py -d cuda -t train --flops dcgm  $model  --precision fp32  >> $output 2>&1
     done
 }
 
