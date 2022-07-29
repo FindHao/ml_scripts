@@ -1,0 +1,3286 @@
+[
+    {
+        "name": "BERT_pytorch",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 19.842756,
+                    "tflops": 0.8181609436912465
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 10.831945000000001,
+                    "tflops": 3.0020236993784484
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 5.205667,
+                    "tflops": 6.176098168495204
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 2.990935625,
+                    "tflops": 11.359591757941596
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 2.6666945,
+                    "tflops": 13.045441882119714
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 2.4973129531250002,
+                    "tflops": 14.077666714429979
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 2.428075671875,
+                    "tflops": 14.384162149741051
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 2.34634363671875,
+                    "tflops": 14.917764422143204
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "Background_Matting",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "ValueError",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [],
+            "error_message": "Model does not support tuning batch size"
+        }
+    },
+    {
+        "name": "LearningToPaint",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 1388.312459,
+                    "tflops": 0.7515514905426673
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 720.71227,
+                    "tflops": 0.7990554913865336
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 367.010744125,
+                    "tflops": 0.9640270957578223
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 191.1436811875,
+                    "tflops": 1.5554753602991171
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 105.8091731875,
+                    "tflops": 3.184315924099267
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 54.77413809375,
+                    "tflops": 4.490214805450501
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 35.53580740625,
+                    "tflops": 6.2946762780394705
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 28.696173070312497,
+                    "tflops": 7.257246829048969
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "Super_SloMo",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 43.308209500000004,
+                    "tflops": 9.55793189661806
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 35.133459,
+                    "tflops": 11.400651131781665
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 29.436320000000002,
+                    "tflops": 13.534110407148289
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 27.1655455625,
+                    "tflops": 14.546173571774904
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 16.82161825,
+                    "tflops": 14.711800205325646
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 8.407868703125,
+                    "tflops": 14.708874457405955
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 4.2036782031249995,
+                    "tflops": 14.707041927469339
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 2.1034818125,
+                    "tflops": 14.717855456566388
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "alexnet",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 1.689414,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 0.8964077500000001,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 0.461435625,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 0.21277175,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 0.10711890625,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.052318437499999995,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.03870796875,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.03205622265625,
+                    "tflops": 0.0
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 1
+        }
+    },
+    {
+        "name": "attention_is_all_you_need_pytorch",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 19.253145500000002,
+                    "tflops": 0.25140731099575425
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 9.909397,
+                    "tflops": 0.22515242646591183
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 5.271045,
+                    "tflops": 0.7234941622363771
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 2.643715375,
+                    "tflops": 1.181533807234686
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 1.2807530625,
+                    "tflops": 2.6913284655495544
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.568420859375,
+                    "tflops": 5.481700665104955
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.30559553125,
+                    "tflops": 11.04551590970508
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.33374419140625,
+                    "tflops": 13.823575984333507
+                }
+            ],
+            "optimal_latency_bs": 64,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "dcgan",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 1.3279295,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 0.6273165,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 0.364632,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 0.180869375,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 0.09680465625000001,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.064219953125,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.0454895,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.03845837890625,
+                    "tflops": 0.0
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 1
+        }
+    },
+    {
+        "name": "demucs",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "RuntimeError",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 30.91926,
+                    "tflops": 4.40517799674475
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 19.149718749999998,
+                    "tflops": 7.244687157829695
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 14.745569249999999,
+                    "tflops": 9.314949201554517
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 11.8309483125,
+                    "tflops": 11.628779486140935
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 11.682043624999999,
+                    "tflops": 12.827689279448872
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 9.65791434375,
+                    "tflops": 13.840553218116234
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 8.1523203984375,
+                    "tflops": 14.88323989280224
+                }
+            ],
+            "error_message": "CUDA out of memory. Tried to allocate 2.83 GiB (GPU 0; 39.59 GiB total capacity; 35.95 GiB already allocated; 529.94 MiB free; 36.59 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF",
+            "optimal_latency_bs": 64,
+            "optimal_tflops_bs": 64
+        }
+    },
+    {
+        "name": "densenet121",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 33.4245945,
+                    "tflops": 0.015430827489859751
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 15.9474975,
+                    "tflops": 0.03275607656658711
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 8.063189125000001,
+                    "tflops": 0.023865878001952705
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 4.02475475,
+                    "tflops": 0.046687407898392735
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 1.983453125,
+                    "tflops": 0.0961037162639299
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.972912859375,
+                    "tflops": 0.19537442681805642
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.50836334375,
+                    "tflops": 0.3517262113083718
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.346432359375,
+                    "tflops": 0.5284436750993414
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "detectron2_fasterrcnn_r_101_c4",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "RuntimeError",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 64.0116835,
+                    "tflops": 1.1511194959812698
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 49.840965499999996,
+                    "tflops": 1.3477225816224072
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 43.493199375,
+                    "tflops": 1.569132332407428
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 43.505616812499994,
+                    "tflops": 1.6298480622718274
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 33.82170340625,
+                    "tflops": 0.6048808716613137
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 41.275474921875,
+                    "tflops": 0.8260968375408758
+                }
+            ],
+            "error_message": "CUDA out of memory. Tried to allocate 10.49 GiB (GPU 0; 39.59 GiB total capacity; 25.71 GiB already allocated; 6.48 GiB free; 30.69 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF",
+            "optimal_latency_bs": 16,
+            "optimal_tflops_bs": 8
+        }
+    },
+    {
+        "name": "detectron2_fasterrcnn_r_101_dc5",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "RuntimeError",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 43.177398,
+                    "tflops": 1.1265479927554298
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 32.22310125,
+                    "tflops": 1.352078898181873
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 29.3912125,
+                    "tflops": 1.4829508483750082
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 32.596547687500006,
+                    "tflops": 1.444230285943855
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 32.27026046875,
+                    "tflops": 1.5548282124803237
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 25.0722529375,
+                    "tflops": 0.3829845550717454
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 31.0304718828125,
+                    "tflops": 0.6777677454680027
+                }
+            ],
+            "error_message": "CUDA error: an illegal memory access was encountered\nCUDA kernel errors might be asynchronously reported at some other API call,so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1.",
+            "optimal_latency_bs": 32,
+            "optimal_tflops_bs": 16
+        }
+    },
+    {
+        "name": "detectron2_fasterrcnn_r_101_fpn",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "RuntimeError",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 41.236042999999995,
+                    "tflops": 0.3169621690360636
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 24.806225249999997,
+                    "tflops": 0.6472406178965614
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 21.556564625,
+                    "tflops": 0.8241289853978728
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 20.120251625,
+                    "tflops": 0.8525498796859802
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 23.102509625,
+                    "tflops": 0.8594311579808249
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 22.491069703125,
+                    "tflops": 0.864105118531071
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 42.452752437499996,
+                    "tflops": 8.674670267697133
+                }
+            ],
+            "error_message": "CUDA out of memory. Tried to allocate 5.38 GiB (GPU 0; 39.59 GiB total capacity; 29.64 GiB already allocated; 1.34 GiB free; 35.82 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF",
+            "optimal_latency_bs": 8,
+            "optimal_tflops_bs": 64
+        }
+    },
+    {
+        "name": "detectron2_fasterrcnn_r_50_c4",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "RuntimeError",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 50.6449755,
+                    "tflops": 1.580158907663067
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 43.993061749999995,
+                    "tflops": 1.8259668707550953
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 40.512827375,
+                    "tflops": 1.8555527939563898
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 38.300932062499996,
+                    "tflops": 1.802268758306646
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 25.9542549375,
+                    "tflops": 0.5818849750407952
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 32.213369265625005,
+                    "tflops": 0.6854308416725656
+                }
+            ],
+            "error_message": "CUDA out of memory. Tried to allocate 9.13 GiB (GPU 0; 39.59 GiB total capacity; 22.61 GiB already allocated; 8.41 GiB free; 28.75 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF",
+            "optimal_latency_bs": 16,
+            "optimal_tflops_bs": 4
+        }
+    },
+    {
+        "name": "detectron2_fasterrcnn_r_50_dc5",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "RuntimeError",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 33.4290015,
+                    "tflops": 1.390906112260814
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 26.51228,
+                    "tflops": 1.7079559795038362
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 26.07036625,
+                    "tflops": 1.7066142885887168
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 29.045502437499998,
+                    "tflops": 1.7508682623678449
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 28.10793896875,
+                    "tflops": 1.7753703643562784
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 20.679870671875,
+                    "tflops": 0.32812004678296763
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 25.895077789062498,
+                    "tflops": 0.6480892686282305
+                }
+            ],
+            "error_message": "CUDA error: an illegal memory access was encountered\nCUDA kernel errors might be asynchronously reported at some other API call,so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1.",
+            "optimal_latency_bs": 32,
+            "optimal_tflops_bs": 16
+        }
+    },
+    {
+        "name": "detectron2_fasterrcnn_r_50_fpn",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "RuntimeError",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 31.277045,
+                    "tflops": 0.3793413660937615
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 21.26924875,
+                    "tflops": 0.6662164726977733
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 18.214935875,
+                    "tflops": 0.8104621157717117
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 16.79036825,
+                    "tflops": 0.8950468151059252
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 18.7278255625,
+                    "tflops": 0.8761232530812469
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 18.348944703125,
+                    "tflops": 0.9032678318766827
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 37.936117453125,
+                    "tflops": 9.58390474174101
+                }
+            ],
+            "error_message": "CUDA error: an illegal memory access was encountered\nCUDA kernel errors might be asynchronously reported at some other API call,so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1.",
+            "optimal_latency_bs": 8,
+            "optimal_tflops_bs": 64
+        }
+    },
+    {
+        "name": "detectron2_fcos_r_50_fpn",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "RuntimeError",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 38.4714325,
+                    "tflops": 0.12784226742153942
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 22.796153,
+                    "tflops": 0.24324440006589537
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 19.656689749999998,
+                    "tflops": 0.3386301443828211
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 18.3602793125,
+                    "tflops": 0.3578680977510314
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 20.47851353125,
+                    "tflops": 0.35768764179748325
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 19.90310665625,
+                    "tflops": 0.36995647050752883
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 21.5388698203125,
+                    "tflops": 0.3945876102811749
+                }
+            ],
+            "error_message": "cuDNN error: CUDNN_STATUS_MAPPING_ERROR",
+            "optimal_latency_bs": 8,
+            "optimal_tflops_bs": 64
+        }
+    },
+    {
+        "name": "detectron2_maskrcnn",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "RuntimeError",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 4047.0534559999996,
+                    "tflops": 8.846350934544827
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 2049.036329,
+                    "tflops": 10.366366671769704
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 1166.47335175,
+                    "tflops": 11.690774967084181
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 578.0928206250001,
+                    "tflops": 11.705921981105256
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 263.950643,
+                    "tflops": 11.305053011315474
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 139.59494421875002,
+                    "tflops": 11.827342713142151
+                }
+            ],
+            "error_message": "CUDA out of memory. Tried to allocate 6.89 GiB (GPU 0; 39.59 GiB total capacity; 22.80 GiB already allocated; 6.22 GiB free; 30.95 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF",
+            "optimal_latency_bs": 32,
+            "optimal_tflops_bs": 32
+        }
+    },
+    {
+        "name": "detectron2_maskrcnn_r_101_c4",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "RuntimeError",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 68.5534925,
+                    "tflops": 1.202037946317508
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 54.28242175,
+                    "tflops": 1.4674415624360686
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 47.159037,
+                    "tflops": 1.5572738479564243
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 46.667303187499996,
+                    "tflops": 1.5988626958588064
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 33.49372828125,
+                    "tflops": 0.5994868332773324
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 41.810738218750004,
+                    "tflops": 0.8247223288195002
+                }
+            ],
+            "error_message": "CUDA out of memory. Tried to allocate 10.44 GiB (GPU 0; 39.59 GiB total capacity; 25.59 GiB already allocated; 7.78 GiB free; 29.39 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF",
+            "optimal_latency_bs": 16,
+            "optimal_tflops_bs": 8
+        }
+    },
+    {
+        "name": "detectron2_maskrcnn_r_101_fpn",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "RuntimeError",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 46.339254499999996,
+                    "tflops": 0.340859563616405
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 27.16231,
+                    "tflops": 0.6763146477099903
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 23.889390125,
+                    "tflops": 0.7719281923271962
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 22.0134154375,
+                    "tflops": 0.8710635193602352
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 24.616706781250002,
+                    "tflops": 0.8665021695756502
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 24.262305703125,
+                    "tflops": 0.871528110883749
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 44.2954307578125,
+                    "tflops": 8.347328068771416
+                }
+            ],
+            "error_message": "CUDA error: an illegal memory access was encountered\nCUDA kernel errors might be asynchronously reported at some other API call,so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1.",
+            "optimal_latency_bs": 8,
+            "optimal_tflops_bs": 64
+        }
+    },
+    {
+        "name": "detectron2_maskrcnn_r_50_c4",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "RuntimeError",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 55.5425305,
+                    "tflops": 1.4812253938602347
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 47.22603775,
+                    "tflops": 1.6630198617246519
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 43.962870374999994,
+                    "tflops": 1.7793622560879856
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 41.95541925,
+                    "tflops": 1.7718629214181898
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 26.207492625,
+                    "tflops": 0.5721024154733059
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 32.642012578125,
+                    "tflops": 0.6811688319826343
+                }
+            ],
+            "error_message": "CUDA out of memory. Tried to allocate 9.20 GiB (GPU 0; 39.59 GiB total capacity; 22.77 GiB already allocated; 7.81 GiB free; 29.36 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF",
+            "optimal_latency_bs": 16,
+            "optimal_tflops_bs": 4
+        }
+    },
+    {
+        "name": "detectron2_maskrcnn_r_50_fpn",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "RuntimeError",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 35.085493,
+                    "tflops": 0.3723219611162728
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 21.5623625,
+                    "tflops": 0.7332260447701598
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 20.196164625,
+                    "tflops": 0.827023917902213
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 18.977289,
+                    "tflops": 0.9050558148727432
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 20.38941325,
+                    "tflops": 0.8705916591738879
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 20.301354984375,
+                    "tflops": 0.8976485603116657
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 39.900440828125,
+                    "tflops": 9.200486675273181
+                }
+            ],
+            "error_message": "CUDA error: an illegal memory access was encountered\nCUDA kernel errors might be asynchronously reported at some other API call,so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1.",
+            "optimal_latency_bs": 8,
+            "optimal_tflops_bs": 64
+        }
+    },
+    {
+        "name": "dlrm",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 2.1604655,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 1.0830837500000001,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 0.56054325,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 0.28411481250000004,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 0.14219175,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.06867664062500001,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.033161375,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.017848000000000003,
+                    "tflops": 0.0
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 1
+        }
+    },
+    {
+        "name": "drq",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "ValueError",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [],
+            "error_message": "Model does not support tuning batch size"
+        }
+    },
+    {
+        "name": "fambench_dlrm",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "TypeError",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [],
+            "error_message": "\n'numpy.int64' object in attribute 'EmbeddingBag.num_embeddings' is not a valid constant.\nValid constants are:\n1. a nn.ModuleList\n2. a value of type {bool, float, int, str, NoneType, torch.device, torch.layout, torch.dtype}\n3. a list or tuple of (2)\n"
+        }
+    },
+    {
+        "name": "fambench_xlmr",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 25.8928915,
+                    "tflops": 0.02415917101093572
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 11.769738,
+                    "tflops": 0.05103141798819751
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 5.300814,
+                    "tflops": 0.10284292651329897
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 2.644591,
+                    "tflops": 0.20602785811965144
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 1.6448489375,
+                    "tflops": 0.3349800703301883
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.8125315468750001,
+                    "tflops": 0.7168138820798109
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.5287969609375001,
+                    "tflops": 1.0541176762473667
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.4710877265625,
+                    "tflops": 1.222426701357003
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "fastNLP_Bert",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 60.0540735,
+                    "tflops": 8.591835838607741
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 46.255264749999995,
+                    "tflops": 10.945041145479548
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 42.9385385,
+                    "tflops": 11.706000538987526
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 39.4228595,
+                    "tflops": 12.768882970255278
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 37.65269740625,
+                    "tflops": 13.298721023328488
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 36.59914275,
+                    "tflops": 13.724889517530478
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 35.649649515625,
+                    "tflops": 14.050632935182067
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 34.81654811328125,
+                    "tflops": 14.35831249910759
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "hf_Albert",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 14.2958295,
+                    "tflops": 0.24840475917230095
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 7.859013,
+                    "tflops": 0.4353263514454647
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 4.17507,
+                    "tflops": 0.853353536536955
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 2.5842867500000004,
+                    "tflops": 1.3649381015950708
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 2.3444525,
+                    "tflops": 1.5550774752854426
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 2.2024125312500002,
+                    "tflops": 1.6661768993622217
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 2.109249609375,
+                    "tflops": 1.7403725856442873
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 2.06555458984375,
+                    "tflops": 1.7770838775754787
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "hf_Bart",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 19.1060035,
+                    "tflops": 0.21985716019340706
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 10.50992475,
+                    "tflops": 0.38337066920753216
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 5.950901625,
+                    "tflops": 0.7220141313174673
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 3.6245101249999996,
+                    "tflops": 1.1962664067047517
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 3.1455515624999997,
+                    "tflops": 1.3888851147371524
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 2.943805125,
+                    "tflops": 1.4773628199062905
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 2.7993816015624997,
+                    "tflops": 1.5360282848041023
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 2.737713890625,
+                    "tflops": 1.5933667674600114
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "hf_Bert",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 14.8192615,
+                    "tflops": 0.22206767792079032
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 7.21675675,
+                    "tflops": 0.4639215151140799
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 3.973604625,
+                    "tflops": 0.8450270542403038
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 2.2292203125,
+                    "tflops": 1.5269405923464834
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 2.06273671875,
+                    "tflops": 1.695461724470563
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 1.946827125,
+                    "tflops": 1.8151144270632296
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 1.864102953125,
+                    "tflops": 1.8862942967497922
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 1.8200086875,
+                    "tflops": 1.94266846638286
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "hf_BigBird",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "RuntimeError",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 97.623366,
+                    "tflops": 0.36599119051504564
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 51.637844,
+                    "tflops": 0.704313224798948
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 38.08441125,
+                    "tflops": 0.9534821657326471
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 35.572370750000005,
+                    "tflops": 1.0197125452871199
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 34.2648355625,
+                    "tflops": 1.0541929858392847
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 33.791416421875,
+                    "tflops": 1.0655249213672207
+                }
+            ],
+            "error_message": "CUDA out of memory. Tried to allocate 24.59 GiB (GPU 0; 39.59 GiB total capacity; 1.00 GiB already allocated; 12.20 GiB free; 25.71 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF",
+            "optimal_latency_bs": 32,
+            "optimal_tflops_bs": 32
+        }
+    },
+    {
+        "name": "hf_DistilBert",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 7.360608,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 4.33504775,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 2.285247875,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 1.3415179375,
+                    "tflops": 1.2430990086688858
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 1.21126678125,
+                    "tflops": 1.37646680009509
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 1.1547914218750002,
+                    "tflops": 1.5022668653443005
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 1.1081856015625,
+                    "tflops": 1.5690042156846775
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 1.085198375,
+                    "tflops": 1.6115903073196631
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "hf_GPT2",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 15.77487,
+                    "tflops": 0.5343976065453198
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 9.03472,
+                    "tflops": 0.9553658492769158
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 7.612189,
+                    "tflops": 1.2100977441365692
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 7.22471175,
+                    "tflops": 1.2780192293939434
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 6.9677909375,
+                    "tflops": 1.3179358674572244
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 6.82010721875,
+                    "tflops": 1.3633196145352962
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 6.7434413515625,
+                    "tflops": 1.3589110949871894
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 6.707691531249999,
+                    "tflops": 1.3642359017756143
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "hf_Longformer",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "RuntimeError",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 54.5952215,
+                    "tflops": 0.6458551619961349
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 54.6729565,
+                    "tflops": 0.6412713122477826
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 52.9853795,
+                    "tflops": 0.6691589918517146
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 51.88488375,
+                    "tflops": 0.6829844463695988
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 51.459006125,
+                    "tflops": 0.6849273450376873
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 51.302311453125,
+                    "tflops": 0.683999643980701
+                }
+            ],
+            "error_message": "CUDA out of memory. Tried to allocate 24.54 GiB (GPU 0; 39.59 GiB total capacity; 1.04 GiB already allocated; 11.99 GiB free; 25.92 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF",
+            "optimal_latency_bs": 32,
+            "optimal_tflops_bs": 16
+        }
+    },
+    {
+        "name": "hf_Reformer",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 13.319299,
+                    "tflops": 0.27142705092581126
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 7.788163,
+                    "tflops": 0.4832210852466926
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 4.714558875,
+                    "tflops": 0.7776624525159396
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 4.2615490000000005,
+                    "tflops": 0.8915811649740826
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 4.026759,
+                    "tflops": 0.9433685999090518
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 3.9179265,
+                    "tflops": 0.9758879528311186
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 3.8604307890625,
+                    "tflops": 0.9836052455716466
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 3.8297448593750003,
+                    "tflops": 1.0102090609402723
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "hf_T5",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "RuntimeError",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 43.749731,
+                    "tflops": 0.8545335277572642
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 33.142886000000004,
+                    "tflops": 1.128183321770458
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 27.889114375,
+                    "tflops": 1.3537391602097304
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 26.05301275,
+                    "tflops": 1.4429201450746847
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 25.418638718750003,
+                    "tflops": 1.4787863997021728
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 25.0209070625,
+                    "tflops": 1.5190256059555451
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 24.8359565546875,
+                    "tflops": 1.5252666170043303
+                }
+            ],
+            "error_message": "CUDA out of memory. Tried to allocate 16.00 GiB (GPU 0; 39.59 GiB total capacity; 33.37 GiB already allocated; 4.39 GiB free; 33.52 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF",
+            "optimal_latency_bs": 64,
+            "optimal_tflops_bs": 64
+        }
+    },
+    {
+        "name": "maml",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "ValueError",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [],
+            "error_message": "Model does not support tuning batch size"
+        }
+    },
+    {
+        "name": "maml_omniglot",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "ValueError",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [],
+            "error_message": "Model does not support tuning batch size"
+        }
+    },
+    {
+        "name": "mnasnet1_0",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 12.4699675,
+                    "tflops": 0.017110653665665148
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 5.0139879999999994,
+                    "tflops": 0.04142764487480411
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 2.62734875,
+                    "tflops": 0.08245077832222204
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 1.2635926875,
+                    "tflops": 0.18582751816563273
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 0.70258725,
+                    "tflops": 0.34188748521533663
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.36087609375,
+                    "tflops": 0.7108774098026556
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.18082861718749998,
+                    "tflops": 2.0577182520949524
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.1186257890625,
+                    "tflops": 2.9001342608129983
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "mobilenet_v2",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 14.261643,
+                    "tflops": 0.01436910177066808
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 5.7368205,
+                    "tflops": 0.03582783025993423
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 2.76402325,
+                    "tflops": 0.0747635767666927
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 1.3980300625,
+                    "tflops": 0.14999006590581043
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 0.72390446875,
+                    "tflops": 0.285432497521617
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.4056145,
+                    "tflops": 0.6241946322218502
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.198196125,
+                    "tflops": 1.320602699040768
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.1374525,
+                    "tflops": 1.507743716874914
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "mobilenet_v2_quantized_qat",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "NotImplemented",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [],
+            "error_message": "The eval test only supports CPU."
+        }
+    },
+    {
+        "name": "mobilenet_v3_large",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 13.95331,
+                    "tflops": 0.013553215455604402
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 6.61648925,
+                    "tflops": 0.029185329723355465
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 3.212171375,
+                    "tflops": 0.05925591610462664
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 1.6775819374999998,
+                    "tflops": 0.11422166742431981
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 0.87751034375,
+                    "tflops": 0.21023632194461583
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.41538365625,
+                    "tflops": 0.4453116092705283
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.2166170546875,
+                    "tflops": 1.29999952876828
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.1137625078125,
+                    "tflops": 2.518460017360002
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "moco",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 66.65113249999999,
+                    "tflops": 0.6657627591976518
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 35.02218525,
+                    "tflops": 1.2443807467029238
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 17.100831125,
+                    "tflops": 2.210036731626624
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 8.92189025,
+                    "tflops": 4.176457458904075
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 4.99166375,
+                    "tflops": 6.8717693764400645
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 3.8359574375000003,
+                    "tflops": 8.739151624445352
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 3.316696515625,
+                    "tflops": 10.063886552618525
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 3.05797851171875,
+                    "tflops": 10.82117978650561
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "nvidia_deeprecommender",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 1.099873,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 0.662516,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 0.35106475000000004,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 0.210143875,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 0.0999129375,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.0505885625,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.0429661875,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.037595582031250005,
+                    "tflops": 0.0
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 1
+        }
+    },
+    {
+        "name": "opacus_cifar10",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 4.895792999999999,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 2.65696275,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 1.425734625,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 0.6644595,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 0.38269171874999997,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.23044523437499997,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.1415890390625,
+                    "tflops": 7.4060037239763865
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.099623921875,
+                    "tflops": 11.499415004581985
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "pyhpc_equation_of_state",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 3.979979,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 2.14838475,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 1.118077375,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 0.5401311875,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 0.27620078125,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.12619946875,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.0637845625,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.0317963671875,
+                    "tflops": 0.0
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 1
+        }
+    },
+    {
+        "name": "pyhpc_isoneutral_mixing",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 5.2133234999999996,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 2.7041327500000003,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 1.296554625,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 0.6381171875,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 0.5025099375000001,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.202871515625,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.1008470625,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.06731465234375,
+                    "tflops": 0.0
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 1
+        }
+    },
+    {
+        "name": "pyhpc_turbulent_kinetic_energy",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "IndexError",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [],
+            "error_message": "index -2 is out of bounds for dimension 2 with size 1"
+        }
+    },
+    {
+        "name": "pytorch_CycleGAN_and_pix2pix",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "ValueError",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [],
+            "error_message": "Model does not support tuning batch size"
+        }
+    },
+    {
+        "name": "pytorch_stargan",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "NotImplemented",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [],
+            "error_message": "Model doesn't support customizing batch size."
+        }
+    },
+    {
+        "name": "pytorch_struct",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "ValueError",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [],
+            "error_message": "max() arg is an empty sequence"
+        }
+    },
+    {
+        "name": "pytorch_unet",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "RuntimeError",
+        "batch_size": null,
+        "precision": "amp",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 17.7419225,
+                    "tflops": 0.5620921410764921
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 15.075180750000001,
+                    "tflops": 0.655953402806363
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 13.528785249999999,
+                    "tflops": 0.7564652965830012
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 13.0005535625,
+                    "tflops": 0.7842128380302215
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 12.561304374999999,
+                    "tflops": 0.8052241737307223
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 12.415634625,
+                    "tflops": 0.8110336726988485
+                }
+            ],
+            "error_message": "cuDNN error: CUDNN_STATUS_NOT_SUPPORTED. This error may appear if you passed in a non-contiguous input.",
+            "optimal_latency_bs": 32,
+            "optimal_tflops_bs": 32
+        }
+    },
+    {
+        "name": "resnet18",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 5.268984,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 2.7627639999999998,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 1.33203575,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 0.6844851875,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 0.3320145625,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.179182640625,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.0939778984375,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.08167724609374999,
+                    "tflops": 0.6960852420969609
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "resnet50",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 13.381465500000001,
+                    "tflops": 0.036777445493334775
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 6.105438250000001,
+                    "tflops": 0.08186937932141966
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 3.07260525,
+                    "tflops": 0.059198982568092286
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 1.711920625,
+                    "tflops": 0.10524676136829433
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 0.7747601562499999,
+                    "tflops": 0.2132873639476296
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.400561984375,
+                    "tflops": 0.3860209345370342
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.260069359375,
+                    "tflops": 0.6128745989837157
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.2414224921875,
+                    "tflops": 0.6873875306533377
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "resnet50_quantized_qat",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "NotImplemented",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [],
+            "error_message": "The eval test only supports CPU."
+        }
+    },
+    {
+        "name": "resnext50_32x4d",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 12.788356,
+                    "tflops": 0.05054531353506557
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 6.2987962500000005,
+                    "tflops": 0.08426043491753561
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 3.059227,
+                    "tflops": 0.06787798026808092
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 1.6665881875,
+                    "tflops": 0.12736515824559044
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 0.8603305625,
+                    "tflops": 0.23842794202135625
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.416022828125,
+                    "tflops": 0.5003386459068054
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.32181311718750005,
+                    "tflops": 0.6195643081854745
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.30347622265625,
+                    "tflops": 0.6986987277357786
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "shufflenet_v2_x1_0",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 13.5777635,
+                    "tflops": 0.00537203286701378
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 6.067992,
+                    "tflops": 0.011481613308440709
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 3.4301095,
+                    "tflops": 0.022012202846094866
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 1.7777591875,
+                    "tflops": 0.04688941426584982
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 0.7812575312500001,
+                    "tflops": 0.09412850046458154
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.3894484375,
+                    "tflops": 0.23072804859320167
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.2174191875,
+                    "tflops": 0.4280660169320724
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.11897989453125,
+                    "tflops": 0.7938248418875052
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "soft_actor_critic",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "NotImplemented",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [],
+            "error_message": "Model doesn't support customizing batch size."
+        }
+    },
+    {
+        "name": "speech_transformer",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 5721.526183,
+                    "tflops": 0.500801753498657
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 2871.96467675,
+                    "tflops": 0.5001053691321817
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 1432.87137825,
+                    "tflops": 0.5007310384810709
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 723.24457175,
+                    "tflops": 0.49489630273240465
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 361.25911196875,
+                    "tflops": 0.4963224627571884
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 179.54655384375002,
+                    "tflops": 0.49872690483498766
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 90.179738703125,
+                    "tflops": 0.49638565950466795
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 44.976697386718755,
+                    "tflops": 0.49720779566453416
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 1
+        }
+    },
+    {
+        "name": "squeezenet1_1",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 4.965873,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 2.48678725,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 1.292772125,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 0.5768185,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 0.31269715625,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.18905814062499998,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.08431760937499999,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.08071362109375,
+                    "tflops": 1.2305445725664308
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "tacotron2",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "amp",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 324.690686,
+                    "tflops": 0.02792796850345521
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 518.81382375,
+                    "tflops": 0.00943245178150408
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 257.495704125,
+                    "tflops": 0.012485630104075458
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 149.8115548125,
+                    "tflops": 0.01863142877204799
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 77.96427009375,
+                    "tflops": 0.032467119572769584
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 39.819586875,
+                    "tflops": 0.05704397291306927
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 20.3157485078125,
+                    "tflops": 0.10779145655210579
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 10.36405309375,
+                    "tflops": 0.1968092315572841
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "timm_efficientdet",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 76.39773650000001,
+                    "tflops": 0.3187777180515073
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 46.728282750000005,
+                    "tflops": 0.48453230322109925
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 33.402138,
+                    "tflops": 0.7196415517193431
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 25.6784498125,
+                    "tflops": 0.8905393232900846
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 25.06483434375,
+                    "tflops": 0.968361685804823
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 23.406051890625,
+                    "tflops": 1.0446227803742274
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 19.491146796875,
+                    "tflops": 1.2343018535084744
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 12.11212380078125,
+                    "tflops": 1.5773545322791174
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "timm_efficientnet",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 14.690720500000001,
+                    "tflops": 0.03429255576030038
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 7.57069725,
+                    "tflops": 0.06745115047395375
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 3.9254718750000004,
+                    "tflops": 0.13186657229174753
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 1.8837515625,
+                    "tflops": 0.26512572928930495
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 0.96803646875,
+                    "tflops": 0.553347272314223
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.481998125,
+                    "tflops": 1.1995981256025203
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.2524328359375,
+                    "tflops": 2.4551120046596333
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.16332453515625,
+                    "tflops": 3.2147272125498336
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "timm_nfnet",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 21.8724535,
+                    "tflops": 0.3792628058106563
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 10.49622625,
+                    "tflops": 0.4363951368017345
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 5.7517495,
+                    "tflops": 0.4552984192705436
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 2.8828147499999996,
+                    "tflops": 0.541295579889614
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 1.40446496875,
+                    "tflops": 0.7282255234094909
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.78939409375,
+                    "tflops": 0.9797650481221012
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.460786796875,
+                    "tflops": 1.3772645354187545
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.40817078125,
+                    "tflops": 1.9226039388368927
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "timm_regnet",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 23.7900415,
+                    "tflops": 0.021859877238494068
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 13.0698655,
+                    "tflops": 0.035875949008722666
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 6.830783875,
+                    "tflops": 0.06816904935878437
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 2.972477375,
+                    "tflops": 1.066331492285576
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 1.51920928125,
+                    "tflops": 0.31650494055092226
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.7602231875000001,
+                    "tflops": 0.6699659489074988
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.6348898125,
+                    "tflops": 0.736223576345117
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.5807528515625,
+                    "tflops": 0.8338029213650315
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 8
+        }
+    },
+    {
+        "name": "timm_resnest",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 6.6883355,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 3.1826385,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 1.5891785,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 0.7875374374999999,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 0.433405875,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.21859099999999998,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.19510045312500002,
+                    "tflops": 0.8859396671862302
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.18366024609374998,
+                    "tflops": 0.964066608443352
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "timm_vision_transformer",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 10.790964,
+                    "tflops": 0.06906538461316467
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 5.54338975,
+                    "tflops": 0.1141661293799726
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 2.6589307499999997,
+                    "tflops": 0.18189961102763844
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 1.2551870625000001,
+                    "tflops": 0.3129237312808726
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 0.655181875,
+                    "tflops": 0.7284189879066468
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.404617578125,
+                    "tflops": 1.1914093519999092
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.37733534375,
+                    "tflops": 1.293237256459465
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.36101909374999996,
+                    "tflops": 1.3627251478165787
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "timm_vovnet",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 10.072815,
+                    "tflops": 0.027722867188349324
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 4.87076025,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 2.4164065,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 1.4234529999999999,
+                    "tflops": 0.12258212210695094
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 0.71809803125,
+                    "tflops": 0.22279607545019708
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.30570292187500003,
+                    "tflops": 0.5137000569877682
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.243284734375,
+                    "tflops": 0.6058139275054838
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.3180472734375,
+                    "tflops": 0.5049457141710136
+                }
+            ],
+            "optimal_latency_bs": 64,
+            "optimal_tflops_bs": 64
+        }
+    },
+    {
+        "name": "tts_angular",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 5.4489855,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 2.5201487499999997,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 1.272108125,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 0.760025,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 0.404933,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.215794796875,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.15576005468749998,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.11482266015625,
+                    "tflops": 10.303886605268696
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "vgg16",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "fp16",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 3.2483965,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 1.5957465000000002,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 0.8409131249999999,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 0.5432813750000001,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 0.47912071875,
+                    "tflops": 0.0
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 0.448846375,
+                    "tflops": 0.8130642619663836
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 0.41591178124999995,
+                    "tflops": 0.9043697348948655
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 0.40351723828124997,
+                    "tflops": 0.967833976712664
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 128
+        }
+    },
+    {
+        "name": "vision_maskrcnn",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "RuntimeError",
+        "batch_size": null,
+        "precision": "fp32",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 64.027461,
+                    "tflops": 6.228458599517572
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 61.486742500000005,
+                    "tflops": 6.52498290804893
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 77.434433,
+                    "tflops": 8.950174251800178
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 66.9643295625,
+                    "tflops": 8.20800293852606
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 59.0944224375,
+                    "tflops": 8.4443673584962
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 64.393690359375,
+                    "tflops": 8.424022965476262
+                }
+            ],
+            "error_message": "CUDA out of memory. Tried to allocate 6.89 GiB (GPU 0; 39.59 GiB total capacity; 27.51 GiB already allocated; 335.94 MiB free; 36.84 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF",
+            "optimal_latency_bs": 16,
+            "optimal_tflops_bs": 4
+        }
+    },
+    {
+        "name": "yolov3",
+        "test": "eval",
+        "device": "cuda",
+        "extra_args": [],
+        "status": "OK",
+        "batch_size": null,
+        "precision": "amp",
+        "results": {
+            "details": [
+                {
+                    "batch_size": 1,
+                    "latency_ms": 20.295348,
+                    "tflops": 0.5283736924606973
+                },
+                {
+                    "batch_size": 2,
+                    "latency_ms": 10.34920425,
+                    "tflops": 0.24631945639387295
+                },
+                {
+                    "batch_size": 4,
+                    "latency_ms": 5.17795475,
+                    "tflops": 0.44098259768638454
+                },
+                {
+                    "batch_size": 8,
+                    "latency_ms": 2.6558205624999998,
+                    "tflops": 0.5714794679202616
+                },
+                {
+                    "batch_size": 16,
+                    "latency_ms": 1.6267835,
+                    "tflops": 0.9216832667539004
+                },
+                {
+                    "batch_size": 32,
+                    "latency_ms": 1.489647171875,
+                    "tflops": 0.9852366628546532
+                },
+                {
+                    "batch_size": 64,
+                    "latency_ms": 1.397377421875,
+                    "tflops": 1.046755867250999
+                },
+                {
+                    "batch_size": 128,
+                    "latency_ms": 1.3454227265625,
+                    "tflops": 1.0156928071315745
+                }
+            ],
+            "optimal_latency_bs": 128,
+            "optimal_tflops_bs": 64
+        }
+    }
+]
