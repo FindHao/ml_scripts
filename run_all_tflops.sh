@@ -10,7 +10,8 @@ cd /home/yhao/d/benchmark
 
 max_iter=20
 func(){
-    for i in {1..$max_iter} ; do
+    for (( i = 1 ; i <= $max_iter; i++ ))
+    do
         # python run.py -d cuda -m jit -t train $model --precision fp32 --torchdynamo nvfuser  >> $output 2>&1
         python run.py -d cuda -t train --flops dcgm  $model  --precision fp32  >> $output 2>&1
     done

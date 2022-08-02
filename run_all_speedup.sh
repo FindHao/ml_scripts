@@ -4,14 +4,14 @@
 
 
 # model=detectron2_maskrcnn_r_50_c4
-output=/home/yhao/d/tmp/run.log
+output=/home/yhao/d/tmp/run_zerograd_none.log
 echo "" > $output
 cd /home/yhao/d/benchmark
 
-max_iter
+max_iter=20
 
 func(){
-    for (( i = 0 ; i <= $max_iter; i++ ))
+    for (( i = 1 ; i <= $max_iter; i++ ))
     do
         python run.py -d cuda -t train $model --precision fp32  >> $output 2>&1
     done
@@ -44,7 +44,7 @@ source /home/yhao/d/conda/bin/activate
 conda activate pt
 echo "@Yueming Hao origin $model" >>$output
 func
-# conda activate opt_zerograd
+conda activate opt_zerograd
 # conda activate opt_sqrt
 echo "@Yueming Hao optimize $model" >>$output
 func2
