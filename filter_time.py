@@ -49,4 +49,48 @@ def filter_time_gpuactive(raw_str):
     return mean(gpu_active_time), mean(gpu_active_ratio)
 
 
-work_multi_models('/home/yhao/d/tmp/run_gpuactivetime.log', w_tflops=True)
+
+def work_multi_models2(input_file, wo_tflops=0):
+    w_gpu = True
+    w_tflops = False
+    content = ''
+    with open(input_file, 'r') as fin:
+        content = fin.read()
+    content_s = [_ for _ in content.split(
+        "@Yueming Hao jit") if _.strip()]
+    durations = {}
+    for amodel in content_s:
+        model_name = amodel.strip().split()[0].strip()
+        gpu_time, cpu_time = filter_time_wo_flops(amodel)
+        if gpu_time is None:
+            print(f"Error when process model {model_name}")
+            continue
+        durations[model_name] = [gpu_time, cpu_time]
+    output_file = '/tmp/jittime.csv'
+    table_head = 'model, gpu time, cpu time\n'
+    with open(output_file, 'w') as fout:
+        fout.write(table_head)
+        for model in durations:
+            fout.write("%s, " % model)
+            for v in durations[model]:
+                fout.write("%.2f, " % v)
+            fout.write('\n')
+        pass
+
+def filter_time_wo_flops(raw_str):
+    gpu_time = []
+    cpu_time = []
+    reg1 = re.compile(
+        r"GPU Time:(.*) milliseconds\nCPU Total Wall Time:(.*) milliseconds")
+    results = reg1.findall(raw_str)
+    if not results:
+        print("no results found!")
+        return None, None
+    for it in results:
+        it = [float(_) for _ in it]
+        gpu_time.append(it[0])
+        cpu_time.append(it[1])
+    return mean(gpu_time), mean(cpu_time)
+
+
+work_multi_models2('/home/yhao/d/tmp/run_all_jit_opt.log')
