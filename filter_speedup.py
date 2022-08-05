@@ -155,4 +155,4 @@ def filter_time_bs(raw_str, gpu=True, flops=False):
 
 
 
-work_multi_models('/home/yhao/d/tmp/run.log', wo_tflops=1)
+work_multi_models('/home/yhao/d/tmp/run_all_speedup_aug4.log', wo_tflops=1)
