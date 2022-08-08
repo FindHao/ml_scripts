@@ -50,24 +50,29 @@ def filter_time_gpuactive(raw_str):
 
 
 
-def work_multi_models2(input_file, wo_tflops=0):
-    w_gpu = True
-    w_tflops = False
+def work_multi_models2(input_file, wo_tflops=True, output_file='/home/yhao/d/tmp/filter_tflops.csv'):
+    if wo_tflops:
+        filter_time_func = filter_time_wo_flops
+    else:
+        filter_time_func = filter_time_w_flops
     content = ''
     with open(input_file, 'r') as fin:
         content = fin.read()
     content_s = [_ for _ in content.split(
-        "@Yueming Hao jit") if _.strip()]
+        "@Yueming Hao origin") if _.strip()]
     durations = {}
     for amodel in content_s:
         model_name = amodel.strip().split()[0].strip()
-        gpu_time, cpu_time = filter_time_wo_flops(amodel)
-        if gpu_time is None:
+        # gpu_time, cpu_time, [tflops]
+        mean_v = filter_time_func(amodel)
+        if mean_v[0] is None:
             print(f"Error when process model {model_name}")
             continue
-        durations[model_name] = [gpu_time, cpu_time]
-    output_file = '/tmp/jittime.csv'
-    table_head = 'model, gpu time, cpu time\n'
+        durations[model_name] = mean_v
+    table_head = 'model, gpu time, cpu time,'
+    if not wo_tflops:
+        table_head += 'tflops,'
+    table_head += '\n'
     with open(output_file, 'w') as fout:
         fout.write(table_head)
         for model in durations:
@@ -93,4 +98,23 @@ def filter_time_wo_flops(raw_str):
     return mean(gpu_time), mean(cpu_time)
 
 
-work_multi_models2('/home/yhao/d/tmp/run_all_jit_opt.log')
+def filter_time_w_flops(raw_str):
+    gpu_time = []
+    cpu_time = []
+    tflops = []
+    reg1 = re.compile(
+        r"GPU Time:(.*) milliseconds\nCPU Total Wall Time:(.*) milliseconds\nFLOPS:(.*) TFLOPs per second")
+    results = reg1.findall(raw_str)
+    if not results:
+        print("no results found!")
+        return None, None, None
+    for it in results:
+        it = [float(_) for _ in it]
+        gpu_time.append(it[0])
+        cpu_time.append(it[1])
+        tflops.append(it[2])
+    return mean(gpu_time), mean(cpu_time), mean(tflops)
+
+
+# work_multi_models2('/home/yhao/d/tmp/run_tflops_aug8.log', output_file='/home/yhao/d/tmp/filter_tflops.csv' )
+work_multi_models2('/home/yhao/d/tmp/run_all_jit_opt.log', output_file='/home/yhao/d/tmp/filter_jit_opt.csv', wo_tflops=True )
