@@ -88,9 +88,14 @@ def filter_time_wo_flops(raw_str):
     reg1 = re.compile(
         r"GPU Time:(.*) milliseconds\nCPU Total Wall Time:(.*) milliseconds")
     results = reg1.findall(raw_str)
+    reg2 = re.compile(r"GPU Time per batch:(.*) milliseconds\nCPU Wall Time per batch:(.*) milliseconds\nFLOPS:(.*) TFLOPs per second")
+    results2 = reg2.findall(raw_str)
     if not results:
-        print("no results found!")
-        return None, None
+        if not results2:
+            print("no results found!")
+            return None, None, None
+        else:
+            results = results2
     for it in results:
         it = [float(_) for _ in it]
         gpu_time.append(it[0])
@@ -105,9 +110,14 @@ def filter_time_w_flops(raw_str):
     reg1 = re.compile(
         r"GPU Time:(.*) milliseconds\nCPU Total Wall Time:(.*) milliseconds\nFLOPS:(.*) TFLOPs per second")
     results = reg1.findall(raw_str)
+    reg2 = re.compile(r"GPU Time per batch:(.*) milliseconds\nCPU Wall Time per batch:(.*) milliseconds\nFLOPS:(.*) TFLOPs per second")
+    results2 = reg2.findall(raw_str)
     if not results:
-        print("no results found!")
-        return None, None, None
+        if not results2:
+            print("no results found!")
+            return None, None, None
+        else:
+            results = results2
     for it in results:
         it = [float(_) for _ in it]
         gpu_time.append(it[0])
@@ -116,5 +126,5 @@ def filter_time_w_flops(raw_str):
     return mean(gpu_time), mean(cpu_time), mean(tflops)
 
 
-# work_multi_models2('/home/yhao/d/tmp/run_tflops_aug8.log', output_file='/home/yhao/d/tmp/filter_tflops.csv' )
-work_multi_models2('/home/yhao/d/tmp/run_all_jit_opt.log', output_file='/home/yhao/d/tmp/filter_jit_opt.csv', wo_tflops=True )
+work_multi_models2('/home/yhao/d/tmp/run_tflops_aug8.log', output_file='/home/yhao/d/tmp/filter_tflops.csv', wo_tflops=False )
+# work_multi_models2('/home/yhao/d/tmp/run_all_jit_opt.log', output_file='/home/yhao/d/tmp/filter_jit_opt.csv', wo_tflops=True )
