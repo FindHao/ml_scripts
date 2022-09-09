@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "justMyCode": true
+            "justMyCode": false
         },
         {
             "name": "test_regnet",
@@ -18,7 +18,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/test_regnet.py",
             "console": "integratedTerminal",
-            "justMyCode": true
+            "justMyCode": false
         },
         {
             "name": "test_profile",
@@ -26,7 +26,19 @@
             "request": "launch",
             "program": "${workspaceFolder}/test_profile.py",
             "console": "integratedTerminal",
-            "justMyCode": true,
+            "justMyCode": false,
+            "args": [
+                "--bs",
+                "32"
+            ]
+        },
+        {
+            "name": "test_sqrt",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/test_sqrt.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
             "args": [
                 "--bs",
                 "32"
