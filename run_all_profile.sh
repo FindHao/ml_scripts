@@ -3,17 +3,27 @@
 
 
 
-# model=detectron2_maskrcnn_r_50_c4
-output=/home/yhao/d/tmp/runall_profile_train_aug9.log
+var_date=$(date +'%Y%m%d')
+output=/home/yhao/d/tmp/runall_profile_eval_$var_date.log
 echo "" > $output
 cd /home/yhao/d/benchmark
 
-max_iter=10
+max_iter=5
 func(){
+    # train
     for (( i = 1 ; i <= $max_iter; i++ ))
     do
         # python run.py -d cuda -m jit -t train $model --precision fp32 --torchdynamo nvfuser  >> $output 2>&1
-        python run.py -d cuda -t train --profile --profile-detailed --profile-devices cpu,cuda --profile-folder ./logs_profile/$model  $model  --precision fp32  >> $output 2>&1
+        python run.py -d cuda -t train --profile --profile-detailed --profile-devices cpu,cuda --profile-folder /home/yhao/d/tmp/logs_profile_train/$model  $model  --precision fp32  >> $output 2>&1
+        if [ $? -ne 0 ]; then
+            break
+        fi
+    done
+    # eval
+    for (( i = 1 ; i <= $max_iter; i++ ))
+    do
+        # python run.py -d cuda -m jit -t train $model --precision fp32 --torchdynamo nvfuser  >> $output 2>&1
+        python run.py -d cuda -t eval --profile --profile-detailed --profile-devices cpu,cuda --profile-folder /home/yhao/d/tmp/logs_profile_eval/$model  $model  --precision fp32  >> $output 2>&1
         if [ $? -ne 0 ]; then
             break
         fi
@@ -22,7 +32,7 @@ func(){
 
 
 source /home/yhao/d/conda/bin/activate
-conda activate pt
+conda activate pt_sep14
 
 echo `date` >> $output
 

@@ -4,7 +4,7 @@ import re
 from numpy import mean
 
 
-def work_multi_models(input_file, w_tflops=False):
+def work_multi_models(input_file, output_file='/home/yhao/d/tmp/gpuactivetime.csv'):
     """
     only works for gpu active time now
     """
@@ -22,8 +22,7 @@ def work_multi_models(input_file, w_tflops=False):
             print(f"Error when process {model_name}")
             continue
         timexratio[model_name] = [og_gputime, og_gpuratio]
-    output_file = '/tmp/gpuactivetime.csv'
-    table_head = "model, gpu time, gpu time ratio%\n"
+    table_head = "model, gpu active time, gpu active time ratio%\n"
     with open(output_file, 'w') as fout:
         fout.write(table_head)
         for model in timexratio:
@@ -126,5 +125,6 @@ def filter_time_w_flops(raw_str):
     return mean(gpu_time), mean(cpu_time), mean(tflops)
 
 
-work_multi_models2('/home/yhao/d/tmp/run_tflops_aug8.log', output_file='/home/yhao/d/tmp/filter_tflops.csv', wo_tflops=False )
+work_multi_models2('/home/yhao/d/tmp/run_tflops_20220818.log', output_file='/home/yhao/d/tmp/filter_tflops_aug18.csv', wo_tflops=False )
 # work_multi_models2('/home/yhao/d/tmp/run_all_jit_opt.log', output_file='/home/yhao/d/tmp/filter_jit_opt.csv', wo_tflops=True )
+# work_multi_models('/home/yhao/d/tmp/runall_profile_eval_20220817.log', output_file='/home/yhao/d/tmp/gpuactivetime_eval.csv')

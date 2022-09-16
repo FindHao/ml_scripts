@@ -136,3 +136,4 @@ log
 *.qdrep
 *.sqilte
 report*
+.vscode
