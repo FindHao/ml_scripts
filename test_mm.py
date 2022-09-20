@@ -8,7 +8,7 @@ def work():
     # warmup
     for i in range(10):
         torch.mm(x, y)
-    for i in range(2):
+    for i in range(200000):
         torch.mm(x, y)
 
 

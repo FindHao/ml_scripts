@@ -46,7 +46,4 @@ def work():
         run_conv2d(input_shape, weight_shape, other_args, profile_folder)
 
 
-
-
-
 work()
