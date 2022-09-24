@@ -2,7 +2,8 @@
 
 
 var_date=$(date +'%Y%m%d%H%M')
-mode=eval
+# check env vriable tb_mode. if not exist, set mode to train
+mode=${tb_mode:-train}
 output=/home/yhao/d/tmp/run_tflops_${mode}_${var_date}.log
 echo "" > $output
 
