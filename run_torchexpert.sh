@@ -1,20 +1,27 @@
 #!/bin/bash
 # This file is used to analyze the profiling results by torchexpert.
 
+# Environment variables:
+#   tb_mode: train, eval
+#   torchexpert_path: path to torchexpert
+#   tb_work_dir: path to the directory where the profiling results are stored. it should contains folders logs_profile_eval and logs_profile_train
+#   tb_conda_dir: path to the conda environment
 
-mode=eval
-var_date=$(date +'%Y%m%d')
-output=/home/yhao/d/tmp/run_torchexpert_$mode_$var_date.log
+
+mode=${tb_mode:-train}
+var_date=$(date +'%Y%m%d%H%M')
+tb_work_dir=${tb_work_dir:-/home/yhao/d/tmp}
+output=${tb_work_dir}/run_torchexpert_$mode_$var_date.log
 echo "" > $output
-cd /home/yhao/d/tmp/
-torchexpert=/data/yhao/TorchExpert/torchexpert.py
-prefix_path=/home/yhao/d/tmp/
-output_csv_file=/home/yhao/d/tmp/torchexpert_results_$mode_$var_date.csv
+cd ${tb_work_dir}
+torchexpert=${torchexpert_path:-${tb_work_dir}/TorchExpert/torchexpert.py}
+prefix_path=${tb_work_dir}
+output_csv_file=${tb_work_dir}/torchexpert_results_$mode_$var_date.csv
 
 
 
-
-source /home/yhao/d/conda/bin/activate
+conda_dir=${tb_conda_dir:-/home/yhao/d/conda}
+source ${conda_dir}/bin/activate
 conda activate pt_sep14
 
 echo `date` >> $output
