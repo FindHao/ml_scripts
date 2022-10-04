@@ -24,7 +24,6 @@ output=${work_path}/${prefix_filename}_${mode}_${var_date}.log
 echo $output
 conda_dir=${tb_conda_dir:-/home/yhao/d/conda}
 source ${conda_dir}/bin/activate
-conda activate pt_sep14
 echo "" > $output
 echo `date` >> $output
 echo "torchexpert: $torchexpert" >> $output
@@ -71,7 +70,6 @@ for model in timm_vision_transformer timm_efficientnet yolov3 timm_resnest moco 
 # for model in pyhpc_isoneutral_mixing timm_vision_transformer detectron2_fasterrcnn_r_50_fpn timm_vovnet detectron2_fasterrcnn_r_50_c4 hf_GPT2 hf_Longformer hf_Reformer hf_Bert tts_angular timm_resnest hf_BigBird resnet18 densenet121 timm_regnet detectron2_maskrcnn resnext50_32x4d pyhpc_equation_of_state pytorch_stargan detectron2_fcos_r_50_fpn pytorch_unet detectron2_fasterrcnn_r_101_c4 yolov3 detectron2_fasterrcnn_r_101_dc5 pyhpc_turbulent_kinetic_energy pytorch_struct detectron2_fasterrcnn_r_50_dc5 resnet50 maml hf_Bart demucs hf_Albert maml_omniglot hf_DistilBert vgg16 detectron2_maskrcnn_r_101_c4 hf_T5 vision_maskrcnn resnet50_quantized_qat detectron2_fasterrcnn_r_101_fpn
 do 
 
-source /home/yhao/d/conda/bin/activate
 conda activate pt_sep14
 echo "@Yueming Hao origin $model" >>$output
 func
