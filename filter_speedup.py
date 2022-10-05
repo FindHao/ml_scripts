@@ -1,5 +1,6 @@
 
 
+import argparse
 import re
 from numpy import mean
 
@@ -40,9 +41,7 @@ def work_single_model(input_file, wo_tflops=0):
           opt_gpu_time, origin_gpu_time/opt_gpu_time, origin_cpu_time, opt_cpu_time, origin_cpu_time/opt_cpu_time, origin_tflops, opt_tflops, opt_tflops/origin_tflops))
         
 
-def work_multi_models(input_file, wo_tflops=0):
-    w_gpu = True
-    w_tflops = False
+def work_multi_models(input_file, w_tflops, w_gpu, output_file):
     content = ''
     with open(input_file, 'r') as fin:
         content = fin.read()
@@ -59,7 +58,6 @@ def work_multi_models(input_file, wo_tflops=0):
         origin_gpu_time, origin_cpu_time, origin_tflops = filter_time_bs(origin_raw, w_gpu, w_tflops)
         opt_gpu_time, opt_cpu_time, opt_tflops = filter_time_bs(opt_raw, w_gpu, w_tflops )
         speedups[model_name] = [[origin_gpu_time, origin_cpu_time, origin_tflops], [opt_gpu_time, opt_cpu_time, opt_tflops]]
-    output_file = '/tmp/speedups.csv'
     table_head = ''
     formatted_speedups = {}
     if w_gpu:
@@ -155,4 +153,13 @@ def filter_time_bs(raw_str, gpu=True, flops=False):
 
 
 
-work_multi_models('/home/yhao/d/tmp/run_all_speedup_aug4.log', wo_tflops=1)
+
+if __name__=='__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--input', type=str,
+                        default='/home/yhao/d/tmp/run_all_speedup_aug4.log')
+    parser.add_argument('-t','--w_tflops', type=int, default=0)
+    parser.add_argument('-g','--w_gpu', type=int, default=1)
+    parser.add_argument('-o', '--output', type=str, default='/tmp/speedups.csv')
+    args = parser.parse_args()
+    work_multi_models(args.input, args.w_tflops, args.w_gpu, args.output)
