@@ -1,15 +1,44 @@
 #!/bin/bash
-
+# Environment variables:
+#   work_path: where benchmark folder locates
+#   tb_mode: train, eval
+#   tb_path: optional. if you want to specifiy where torchbench locates
+#   torchexpert_path: optional. if you want to specify where torchexpert locates
+#   tb_conda_dir: where conda locates
 
 var_date=$(date +'%Y%m%d%H%M')
-# check env vriable tb_mode. if not exist, set mode to train
 mode=${tb_mode:-train}
-output=/home/yhao/d/tmp/run_tflops_${mode}_${var_date}.log
+#work_path
+work_path=${work_path:-/home/yhao/d}
+# torchbench path
+tb_path=${tb_path:-${work_path}/benchmark}
+torchexpert_path=${torchexpert_path:-${work_path}/TorchExpert}
+torchexpert=${torchexpert_path}/torchexpert.py
+cur_filename=$(basename $0)
+prefix_filename=${cur_filename%.*}
+logs_path=${work_path}/logs_${prefix_filename}
+if [ ! -d $logs_path ]; then
+    mkdir -p $logs_path
+fi
+output=${work_path}/${prefix_filename}_${mode}_${var_date}.log
+echo $output
+conda_dir=${tb_conda_dir:-/home/yhao/d/conda}
+source ${conda_dir}/bin/activate
 echo "" > $output
-
 echo `date` >> $output
+echo "torchexpert: $torchexpert" >> $output
+echo "work_path: $work_path" >> $output
+echo "output_csv_file: $output" >> $output
+echo "mode: $mode" >> $output
+echo "conda_dir: $conda_dir" >> $output
 
-cd /home/yhao/d/benchmark
+echo "conda envs:" >> $output
+env1=pt_sep14
+echo $env1 >> $output
+env2=pt_sep14_allopt
+echo $env2 >> $output
+
+cd $tb_path
 
 max_iter=10
 func(){
@@ -25,7 +54,6 @@ func(){
 }
 
 
-source /home/yhao/d/conda/bin/activate
 conda activate pt_sep14
 for model in detectron2_maskrcnn_r_101_fpn mnasnet1_0 shufflenet_v2_x1_0 BERT_pytorch detectron2_maskrcnn_r_50_c4 mobilenet_v2 soft_actor_critic Background_Matting detectron2_maskrcnn_r_50_fpn mobilenet_v2_quantized_qat speech_transformer LearningToPaint dlrm mobilenet_v3_large squeezenet1_1 Super_SloMo drq moco tacotron2 alexnet fambench_dlrm nvidia_deeprecommender timm_efficientdet attention_is_all_you_need_pytorch fambench_xlmr opacus_cifar10 timm_efficientnet dcgan fastNLP_Bert pplbench_beanmachine timm_nfnet demucs hf_Albert pyhpc_equation_of_state timm_regnet densenet121 hf_Bart pyhpc_isoneutral_mixing timm_resnest detectron2_fasterrcnn_r_101_c4 hf_Bert pyhpc_turbulent_kinetic_energy timm_vision_transformer detectron2_fasterrcnn_r_101_dc5 hf_BigBird  timm_vovnet detectron2_fasterrcnn_r_101_fpn hf_DistilBert pytorch_stargan tts_angular detectron2_fasterrcnn_r_50_c4 hf_GPT2 pytorch_struct vgg16 detectron2_fasterrcnn_r_50_dc5 hf_Longformer pytorch_unet vision_maskrcnn detectron2_fasterrcnn_r_50_fpn hf_Reformer resnet18 yolov3 detectron2_fcos_r_50_fpn hf_T5 resnet50 detectron2_maskrcnn maml resnet50_quantized_qat detectron2_maskrcnn_r_101_c4 maml_omniglot resnext50_32x4d
 # for model in detectron2_fcos_r_50_fpn fambench_dlrm fastNLP_Bert maml pplbench_beanmachine pyhpc_equation_of_state pyhpc_isoneutral_mixing pyhpc_turbulent_kinetic_energy pytorch_CycleGAN_and_pix2pix dlrm timm_efficientdet demucs

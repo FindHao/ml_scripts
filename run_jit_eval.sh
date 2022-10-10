@@ -20,7 +20,7 @@ func(){
 func2(){
     for (( i = 1 ; i <= $max_iter; i++ ))
     do
-        python run.py -d cuda -t eval  --model jit $model --precision fp32  >> $output 2>&1
+        python run.py -d cuda -t eval  --mode jit $model --precision fp32  >> $output 2>&1
         if [ $? -ne 0 ]; then
             break
         fi
