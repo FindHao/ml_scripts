@@ -1,5 +1,6 @@
 
 
+import argparse
 import re
 from numpy import mean
 
@@ -49,16 +50,16 @@ def filter_time_gpuactive(raw_str):
 
 
 
-def work_multi_models2(input_file, wo_tflops=True, output_file='/home/yhao/d/tmp/filter_tflops.csv'):
-    if wo_tflops:
-        filter_time_func = filter_time_wo_flops
-    else:
+def work_multi_models2(input_file, w_tflops, output_file):
+    if w_tflops:
         filter_time_func = filter_time_w_flops
+    else:
+        filter_time_func = filter_time_wo_flops
     content = ''
     with open(input_file, 'r') as fin:
         content = fin.read()
     content_s = [_ for _ in content.split(
-        "@Yueming Hao origin") if _.strip()]
+        "@Yueming Hao origin") if _.strip()][1:]
     durations = {}
     for amodel in content_s:
         model_name = amodel.strip().split()[0].strip()
@@ -69,7 +70,7 @@ def work_multi_models2(input_file, wo_tflops=True, output_file='/home/yhao/d/tmp
             continue
         durations[model_name] = mean_v
     table_head = 'model, gpu time, cpu time,'
-    if not wo_tflops:
+    if w_tflops:
         table_head += 'tflops,'
     table_head += '\n'
     with open(output_file, 'w') as fout:
@@ -125,6 +126,11 @@ def filter_time_w_flops(raw_str):
     return mean(gpu_time), mean(cpu_time), mean(tflops)
 
 
-work_multi_models2('/home/yhao/d/tmp/run_tflops_20220818.log', output_file='/home/yhao/d/tmp/filter_tflops_aug18.csv', wo_tflops=False )
-# work_multi_models2('/home/yhao/d/tmp/run_all_jit_opt.log', output_file='/home/yhao/d/tmp/filter_jit_opt.csv', wo_tflops=True )
-# work_multi_models('/home/yhao/d/tmp/runall_profile_eval_20220817.log', output_file='/home/yhao/d/tmp/gpuactivetime_eval.csv')
+if __name__=='__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--input', type=str,
+                        default='/home/yhao/d/tmp/run_all_speedup_aug4.log')
+    parser.add_argument('-t','--w_tflops', type=int, default=0)
+    parser.add_argument('-o', '--output', type=str, default='/tmp/filter_time.csv')
+    args = parser.parse_args()
+    work_multi_models2(args.input, args.w_tflops, args.output)
