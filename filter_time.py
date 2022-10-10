@@ -31,7 +31,6 @@ def work_multi_models(input_file, output_file='/home/yhao/d/tmp/gpuactivetime.cs
             for v in timexratio[model]:
                 fout.write("%.2f, " % v)
             fout.write('\n')
-        pass
 
 def filter_time_gpuactive(raw_str):
     gpu_active_time = []
