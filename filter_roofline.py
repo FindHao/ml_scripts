@@ -1,12 +1,23 @@
 
 
+import argparse
+import os
+from pathlib import Path
+
+file_name = ''
+
+
 def filter_from_csv(file_path):
+    global file_name
     # sm__sass_thread_inst_executed_op_ffma_pred_on.sum.peak_sustained
     with open(file_path, 'r') as f:
         content = f.read()
+    file_name = Path(file_path).stem
+    print(file_name)
     if content.find('"ID","Process ID","Process Name",') < 0:
         print("Invalid csv file")
         return
+    
     content = content.split('"ID","Process ID","Process Name",')[1]
     lines = content.splitlines()
     lines[0] = '"ID","Process ID","Process Name",'+lines[0]
@@ -27,22 +38,22 @@ def filter_from_csv(file_path):
 
 def compute_roofline(d):
     peak_fp32 = 2 * \
-        float(d['sm__sass_thread_inst_executed_op_ffma_pred_on.sum.peak_sustained'])
+        float(d['sm__sass_thread_inst_executed_op_ffma_pred_on.sum.peak_sustained'].replace(',', ''))
     achieved_fp32 = 0.0
     achieved_fp32 += float(
-        d["smsp__sass_thread_inst_executed_op_fadd_pred_on.sum.per_cycle_elapsed"])
+        d["smsp__sass_thread_inst_executed_op_fadd_pred_on.sum.per_cycle_elapsed"].replace(',', ''))
     achieved_fp32 += float(
-        d["smsp__sass_thread_inst_executed_op_fmul_pred_on.sum.per_cycle_elapsed"])
+        d["smsp__sass_thread_inst_executed_op_fmul_pred_on.sum.per_cycle_elapsed"].replace(',', ''))
     achieved_fp32 += 2 * float(
-        d["smsp__sass_thread_inst_executed_op_ffma_pred_on.sum.per_cycle_elapsed"])
+        d["smsp__sass_thread_inst_executed_op_ffma_pred_on.sum.per_cycle_elapsed"].replace(',', ''))
     achieved_point_y = achieved_fp32
     achieved_point_x = achieved_fp32 * \
-        float(d["sm__cycles_elapsed.avg.per_second"])
+        float(d["sm__cycles_elapsed.avg.per_second"].replace(',', ''))
 
     roofline_y = float(
-        d['sm__sass_thread_inst_executed_op_ffma_pred_on.sum.peak_sustained']) * 2
+        d['sm__sass_thread_inst_executed_op_ffma_pred_on.sum.peak_sustained'].replace(',', '')) * 2
     roofline_oblique_k = float(
-        d['dram__bytes.sum.peak_sustained']) * float(d['dram__cycles_elapsed.avg.per_second'])
+        d['dram__bytes.sum.peak_sustained'].replace(',','')) * float(d['dram__cycles_elapsed.avg.per_second'].replace(',', '')) 
     intersection_x = roofline_y / roofline_oblique_k
 
     eligible_peak_flops = 0
@@ -52,13 +63,12 @@ def compute_roofline(d):
     else:
         eligible_peak_flops = achieved_point_x * roofline_oblique_k
         compute_bound = False
-    gpu_time_duration = float(d['gpu__time_duration.sum'])
+    gpu_time_duration = float(d['gpu__time_duration.sum'].replace(',', ''))
     return (compute_bound, eligible_peak_flops, achieved_point_y, peak_fp32, gpu_time_duration)
 
 
-def work():
-    kernels = filter_from_csv(
-        "/home/yhao24/data/ncu/detectron2_maskrcnn_r_101_fpn.csv")
+def work(input_path):
+    kernels = filter_from_csv(input_path)
     achieved_flops = []
     eligible_peak_flops = []
     peak_flops = []
@@ -72,12 +82,19 @@ def work():
         peak_flops.append(peak_flop)
         gpu_time_durations.append(gpu_time_duration)
     whole_duration = sum(gpu_time_durations)
-    print("mean achieved_flops: ", sum(
-        [x*y for x, y in zip(achieved_flops, gpu_time_durations)]) / whole_duration)
-    print("mean eligible_peak_flops: ", sum(
-        [x*y for x, y in zip(eligible_peak_flops, gpu_time_durations)]) / whole_duration)
-    print("mean peak_flops: ", sum(
-        [x*y for x, y in zip(peak_flops, gpu_time_durations)]) / whole_duration)
+    mean_achieved_flops = sum(
+        [x*y for x, y in zip(achieved_flops, gpu_time_durations)]) / whole_duration
+    mean_eligible_peak_flops = sum(
+        [x*y for x, y in zip(eligible_peak_flops, gpu_time_durations)]) / whole_duration
+    mean_peak_flops = sum(
+        [x*y for x, y in zip(peak_flops, gpu_time_durations)]) / whole_duration
+    print("model, Mean achieved, eligible peak, peak flops:\n{}, {}, {}, {}".format(file_name, mean_achieved_flops, mean_eligible_peak_flops, mean_peak_flops))
 
 
-work()
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--input', type=str,
+                        default='/home/yhao24/ncsugdrive/data/logs_run_all_ncu/BERT_pytorch.log')
+    args = parser.parse_args()
+    work(args.input)
