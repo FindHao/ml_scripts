@@ -129,7 +129,7 @@ if __name__=='__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input', type=str,
                         default='/home/yhao/d/tmp/run_all_speedup_aug4.log')
-    parser.add_argument('-t','--w_tflops', type=int, default=0)
+    parser.add_argument('-t','--w_tflops', type=int, default=1)
     parser.add_argument('-o', '--output', type=str, default='/tmp/filter_time.csv')
     args = parser.parse_args()
     work_multi_models2(args.input, args.w_tflops, args.output)
