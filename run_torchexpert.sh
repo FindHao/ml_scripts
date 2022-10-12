@@ -36,7 +36,7 @@ do
 
 done
 
-python3 ${SHELL_FOLDER}/filter_ratio.py -i ${output_csv_file} -o ${work_path}/${profile_suffix}/profile_${mode}_filter.csv
+python3 ${SHELL_FOLDER}/filter_ratios.py -i ${output_csv_file} -o ${work_path}/${profile_suffix}/profile_${mode}_filter.csv
 
 
 echo `date` >> $output
