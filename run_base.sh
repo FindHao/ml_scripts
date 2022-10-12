@@ -35,6 +35,17 @@ echo "conda_dir: $conda_dir" >> $output
 
 echo "conda envs:" >> $output
 env1=${tb_env1:-pt_sep14}
-echo $env1 >> $output
-env2=pt_sep14_allopt
-echo $env2 >> $output
+echo "env1" $env1 >> $output
+env2=${tb_env2:-pt_sep14_allopt}
+echo "env2" $env2 >> $output
+
+
+notify()
+{
+    hostname=`cat /proc/sys/kernel/hostname`
+    curl -s \
+    --form-string "token=${PUSHOVER_API}" \
+    --form-string "user=${PUSHOVER_USER_KEY}" \
+    --form-string "message=${prefix_filename} on ${hostname} done! " \
+    https://api.pushover.net/1/messages.json
+}
