@@ -22,8 +22,13 @@ if [ ! -d $logs_path ]; then
     mkdir -p $logs_path
 fi
 output=${work_path}/${prefix_filename}_${mode}_${var_date}.log
-echo $output
 conda_dir=${tb_conda_dir:-/home/yhao/d/conda}
+env1=${tb_env1:-pt_sep14}
+env2=${tb_env2:-pt_sep14_allopt}
+enable_jit=${tb_jit:-0}
+
+
+echo $output
 source ${conda_dir}/bin/activate
 echo "" > $output
 echo `date` >> $output
@@ -32,11 +37,8 @@ echo "work_path: $work_path" >> $output
 echo "output_csv_file: $output" >> $output
 echo "mode: $mode" >> $output
 echo "conda_dir: $conda_dir" >> $output
-
 echo "conda envs:" >> $output
-env1=${tb_env1:-pt_sep14}
 echo "env1" $env1 >> $output
-env2=${tb_env2:-pt_sep14_allopt}
 echo "env2" $env2 >> $output
 
 

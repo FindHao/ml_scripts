@@ -9,6 +9,10 @@ if [ $tb_env1 ] && [ $tb_env1 != "pt_sep14" ]; then
     profile_suffix=logs_profile_${mode}_$env1
 fi
 
+if [ $enable_jit -eq 1 ]; then
+    echo "enabled jit" >> $output
+    profile_suffix=${profile_suffix}_jit
+fi
 
 if [ -d ${work_path}/${profile_suffix} ]; then
     echo "${work_path}/${profile_suffix} exists" >> $output
