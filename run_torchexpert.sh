@@ -13,6 +13,8 @@ if [ $enable_jit -eq 1 ]; then
     echo "enabled jit" >> $output
     profile_suffix=${profile_suffix}_jit
 fi
+# you can define a profilesuffix by yourself.
+profile_suffix=${tb_profile_suffix:-$profile_suffix}
 
 if [ -d ${work_path}/${profile_suffix} ]; then
     echo "${work_path}/${profile_suffix} exists" >> $output

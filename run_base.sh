@@ -40,7 +40,9 @@ echo "conda_dir: $conda_dir" >> $output
 echo "conda envs:" >> $output
 echo "env1" $env1 >> $output
 echo "env2" $env2 >> $output
-
+if [ $enable_jit -eq 1 ]; then
+    echo "enable_jit: True" >> $output
+fi
 
 notify()
 {
