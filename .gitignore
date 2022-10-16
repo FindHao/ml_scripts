@@ -138,3 +138,5 @@ log
 report*
 .vscode
 *ncu-rep
+
+*.csv
