@@ -2,7 +2,7 @@
 
 import argparse
 import re
-from numpy import mean
+from numpy import mean,std
 
 
 def work_multi_models(input_file, output_file='/home/yhao/d/tmp/gpuactivetime.csv'):
@@ -59,36 +59,36 @@ def work_multi_models2(input_file, w_tflops, output_file):
         content = fin.read()
     content_s = [_ for _ in content.split(
         "@Yueming Hao origin") if _.strip()][1:]
-    durations = {}
+    std_values = {}
     for amodel in content_s:
         model_name = amodel.strip().split()[0].strip()
-        # gpu_time, cpu_time, [tflops]
-        mean_v = filter_time_func(amodel)
-        if mean_v[0] is None:
-            print(f"Error when process model {model_name}")
-            continue
-        durations[model_name] = mean_v
-    table_head = 'model, gpu time, cpu time,'
+        niter, cpu_time = filter_time_func(amodel)
+        std_value = std(cpu_time)
+        if std_value > 1:
+            print(f"std value is {std_value:.2f} for {model_name}")
+            print(cpu_time)
+        std_values[model_name] = std_value
+    table_head = 'model, std,'
     if w_tflops:
         table_head += 'tflops,'
     table_head += '\n'
     with open(output_file, 'w') as fout:
         print("writing to file %s" % output_file)
         fout.write(table_head)
-        for model in durations:
+        for model in std_values:
             fout.write("%s, " % model)
-            for v in durations[model]:
-                fout.write("%.2f, " % v)
+            fout.write("%.2f, " % std_values[model])
             fout.write('\n')
         pass
 
 def filter_time_wo_flops(raw_str):
-    gpu_time = []
+    niter = []
     cpu_time = []
     reg1 = re.compile(
-        r"GPU Time:(.*) milliseconds\nCPU Total Wall Time:(.*) milliseconds")
+        r"niter:(.+?)\n[\s\S]+?CPU Total Wall Time:(.*) milliseconds")
     results = reg1.findall(raw_str)
-    reg2 = re.compile(r"GPU Time per batch:(.*) milliseconds\nCPU Wall Time per batch:(.*) milliseconds\nFLOPS:(.*) TFLOPs per second")
+    reg2 = re.compile(
+        r"niter:(.+?)\n[\s\S]+?CPU Wall Time per batch:(.*) milliseconds")
     results2 = reg2.findall(raw_str)
     if not results:
         if not results2:
@@ -97,10 +97,10 @@ def filter_time_wo_flops(raw_str):
         else:
             results = results2
     for it in results:
-        it = [float(_) for _ in it]
-        gpu_time.append(it[0])
-        cpu_time.append(it[1])
-    return mean(gpu_time), mean(cpu_time)
+        it = [_ for _ in it]
+        niter.append(int(it[0]))
+        cpu_time.append(float(it[1]))
+    return niter, cpu_time
 
 
 def filter_time_w_flops(raw_str):
@@ -130,7 +130,8 @@ if __name__=='__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input', type=str,
                         default='/home/yhao/d/tmp/run_all_speedup_aug4.log')
-    parser.add_argument('-t','--w_tflops', type=int, default=1)
+    parser.add_argument('-t','--w_tflops', type=int, default=0)
     parser.add_argument('-o', '--output', type=str, default='/tmp/filter_time.csv')
+    parser.add_argument('-g', '--w_gpu', type=int, default=0)
     args = parser.parse_args()
     work_multi_models2(args.input, args.w_tflops, args.output)

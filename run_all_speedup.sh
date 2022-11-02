@@ -11,7 +11,7 @@ then
     tflops="--flops dcgm"
     echo "enable dcgm tflops"
 else
-    tflops=${tb_tflops}
+    tflops=""
 fi
 
 func(){
@@ -46,7 +46,8 @@ echo `date` >> $output
 # remaining test aug4
 # for model in pyhpc_isoneutral_mixing timm_vision_transformer detectron2_fasterrcnn_r_50_fpn timm_vovnet detectron2_fasterrcnn_r_50_c4 hf_GPT2 hf_Longformer hf_Reformer hf_Bert tts_angular timm_resnest hf_BigBird resnet18 densenet121 timm_regnet detectron2_maskrcnn resnext50_32x4d pyhpc_equation_of_state pytorch_stargan detectron2_fcos_r_50_fpn pytorch_unet detectron2_fasterrcnn_r_101_c4 yolov3 detectron2_fasterrcnn_r_101_dc5 pyhpc_turbulent_kinetic_energy pytorch_struct detectron2_fasterrcnn_r_50_dc5 resnet50 maml hf_Bart demucs hf_Albert maml_omniglot hf_DistilBert vgg16 detectron2_maskrcnn_r_101_c4 hf_T5 vision_maskrcnn resnet50_quantized_qat detectron2_fasterrcnn_r_101_fpn
 # table 3
-for model in mobilenet_v3_large  timm_vision_transformer dcgan shufflenet_v2_x1_0 soft_actor_critic opacus_cifar10 timm_efficientnet attention_is_all_you_need_pytorch yolov3 timm_efficientdet mobilenet_v2 mobilenet_v2_quantized_qat densenet121 resnet50_quantized_qat tts_angular hf_Bart hf_DistilBert resnet50 timm_resnest BERT_pytorch moco timm_vovnet hf_Reformer hf_T5 drq detectron2_fasterrcnn_r_101_fpn
+# for model in mobilenet_v3_large  timm_vision_transformer dcgan shufflenet_v2_x1_0 soft_actor_critic opacus_cifar10 timm_efficientnet attention_is_all_you_need_pytorch yolov3 timm_efficientdet mobilenet_v2 mobilenet_v2_quantized_qat densenet121 resnet50_quantized_qat tts_angular hf_Bart hf_DistilBert resnet50 timm_resnest BERT_pytorch moco timm_vovnet hf_Reformer hf_T5 drq detectron2_fasterrcnn_r_101_fpn
+for model in hf_BigBird
 do 
 conda activate $env1
 echo "@Yueming Hao origin $model" >>$output
