@@ -63,6 +63,9 @@ def work_multi_models2(input_file, w_tflops, output_file):
     for amodel in content_s:
         model_name = amodel.strip().split()[0].strip()
         niter, cpu_time = filter_time_func(amodel)
+        if not cpu_time:
+            print(f"Error when process {model_name}")
+            continue
         std_value = std(cpu_time)
         if std_value > 1:
             print(f"std value is {std_value:.2f} for {model_name}")
@@ -93,7 +96,7 @@ def filter_time_wo_flops(raw_str):
     if not results:
         if not results2:
             print("no results found!")
-            return None, None, None
+            return None, None
         else:
             results = results2
     for it in results:
