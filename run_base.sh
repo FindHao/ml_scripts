@@ -11,17 +11,21 @@ var_date=$(date +'%Y%m%d%H%M')
 mode=${tb_mode:-train}
 #work_path
 work_path=${work_path:-/home/yhao/d}
+if [ ! -d $work_path ]; then
+    echo "work_path not exist"
+    exit 1
+fi
 # torchbench path
 tb_path=${tb_path:-${work_path}/benchmark}
 torchexpert_path=${torchexpert_path:-${work_path}/TorchExpert}
 torchexpert=${torchexpert_path}/torchexpert.py
 cur_filename=$(basename $0)
 prefix_filename=${cur_filename%.*}
-logs_path=${work_path}/logs_${prefix_filename}
+logs_path=${work_path}/logs/logs_${prefix_filename}
 if [ ! -d $logs_path ]; then
     mkdir -p $logs_path
 fi
-output=${work_path}/${prefix_filename}_${mode}_${var_date}.log
+output=${work_path}/logs/${prefix_filename}_${mode}_${var_date}.log
 conda_dir=${tb_conda_dir:-/home/yhao/d/conda}
 env1=${tb_env1:-pt_sep14}
 env2=${tb_env2:-pt_sep14_allopt}
