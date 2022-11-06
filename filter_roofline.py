@@ -1,6 +1,7 @@
 
 
 import argparse
+from fileinput import filename
 import os
 from pathlib import Path
 
@@ -13,7 +14,6 @@ def filter_from_csv(file_path):
     with open(file_path, 'r') as f:
         content = f.read()
     file_name = Path(file_path).stem
-    print(file_name)
     if content.find('"ID","Process ID","Process Name",') < 0:
         print("Invalid csv file")
         return
@@ -67,7 +67,7 @@ def compute_roofline(d):
     return (compute_bound, eligible_peak_flops, achieved_point_y, peak_fp32, gpu_time_duration)
 
 
-def work(input_path):
+def work(input_path, print_header):
     kernels = filter_from_csv(input_path)
     achieved_flops = []
     eligible_peak_flops = []
@@ -88,7 +88,10 @@ def work(input_path):
         [x*y for x, y in zip(eligible_peak_flops, gpu_time_durations)]) / whole_duration
     mean_peak_flops = sum(
         [x*y for x, y in zip(peak_flops, gpu_time_durations)]) / whole_duration
-    print("model, Mean achieved, eligible peak, peak flops:\n{}, {}, {}, {}".format(file_name, mean_achieved_flops, mean_eligible_peak_flops, mean_peak_flops))
+    if print_header:
+        print("model, Mean achieved, eligible peak, peak flops:\n{}, {}, {}, {}".format(file_name, mean_achieved_flops, mean_eligible_peak_flops, mean_peak_flops))
+    else:
+        print("{}, {}, {}, {}".format(file_name, mean_achieved_flops, mean_eligible_peak_flops, mean_peak_flops))
 
 
 
@@ -96,5 +99,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input', type=str,
                         default='/home/yhao24/ncsugdrive/data/logs_run_all_ncu/BERT_pytorch.log')
+    parser.add_argument('-l', '--long', action='store_true', help='long output')
     args = parser.parse_args()
-    work(args.input)
+    try:
+        work(args.input, args.long)
+    except Exception as e:
+        print(e)
+        print(file_name)
