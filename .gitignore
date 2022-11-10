@@ -140,3 +140,4 @@ report*
 *ncu-rep
 
 *.csv
+.downloads/

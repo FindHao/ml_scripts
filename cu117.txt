@@ -1,9 +1,3 @@
-https://download.pytorch.org/whl/nightly/torchtext-0.14.0.dev20221026-cp38-cp38-linux_x86_64.whl
-
-https://download.pytorch.org/whl/nightly/torchdata-0.6.0.dev20221026-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
-
 https://download.pytorch.org/whl/nightly/cu117/torchvision-0.15.0.dev20221026%2Bcu117-cp38-cp38-linux_x86_64.whl
-
 https://download.pytorch.org/whl/nightly/cu117/torch-1.14.0.dev20221026%2Bcu117-cp38-cp38-linux_x86_64.whl
-
 https://download.pytorch.org/whl/nightly/cu117/torchaudio-0.14.0.dev20221026%2Bcu117-cp38-cp38-linux_x86_64.whl
