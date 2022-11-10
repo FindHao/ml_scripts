@@ -8,7 +8,7 @@
 #   tb_env1: the conda env you would like to test
 
 var_date=$(date +'%Y%m%d%H%M')
-mode=${tb_mode:-train}
+mode=${mode:-train}
 #work_path
 work_path=${work_path:-/home/yhao/d}
 if [ ! -d $work_path ]; then
@@ -26,10 +26,12 @@ if [ ! -d $logs_path ]; then
     mkdir -p $logs_path
 fi
 output=${work_path}/logs/${prefix_filename}_${mode}_${var_date}.log
-conda_dir=${tb_conda_dir:-/home/yhao/d/conda}
-env1=${tb_env1:-pt_sep14}
-env2=${tb_env2:-pt_sep14_allopt}
-enable_jit=${tb_jit:-0}
+conda_dir=${conda_dir:-/home/yhao/d/conda}
+env1=${env1:-pt_sep14}
+env2=${env2:-pt_sep14_allopt}
+enable_jit=${enable_jit:-0}
+cuda_env1=${cuda_env1:-/home/yhao/setenvs/set11.6-cudnn8.3.3.sh}
+cuda_env2=${cuda_env2:-/home/yhao/setenvs/set11.6-cudnn8.5.0.sh}
 
 
 echo $output
