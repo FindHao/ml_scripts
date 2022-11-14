@@ -11,5 +11,5 @@ if [ ! -d $cuda_path ]; then
 fi
 
 cp $cudnn_path/include/cudnn*.h $cuda_path/include
-cp $cudnn_path/lib64/libcudnn* $cuda_path/lib64
+cp $cudnn_path/lib/libcudnn* $cuda_path/lib64
 chmod a+r $cuda_path/include/cudnn*.h $cuda_path/lib64/libcudnn*
