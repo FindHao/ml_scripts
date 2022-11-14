@@ -27,7 +27,7 @@ if [ ! -d $logs_path ]; then
 fi
 output=${work_path}/logs/${prefix_filename}_${mode}_${var_date}.log
 conda_dir=${conda_dir:-/home/yhao/d/conda}
-env1=${env1:-pt_sep14}
+env1=${env1:-pt_oct26}
 env2=${env2:-pt_sep14_allopt}
 enable_jit=${enable_jit:-0}
 cuda_env1=${cuda_env1:-/home/yhao/setenvs/set11.6-cudnn8.3.3.sh}
