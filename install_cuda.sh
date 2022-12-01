@@ -1,32 +1,57 @@
 #!/bin/bash
 
-# check variable exsitence
-if [ -z "$cuda116_path" ]; then
-    echo "cuda116_path is not set"
+# for variable in t_cuda t_cudnn t_cuda_path
+# do 
+#     if [ -z "${!variable}" ]; then
+#         echo "${variable} not set"
+#         exit 1
+#     fi
+# done
+
+# check t_cuda is equal to 116 or 117 or 118
+if [ "$t_cuda" == "116" ] ; then
+    cuda_download_link="https://developer.download.nvidia.com/compute/cuda/11.6.2/local_installers/cuda_11.6.2_510.47.03_linux.run"
+    cudnn_download_link="https://developer.download.nvidia.com/compute/redist/cudnn/v8.3.2/local_installers/11.5/cudnn-linux-x86_64-8.3.2.44_cuda11.5-archive.tar.xz"
+    cuda_file_name="cuda_11.6.2_510.47.03_linux.run"
+    cudnn_file_name="cudnn-linux-x86_64-8.3.2.44_cuda11.5-archive"
+    cudnn_file_name_with_ext="cudnn-linux-x86_64-8.3.2.44_cuda11.5-archive.tar.xz"
+fi
+if [ "$t_cuda" == "117" ] ; then
+    cuda_download_link="https://developer.download.nvidia.com/compute/cuda/11.7.0/local_installers/cuda_11.7.0_515.43.04_linux.run"
+    cudnn_download_link="https://ossci-linux.s3.amazonaws.com/cudnn-linux-x86_64-8.5.0.96_cuda11-archive.tar.xz"
+    cuda_file_name="cuda_11.7.0_515.43.04_linux.run"
+    cudnn_file_name="cudnn-linux-x86_64-8.5.0.96_cuda11-archive"
+    cudnn_file_name_with_ext="cudnn-linux-x86_64-8.5.0.96_cuda11-archive.tar.xz"
+fi
+if [ "$t_cuda" == "118" ] ; then
+    cuda_download_link="https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda_11.8.0_520.61.05_linux.run"
+    cudnn_download_link="https://ossci-linux.s3.amazonaws.com/cudnn-linux-x86_64-8.5.0.96_cuda11-archive.tar.xz"
+    cuda_file_name="cuda_11.8.0_520.61.05_linux.run"
+    cudnn_file_name="cudnn-linux-x86_64-8.5.0.96_cuda11-archive"
+    cudnn_file_name_with_ext="cudnn-linux-x86_64-8.5.0.96_cuda11-archive.tar.xz"
+fi
+if [ -z "$cuda_download_link" ]; then
+    echo "t_cuda is only available for 116, 117, 118"
     exit 1
 fi
-if [ -z "$cuda117_path" ]; then
-    echo "cuda117_path is not set"
+if [ -z "$t_cuda_path" ]; then
+    echo "t_cuda_path not set"
     exit 1
 fi
 
-wget -q https://developer.download.nvidia.com/compute/cuda/11.6.2/local_installers/cuda_11.6.2_510.47.03_linux.run -P ./.downloads/cu116
-pushd ./.downloads/cu116
-chmod +x cuda_11.6.2_510.47.03_linux.run
-./cuda_11.6.2_510.47.03_linux.run --toolkit --toolkitpath=${cuda116_path} --silent
-wget -q https://developer.download.nvidia.com/compute/redist/cudnn/v8.3.2/local_installers/11.5/cudnn-linux-x86_64-8.3.2.44_cuda11.5-archive.tar.xz -O cudnn-linux-x86_64-8.3.2.44_cuda11.5-archive.tar.xz
-tar xf cudnn-linux-x86_64-8.3.2.44_cuda11.5-archive.tar.xz
-cuda_path=${cuda116_path} cudnn_path=$(pwd)/cudnn-linux-x86_64-8.3.2.44_cuda11.5-archive ../../install_cudnn.sh
+mkdir -p .downloads/$t_cuda
 
-popd
-wget -q https://developer.download.nvidia.com/compute/cuda/11.7.0/local_installers/cuda_11.7.0_515.43.04_linux.run -P ./.downloads/cu117
-pushd ./.downloads/cu117
-chmod +x cuda_11.7.0_515.43.04_linux.run
-./cuda_11.7.0_515.43.04_linux.run --toolkit --toolkitpath=${cuda117_path} --silent
-wget -q https://ossci-linux.s3.amazonaws.com/cudnn-linux-x86_64-8.5.0.96_cuda11-archive.tar.xz -O cudnn-linux-x86_64-8.5.0.96_cuda11-archive.tar.xz
-tar xf cudnn-linux-x86_64-8.5.0.96_cuda11-archive.tar.xz
-cuda_path=${cuda117_path} cudnn_path=$(pwd)/cudnn-linux-x86_64-8.5.0.96_cuda11-archive ../../install_cudnn.sh
+function download_and_install() {
+    echo "Downloading cudatoolkit"
+    wget $cuda_download_link -O .downloads/$t_cuda/$cuda_file_name
+    echo "Downloading cudnn"
+    wget $cudnn_download_link -O .downloads/$t_cuda/$cudnn_file_name_with_ext &
+    /usr/bin/bash .downloads/$t_cuda/$cuda_file_name --silent --toolkit --toolkitpath=$t_cuda_path 
+    wait
+    tar -xf .downloads/$t_cuda/$cudnn_file_name_with_ext -C .downloads/$t_cuda/$cudnn_file_name
+    cp .downloads/$t_cuda/cudnn_file_name/include/cudnn*.h $t_cuda_path/include
+    cp .downloads/$t_cuda/cudnn_file_name/lib64/libcudnn* $t_cuda_path/lib64
+    chmod a+r $t_cuda_path/include/cudnn*.h $t_cuda_path/lib64/libcudnn*
+}
 
-
-
-
+download_and_install
