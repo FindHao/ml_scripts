@@ -51,10 +51,10 @@ function download_and_install() {
     /usr/bin/bash .downloads/$t_cuda/$cuda_file_name --silent --toolkit --toolkitpath=$t_cuda_path 
     wait
     mkdir .downloads/$t_cuda/$cudnn_file_name
-    tar -xf .downloads/$t_cuda/$cudnn_file_name_with_ext -C .downloads/$t_cuda/$cudnn_file_name
-    cp .downloads/$t_cuda/cudnn_file_name/include/cudnn*.h $t_cuda_path/include
-    cp .downloads/$t_cuda/cudnn_file_name/lib64/libcudnn* $t_cuda_path/lib64
-    chmod a+r $t_cuda_path/include/cudnn*.h $t_cuda_path/lib64/libcudnn*
+    tar -xf .downloads/$t_cuda/$cudnn_file_name_with_ext -C .downloads/$t_cuda/
+    cp .downloads/$t_cuda/$cudnn_file_name/include/cudnn*.h $t_cuda_path/include
+    cp .downloads/$t_cuda/$cudnn_file_name/lib/libcudnn* $t_cuda_path/lib64
+    chmod a+r $t_cuda_path/include/cudnn*.h $t_cuda_path/lib/libcudnn*
 }
 
 download_and_install
