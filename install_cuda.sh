@@ -39,6 +39,8 @@ if [ -z "$t_cuda_path" ]; then
     exit 1
 fi
 
+echo "This script will install cuda $t_cuda to $t_cuda_path."
+
 mkdir -p .downloads/$t_cuda
 
 function download_and_install() {
@@ -48,6 +50,7 @@ function download_and_install() {
     wget $cudnn_download_link -O .downloads/$t_cuda/$cudnn_file_name_with_ext &
     /usr/bin/bash .downloads/$t_cuda/$cuda_file_name --silent --toolkit --toolkitpath=$t_cuda_path 
     wait
+    mkdir .downloads/$t_cuda/$cudnn_file_name
     tar -xf .downloads/$t_cuda/$cudnn_file_name_with_ext -C .downloads/$t_cuda/$cudnn_file_name
     cp .downloads/$t_cuda/cudnn_file_name/include/cudnn*.h $t_cuda_path/include
     cp .downloads/$t_cuda/cudnn_file_name/lib64/libcudnn* $t_cuda_path/lib64
