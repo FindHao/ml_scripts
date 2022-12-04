@@ -54,7 +54,7 @@ function download_and_install() {
     tar -xf .downloads/$t_cuda/$cudnn_file_name_with_ext -C .downloads/$t_cuda/
     cp .downloads/$t_cuda/$cudnn_file_name/include/cudnn*.h $t_cuda_path/include
     cp .downloads/$t_cuda/$cudnn_file_name/lib/libcudnn* $t_cuda_path/lib64
-    chmod a+r $t_cuda_path/include/cudnn*.h $t_cuda_path/lib/libcudnn*
+    chmod a+r $t_cuda_path/include/cudnn*.h $t_cuda_path/lib64/libcudnn*
 }
 
 download_and_install
