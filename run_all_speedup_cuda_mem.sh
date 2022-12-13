@@ -17,7 +17,7 @@ fi
 func(){
     for (( i = 1 ; i <= $max_iter; i++ ))
     do
-        python run.py -d cuda ${tflops} -t $mode $model --precision fp32  >> $output 2>&1
+        python run.py -d cuda ${tflops} --metrics cpu_peak_mem,gpu_peak_mem --metrics-gpu-backend dcgm  -t $mode $model --precision fp32  >> $output 2>&1
     done
 }
 
