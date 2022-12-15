@@ -40,6 +40,7 @@ echo "" > $output
 echo `date` >> $output
 echo "torchexpert: $torchexpert" >> $output
 echo "work_path: $work_path" >> $output
+echo "tb_path: $tb_path" >> $output
 echo "output_csv_file: $output" >> $output
 echo "mode: $mode" >> $output
 echo "conda_dir: $conda_dir" >> $output

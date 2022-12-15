@@ -5,7 +5,7 @@ source ${SHELL_FOLDER}/run_base.sh
 
 cd $tb_path
 
-max_iter=20
+max_iter=10
 if [[ -z ${tb_tflops} ]] ;
 then
     tflops=""
@@ -21,10 +21,9 @@ func(){
     done
 }
 
-
+echo "cuda_env1: $cuda_env1" >> $output
+echo "cuda_env2: $cuda_env2" >> $output
 echo `date` >> $output
-
-
 
 # for model in timm_nfnet
 for model in $all_models
