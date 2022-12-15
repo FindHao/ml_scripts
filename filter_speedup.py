@@ -4,6 +4,10 @@ import argparse
 import re
 from numpy import mean
 
+metric_text_map1 = {
+    'cpumem': "CPU Time:,\t%.2f, %.2f, %.2f",
+    'gpumem': "GPU Time:,\t%.2f, %.2f, %.2f",
+}
 
 def filter_time(raw_str):
     gpu_time = []
@@ -40,11 +44,12 @@ def work_single_model(input_file, wo_tflops=0):
         origin_gpu_time, origin_cpu_time, origin_tflops = filter_time(
             origin_raw)
         opt_gpu_time, opt_cpu_time, opt_tflops = filter_time(opt_raw)
-        print("\t, Origin, Optimize, Speedup\nGPU Time:,\t%.2f, %.2f, %.2fX\nCPU Time:,\t%.2f, %.2f, %.2fX\nTFLOPS:, \t%.2f, %.2f, %.2fX" % (origin_gpu_time,
-                                                                                                                                             opt_gpu_time, origin_gpu_time/opt_gpu_time, origin_cpu_time, opt_cpu_time, origin_cpu_time/opt_cpu_time, origin_tflops, opt_tflops, opt_tflops/origin_tflops))
+        print("\t, Origin, Optimize, Speedup\nGPU Time:,\t%.2f, %.2f, %.2fX\nCPU Time:,\t%.2f, %.2f, %.2fX\nTFLOPS:, \t%.2f, %.2f, %.2fX" %
+              (origin_gpu_time,
+               opt_gpu_time, origin_gpu_time/opt_gpu_time, origin_cpu_time, opt_cpu_time, origin_cpu_time/opt_cpu_time, origin_tflops, opt_tflops, opt_tflops/origin_tflops))
 
 
-def work_multi_models(input_file, w_tflops, w_gpu, output_file):
+def work_multi_models(input_file, w_tflops, w_gpu, output_file, cpumem, gpu_mem):
     content = ''
     with open(input_file, 'r') as fin:
         content = fin.read()
@@ -171,5 +176,8 @@ if __name__ == '__main__':
     parser.add_argument('-g', '--w_gpu', type=int, default=1)
     parser.add_argument('-o', '--output', type=str,
                         default='/tmp/speedups.csv')
+    parser.add_argument('--cpumem', type=int, default=0)
+    parser.add_argument('--gpumem', type=int, default=0)
     args = parser.parse_args()
-    work_multi_models(args.input, args.w_tflops, args.w_gpu, args.output)
+    work_multi_models(args.input, args.w_tflops, args.w_gpu,
+                      args.output, args.cpumem, args.gpumem)
