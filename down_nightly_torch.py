@@ -5,12 +5,12 @@ from bs4 import BeautifulSoup
 from pkginfo import Wheel
 import argparse
 import os
-from urllib.parse import unquote
+from urllib.parse import unquote, quote
 
 
 # The base URL for the PyTorch nightly builds
 base_url = "https://download.pytorch.org/whl/nightly/cu116"
-pkgs = ["torchdata", "torchvision", "torchtext", "torchaudio", "torch"]
+pkgs = ["torchdata", "torchvision", "torchtext", "torchaudio", "torch", "pytorch-triton"]
 # raw dependency data deps = {pkg: [dep1, dep2=XX] }
 deps = {}
 filter_deps = {}
@@ -66,6 +66,14 @@ def download_file(url, force=False):
         print("Error downloading file")
         exit(1)
 
+def download_pytorch_triton(force=False):
+    print("Downloading pytorch-triton")
+    triton_version = filter_deps["torch"]["pytorch-triton"]
+    download_url = get_download_url("pytorch-triton", quote(triton_version))
+    if download_url is None:
+        print("Could not find a package for %s on %s" % (pkg, triton_version))
+    download_file(download_url, force=force)
+
 
 def parse_dependencies(dependencies):
     torch_deps = {}
@@ -85,7 +93,7 @@ def check_dependencies(date_str):
         for dep_pkg in filter_deps[pkg]:
             # print(f"Package: {pkg}, Dependency: {dep}")
             dep_pkg_version = filter_deps[pkg][dep_pkg]
-            if dep_pkg_version.find(date_str) == -1:
+            if dep_pkg != "pytorch-triton" and dep_pkg_version.find(date_str) == -1:
                 print(f"Package: {pkg}, Dependency: {dep_pkg} is not the same version as the package")
                 print(f"Package: {pkg}, Dependency: {dep_pkg} version: {dep_pkg_version}")
 
@@ -96,13 +104,15 @@ if __name__ == "__main__":
     parser.add_argument("--force", action="store_true",
                         help="overwrite existing files")
     # add arguments for pkg name 
-    parser.add_argument("--pkgs", type=str, default="torchdata,torchvision,torchtext,torchaudio,torch",
+    parser.add_argument("--pkgs", type=str, default="torchdata,torchvision,torchtext,torchaudio,torch,pytorch-triton",
                         help="name of the package you want to download")
     args = parser.parse_args()
     date_str = args.date
     if args.pkgs:
         pkgs = args.pkgs.split(",")
     for pkg in pkgs:
+        if pkg =="pytorch-triton":
+            continue
         # Get the download URL for the package
         download_url = get_download_url(pkg, date_str)
         if download_url is None:
@@ -118,3 +128,5 @@ if __name__ == "__main__":
         filter_deps[pkg] = torch_deps
     print("=====================================")
     check_dependencies(date_str)
+    download_pytorch_triton(args.force)
+    
