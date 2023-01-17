@@ -1,4 +1,5 @@
 #!/bin/bash
+# usage: t_cuda=118 t_cuda_path=/install/path  ./install_cuda.sh
 
 # for variable in t_cuda t_cudnn t_cuda_path
 # do 
