@@ -5,22 +5,35 @@ import torch
 import torch.nn.functional as F
 import argparse
 
-out_channels = 1024
+# out_channels = 1024
+# input_shape = [1, 1024, 50, 75]
+# stride = (1, 1)
+# padding = (1, 1)
+# dilation = (1, 1)
+# groups = 1
+# weight_shape = (out_channels, input_shape[1] // groups, 3, 3)
+# weight = torch.ones(weight_shape, dtype=torch.float32, device='cuda')
+# x = torch.ones(input_shape, dtype=torch.float32, device='cuda')
+# bias_shape = (out_channels,)
+# bias = torch.ones(bias_shape, dtype=torch.float32, device='cuda')
+
 input_shape = [1, 1024, 50, 75]
 stride = (1, 1)
 padding = (1, 1)
 dilation = (1, 1)
 groups = 1
-weight_shape = (out_channels, input_shape[1] // groups, 3, 3)
+weight_shape = (1024, 1024, 3, 3)
 weight = torch.ones(weight_shape, dtype=torch.float32, device='cuda')
 x = torch.ones(input_shape, dtype=torch.float32, device='cuda')
-bias_shape = (out_channels,)
-bias = torch.ones(bias_shape, dtype=torch.float32, device='cuda')
+bias_shape = (1024,)
+bias = torch.ones((1024, ), dtype=torch.float32, device='cuda')
 
+def run2():
+    
+    for i in range(100):
+        F.conv2d(x, weight, bias, (1, 1), (1, 1), (1, 1), 1)
 
 def run():
-    for i in range(10):
-        F.conv2d(x, weight, bias, stride, padding, dilation, groups)
     
     for i in range(100):
         F.conv2d(x, weight, bias, stride, padding, dilation, groups)
@@ -51,7 +64,7 @@ if __name__ == "__main__":
     if args.profile:
         profile_run()
     else:
-        run()
+        run2()
         
         
     
