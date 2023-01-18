@@ -9,7 +9,7 @@
 
 var_date=$(date +'%Y%m%d%H%M')
 mode=${mode:-train}
-#work_path
+
 work_path=${work_path:-/home/yhao/d}
 if [ ! -d $work_path ]; then
     echo "work_path not exist"
