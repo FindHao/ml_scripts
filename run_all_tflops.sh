@@ -12,7 +12,7 @@ func(){
     for (( i = 1 ; i <= $max_iter; i++ ))
     do
         # python run.py -d cuda -m jit -t train $model --precision fp32 --torchdynamo nvfuser  >> $output 2>&1
-        python run.py -d cuda -t $mode --flops dcgm  $model  --precision fp32  >> $output 2>&1
+        python run.py -d cuda -t $mode --metrics flops --metrics-gpu-backend dcgm $model  --precision fp32  >> $output 2>&1
         # error return
         if [ $? -ne 0 ]; then
             break
