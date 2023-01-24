@@ -32,7 +32,7 @@ env2=${env2:-pt_sep14_allopt}
 enable_jit=${enable_jit:-0}
 cuda_env1=${cuda_env1:-/home/yhao/setenvs/set11.6-cudnn8.3.3.sh}
 cuda_env2=${cuda_env2:-/home/yhao/setenvs/set11.6-cudnn8.5.0.sh}
-
+max_iter=${max_iter:-10}
 
 echo $output
 source ${conda_dir}/bin/activate
