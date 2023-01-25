@@ -5,7 +5,6 @@ source ${SHELL_FOLDER}/run_base.sh
 
 cd $tb_path
 
-max_iter=10
 if [[ -z ${tb_tflops} ]] ;
 then
     tflops=""

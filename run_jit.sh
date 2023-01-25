@@ -4,7 +4,6 @@ source ${SHELL_FOLDER}/run_base.sh
 conda activate $env1
 cd $tb_path
 
-max_iter=20
 func(){
     for (( i = 1 ; i <= $max_iter; i++ ))
     do
