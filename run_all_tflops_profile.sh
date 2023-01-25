@@ -8,15 +8,17 @@ export NVIDIA_TF32_OVERRIDE=0
 cd $tb_path
 
 func(){
-    for (( i = 1 ; i <= $max_iter; i++ ))
-    do
-        # python run.py -d cuda -m jit -t train $model --precision fp32 --torchdynamo nvfuser  >> $output 2>&1
-        python run.py -d cuda -t $mode --metrics flops --metrics-gpu-backend dcgm $model  --precision fp32  >> $output 2>&1
-        # error return
-        if [ $? -ne 0 ]; then
-            break
-        fi
-    done
+    python run.py  -d cuda -t $mode --profile --profile-detailed  --profile-folder ${logs_path}/$model $model  --precision fp32 >> $output 2>&1
+    # error return
+    if [ $? -ne 0 ]; then
+        break
+    fi
+    python run.py -d cuda -t $mode --metrics flops --metrics-gpu-backend dcgm --export-metrics $model  --precision fp32  >> $output 2>&1
+    # error return
+    if [ $? -ne 0 ]; then
+        break
+    fi
+    mv ${model}*metrics.csv ${logs_path}/
 }
 
 
@@ -27,6 +29,7 @@ do
     echo "@Yueming Hao origin $model" >>$output
     func
 done
+
 
 echo `date` >> $output
 notify
