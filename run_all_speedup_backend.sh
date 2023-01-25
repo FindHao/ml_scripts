@@ -17,14 +17,14 @@ fi
 func(){
     for (( i = 1 ; i <= $max_iter; i++ ))
     do
-        python run.py -d cuda ${tflops} -t $mode $model   >> $output 2>&1
+        python run.py -d cuda ${tflops} -t $mode --metrics cpu_peak_mem,gpu_peak_mem --metrics-gpu-backend dcgm $model   >> $output 2>&1
     done
 }
 
 func_torchscript(){
     for (( i = 1 ; i <= $max_iter; i++ ))
     do
-        python run.py -d cuda ${tflops} -t $mode $model --backend torchscript  >> $output 2>&1
+        python run.py -d cuda ${tflops} -t $mode $model  --metrics cpu_peak_mem,gpu_peak_mem --metrics-gpu-backend dcgm --backend torchscript  >> $output 2>&1
         if [ $? -ne 0 ]; then
             break
         fi
@@ -54,7 +54,7 @@ func_torch_trt(){
 func_torchdynamo(){
     for (( i = 1 ; i <= $max_iter; i++ ))
     do
-        python run.py -d cuda ${tflops} -t $mode $model --torchdynamo inductor >> $output 2>&1
+        python run.py -d cuda ${tflops} -t $mode --metrics cpu_peak_mem,gpu_peak_mem --metrics-gpu-backend dcgm $model   --torchdynamo inductor >> $output 2>&1
         if [ $? -ne 0 ]; then
             break
         fi
