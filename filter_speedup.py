@@ -4,52 +4,7 @@ import argparse
 import re
 from numpy import mean
 
-metric_text_map1 = {
-    'cpumem': "CPU Time:,\t%.2f, %.2f, %.2f",
-    'gpumem': "GPU Time:,\t%.2f, %.2f, %.2f",
-}
-
-def filter_time(raw_str):
-    gpu_time = []
-    cpu_time = []
-    tflops = []
-    reg1 = re.compile(
-        r"GPU Time:(.*) milliseconds\nCPU Total Wall Time:(.*) milliseconds\nFLOPS: (.*) TFLOPs per second")
-    results = reg1.findall(raw_str)
-    for it in results:
-        it = [float(_) for _ in it]
-        gpu_time.append(it[0])
-        cpu_time.append(it[1])
-        tflops.append(it[2])
-    return mean(gpu_time), mean(cpu_time), mean(tflops)
-
-
-def work_single_model(input_file, wo_tflops=0):
-    content = ''
-    with open(input_file, 'r') as fin:
-        content = fin.read()
-    content_s = [_ for _ in content.split(
-        "@Yueming Hao optimize") if _.strip()]
-    if len(content_s) != 2:
-        print("more than 2 item in content_s")
-    origin_raw = content_s[0]
-    opt_raw = content_s[1]
-
-    if wo_tflops == 1:
-        origin_gpu_time, origin_cpu_time,  = filter_time_wo_flops(origin_raw)
-        opt_gpu_time, opt_cpu_time = filter_time_wo_flops(opt_raw)
-        print("\t, Origin, Optimize, Speedup\nGPU Time:,\t%.2f, %.2f, %.2fX\nCPU Time:,\t%.2f, %.2f, %.2fX" % (origin_gpu_time,
-                                                                                                               opt_gpu_time, origin_gpu_time/opt_gpu_time, origin_cpu_time, opt_cpu_time, origin_cpu_time/opt_cpu_time))
-    else:
-        origin_gpu_time, origin_cpu_time, origin_tflops = filter_time(
-            origin_raw)
-        opt_gpu_time, opt_cpu_time, opt_tflops = filter_time(opt_raw)
-        print("\t, Origin, Optimize, Speedup\nGPU Time:,\t%.2f, %.2f, %.2fX\nCPU Time:,\t%.2f, %.2f, %.2fX\nTFLOPS:, \t%.2f, %.2f, %.2fX" %
-              (origin_gpu_time,
-               opt_gpu_time, origin_gpu_time/opt_gpu_time, origin_cpu_time, opt_cpu_time, origin_cpu_time/opt_cpu_time, origin_tflops, opt_tflops, opt_tflops/origin_tflops))
-
-
-def work_multi_models(input_file, w_tflops, w_gpu, output_file, cpumem, gpu_mem):
+def work_multi_models(input_file, output_file):
     content = ''
     with open(input_file, 'r') as fin:
         content = fin.read()
@@ -64,120 +19,92 @@ def work_multi_models(input_file, w_tflops, w_gpu, output_file, cpumem, gpu_mem)
             continue
         origin_raw = amodel_s[0]
         opt_raw = amodel_s[1]
-        origin_gpu_time, origin_cpu_time, origin_tflops = filter_time_bs(
-            origin_raw, w_gpu, w_tflops)
-        opt_gpu_time, opt_cpu_time, opt_tflops = filter_time_bs(
-            opt_raw, w_gpu, w_tflops)
-        speedups[model_name] = [[origin_gpu_time, origin_cpu_time,
-                                 origin_tflops], [opt_gpu_time, opt_cpu_time, opt_tflops]]
-    table_head = ''
-    formatted_speedups = {}
-    if w_gpu:
-        if w_tflops:
-            # origin   | opt  | speedup
-            table_head = "model, gpu time, cpu time, tflops, gpu time, cpu time, tflops, gpu speedup, total speedup, tflops speedup\n"
-        else:
-            table_head = "model, gpu time, cpu time, gpu time, cpu time, gpu speedup, total speedup\n"
-    else:
-        table_head = "model, cpu time, cpu time, total speedup\n"
-    for model in speedups:
-        origin = speedups[model][0]
-        opt = speedups[model][1]
-        gpu_speedup = origin[0]/opt[0] if opt[0] else 1
-        cpu_speedup = origin[1] / opt[1] if opt[1] else 1
-        flops_speedup = opt[2] / origin[2] if opt[2] else 1
-        if w_gpu:
-            if w_tflops:
-                formatted_speedups[model] = [origin[0], origin[1], origin[2],
-                                             opt[0], opt[1], opt[2], gpu_speedup, cpu_speedup, flops_speedup]
-            else:
-                formatted_speedups[model] = [
-                    origin[0], origin[1], opt[0], opt[1], gpu_speedup, cpu_speedup]
-        else:
-            formatted_speedups[model] = [origin[1], opt[1], cpu_speedup]
+        origin_results = filter_time_bs(origin_raw)
+        if not origin_results:
+            print("No original results for %s" % model_name)
+            continue
+        opt_results = filter_time_bs(opt_raw)
+        speedups[model_name] = [origin_results, opt_results]
+    first_model = list(speedups.keys())[0]
+    table_head = "model, origin cpu time, opt cpu time, total speedup"
+    if 'gpu' in speedups[first_model][0]:
+        table_head += ", origin gpu time, opt gpu time, gpu speedup"
+    if 'flops' in speedups[first_model][0]:
+        table_head += ", origin tflops, opt tflops, tflops speedup"
+    if 'cpu_mem' in speedups[first_model][0]:
+        table_head += ", origin cpu mem, opt cpu mem, cpu mem speedup"
+    if 'gpu_mem' in speedups[first_model][0]:
+        table_head += ", origin gpu mem, opt gpu mem, gpu mem speedup"
+    table_head += "\n"
+    metrics_order = ['cpu', 'gpu', 'flops', 'cpu_mem', 'gpu_mem']
     with open(output_file, 'w') as fout:
         fout.write(table_head)
-        for model in formatted_speedups:
-            fout.write("%s, " % model)
-            for v in formatted_speedups[model]:
-                fout.write("%.2f, " % v)
-            fout.write('\n')
-        pass
+        for model in speedups:
+            fout.write("%s" % model)
+            origin = speedups[model][0]
+            opt = speedups[model][1]
+            for metric in metrics_order:
+                if metric not in origin:
+                    continue
+                if metric not in opt:
+                    print("No metric %s results for %s opt " % (metric, model))
+                    opt[metric] = 0
+                tmp_speedup = origin[metric] / opt[metric] if opt[metric] > 0 else 0
+                fout.write(", %.2f, %.2f, %.2f" % (origin[metric], opt[metric], tmp_speedup))
+            fout.write("\n")
 
 
-def filter_time_wo_flops(raw_str):
-    gpu_time = []
-    cpu_time = []
-    reg1 = re.compile(
-        r"GPU Time:(.*) milliseconds\nCPU Total Wall Time:(.*) milliseconds")
-    results = reg1.findall(raw_str)
-    if not results:
-        print("no results found!")
-        exit(-1)
-    for it in results:
-        it = [float(_) for _ in it]
-        gpu_time.append(it[0])
-        cpu_time.append(it[1])
-    return mean(gpu_time), mean(cpu_time)
+def reg_filter(raw_str):
+    measurements = {}
 
-
-def reg_filter(raw_str, gpu=True, flops=False, bs=False):
-    if bs:
-        bs_str = " per batch"
-        total = ''
-    else:
-        bs_str = ""
-        total = "Total "
-    reg_cpu = re.compile(r"CPU Wall Time%s:(.*) milliseconds" % bs_str)
-    reg_cpu_gpu = re.compile(
-        r"GPU Time%s:(.*) milliseconds\nCPU %sWall Time%s:(.*) milliseconds" % (bs_str, total, bs_str))
-    reg_cpu_gpu_flops = re.compile(
-        r"GPU Time%s:(.*) milliseconds\nCPU %sWall Time%s:(.*) milliseconds\nFLOPS:(.*) TFLOPs per second" % (bs_str, total, bs_str))
-    reg = reg_cpu
-    if flops:
-        gpu = True
-        reg = reg_cpu_gpu_flops
-    elif gpu:
-        reg = reg_cpu_gpu
-    results = reg.findall(raw_str)
-    return results
-
-
-def filter_time_bs(raw_str, gpu=True, flops=False):
-    gpu_time = []
-    cpu_time = []
-    flops_num = []
-    results = reg_filter(raw_str, gpu, flops, False)
-    if not results:
-        results = reg_filter(raw_str, gpu, flops, True)
-        if not results:
+    def check_bs(tmp_batch_str="", tmp_total_str=""):
+        reg_cpu = re.compile(r"CPU %sWall Time%s:(.*) milliseconds" %
+                             (tmp_total_str, tmp_batch_str))
+        return reg_cpu.findall(raw_str)
+    batch_str = " per batch"
+    total_str = "Total "
+    if not check_bs(tmp_total_str=total_str):
+        if not check_bs(tmp_batch_str=batch_str):
             print("error when processing ", raw_str)
-            return [0, 0, 0]
-    for it in results:
-        it = [float(_.strip()) for _ in it]
-        if gpu:
-            gpu_time.append(it[0])
-            cpu_time.append(it[1])
-        else:
-            cpu_time.append(it[0])
-        if flops:
-            flops_num.append(it[2])
-    mean_gpu = mean(gpu_time) if gpu_time else 0
-    mean_cpu = mean(cpu_time) if cpu_time else 0
-    mean_flops = mean(flops_num) if flops_num else 0
-    return [mean_gpu, mean_cpu, mean_flops]
+            return None
+        total_str = ""
+    else:
+        batch_str = ""
+    reg_cpu = re.compile(r"CPU %sWall Time%s:(.*) milliseconds" %
+                         (total_str, batch_str))
+    reg_gpu = re.compile(r"GPU Time%s:(.*) milliseconds" % batch_str)
+    reg_flops = re.compile(r"FLOPS:(.*) TFLOPs per second")
+    reg_cpu_mem = re.compile(r"CPU Peak Memory:(.*) GB")
+    reg_gpu_mem = re.compile(r"GPU Peak Memory:(.*) GB")
+    regs = {
+        'cpu': reg_cpu,
+        'gpu': reg_gpu,
+        'flops': reg_flops,
+        'cpu_mem': reg_cpu_mem,
+        'gpu_mem': reg_gpu_mem
+    }
+    for k in regs:
+        result = regs[k].findall(raw_str)
+        if result:
+            tmp = [float(_.strip()) for _ in result]
+            measurements[k] = tmp
+    return measurements
 
+
+def filter_time_bs(raw_str):
+    measurements = reg_filter(raw_str)
+    if not measurements:
+        return None
+    mean_results = {}
+    for k in measurements:
+        mean_results[k] = mean(measurements[k])
+    return mean_results
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input', type=str,
                         default='/home/yhao/d/tmp/run_all_speedup_aug4.log')
-    parser.add_argument('-t', '--w_tflops', type=int, default=1)
-    parser.add_argument('-g', '--w_gpu', type=int, default=1)
     parser.add_argument('-o', '--output', type=str,
                         default='/tmp/speedups.csv')
-    parser.add_argument('--cpumem', type=int, default=0)
-    parser.add_argument('--gpumem', type=int, default=0)
     args = parser.parse_args()
-    work_multi_models(args.input, args.w_tflops, args.w_gpu,
-                      args.output, args.cpumem, args.gpumem)
+    work_multi_models(args.input, args.output)
