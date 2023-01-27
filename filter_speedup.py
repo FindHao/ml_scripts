@@ -29,14 +29,14 @@ def work_multi_models(input_file, output_file):
     table_head = "model, origin cpu time, opt cpu time, total speedup"
     if 'gpu' in speedups[first_model][0]:
         table_head += ", origin gpu time, opt gpu time, gpu speedup"
-    if 'flops' in speedups[first_model][0]:
+    if 'tflops' in speedups[first_model][0]:
         table_head += ", origin tflops, opt tflops, tflops speedup"
     if 'cpu_mem' in speedups[first_model][0]:
         table_head += ", origin cpu mem, opt cpu mem, cpu mem speedup"
     if 'gpu_mem' in speedups[first_model][0]:
         table_head += ", origin gpu mem, opt gpu mem, gpu mem speedup"
     table_head += "\n"
-    metrics_order = ['cpu', 'gpu', 'flops', 'cpu_mem', 'gpu_mem']
+    metrics_order = ['cpu', 'gpu', 'tflops', 'cpu_mem', 'gpu_mem']
     with open(output_file, 'w') as fout:
         fout.write(table_head)
         for model in speedups:
@@ -49,7 +49,10 @@ def work_multi_models(input_file, output_file):
                 if metric not in opt:
                     print("No metric %s results for %s opt " % (metric, model))
                     opt[metric] = 0
-                tmp_speedup = origin[metric] / opt[metric] if opt[metric] > 0 else 0
+                if metric in ['cpu', 'gpu']:
+                    tmp_speedup = origin[metric] / opt[metric] if opt[metric] > 0 else 0
+                else:
+                    tmp_speedup = opt[metric] / origin[metric] if origin[metric] > 0 else 0
                 fout.write(", %.2f, %.2f, %.2f" % (origin[metric], opt[metric], tmp_speedup))
             fout.write("\n")
 
@@ -79,7 +82,7 @@ def reg_filter(raw_str):
     regs = {
         'cpu': reg_cpu,
         'gpu': reg_gpu,
-        'flops': reg_flops,
+        'tflops': reg_flops,
         'cpu_mem': reg_cpu_mem,
         'gpu_mem': reg_gpu_mem
     }
