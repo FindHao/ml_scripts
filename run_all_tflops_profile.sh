@@ -11,12 +11,12 @@ func(){
     python run.py  -d cuda -t $mode --profile --profile-detailed  --profile-folder ${logs_path}/$model $model  --precision fp32 >> $output 2>&1
     # error return
     if [ $? -ne 0 ]; then
-        break
+        return
     fi
     python run.py -d cuda -t $mode --metrics flops --metrics-gpu-backend dcgm --export-metrics $model  --precision fp32  >> $output 2>&1
     # error return
     if [ $? -ne 0 ]; then
-        break
+        return
     fi
     mv ${model}*metrics.csv ${logs_path}/
 }
