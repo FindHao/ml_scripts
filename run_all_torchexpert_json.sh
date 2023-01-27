@@ -3,8 +3,7 @@
 
 SHELL_FOLDER=$(cd "$(dirname "$0")";pwd)
 source ${SHELL_FOLDER}/run_base.sh
-
-cd $tb_path
+cd ${SHELL_FOLDER}
 
 jsons_path=${jsons_path:-/home/yhao/d/p8/logs/logs_run_all_tflops_profile_train}
 conda activate $env1
