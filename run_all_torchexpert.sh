@@ -1,7 +1,7 @@
 #!/bin/bash
 SHELL_FOLDER=$(cd "$(dirname "$0")";pwd)
 source ${SHELL_FOLDER}/run_base.sh
-cd ${SHELL_FOLDER}
+cd ${tb_path}
 
 export NVIDIA_TF32_OVERRIDE=0
 
@@ -10,7 +10,7 @@ func(){
     for (( i = 1 ; i <= $max_iter; i++ ))
     do
         # python run.py -d cuda -m jit -t train $model --precision fp32 --torchdynamo nvfuser  >> $output 2>&1
-        python run.py -d cuda -t $mode --profile-detailed --profile-devices cpu,cuda --profile-folder /tmp/logs_profile_$mode/$model  $model  --precision fp32  >> $output 2>&1
+        python run.py -d cuda -t $mode --profile --profile-detailed --profile-devices cpu,cuda --profile-folder /tmp/logs_profile_$mode/$model  $model  --precision fp32  >> $output 2>&1
         if [ $? -ne 0 ]; then
             break
         fi

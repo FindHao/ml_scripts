@@ -46,7 +46,10 @@ def work_multi_models(input_file, output_file):
             for metric in metrics_order:
                 if metric not in origin:
                     continue
-                if metric not in opt:
+                if not opt:
+                    opt = {}
+                    opt[metric] = -1
+                elif metric not in opt:
                     print("No metric %s results for %s opt " % (metric, model))
                     opt[metric] = 0
                 if metric in ['cpu', 'gpu']:
