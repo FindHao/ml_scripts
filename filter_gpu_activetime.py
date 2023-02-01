@@ -1,7 +1,10 @@
 import argparse
 from collections import defaultdict
-from statistics import mean
 
+def mean_wo_max_min(alist):
+    # remove the max and min
+    alist = sorted(alist)
+    return sum(alist[1:-1]) / (len(alist) - 2)
 
 def work_multi_models(input_path, output_path):
 
@@ -14,15 +17,17 @@ def work_multi_models(input_path, output_path):
         aline = aline.split(",")
         model_name = aline[0]
         # Model	memcpy	active	busy	total	memcpy ratio	active ratio	busy ratio	average occupancy
-        raw_logs[model_name].append(aline[1:])
+        # ignore the first model name and the last average occupancy
+        raw_logs[model_name].append(aline[1:-1])
     results = defaultdict(list)
     for model_name, logs in raw_logs.items():
         results[model_name] = []
-        for i in range(8):
+        for i in range(7):
             tmp = []
             for log in logs:
                 tmp.append(float(log[i]))
-            results[model_name].append(mean(tmp))
+            results[model_name].append(mean_wo_max_min(tmp))
+    
     with open(output_path, 'w') as fout:
         for model_name, log in results.items():
             fout.write(f"{model_name},{','.join([str(_) for _ in log])}\n")
