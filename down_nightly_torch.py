@@ -1,3 +1,4 @@
+from collections import defaultdict
 import re
 import subprocess
 import requests
@@ -9,16 +10,16 @@ from urllib.parse import unquote, quote
 
 
 # The base URL for the PyTorch nightly builds
-base_url = "https://download.pytorch.org/whl/nightly/cu116"
+base_url = "https://download.pytorch.org/whl/nightly/cu118"
 pkgs = ["torchdata", "torchvision", "torchtext", "torchaudio", "torch", "pytorch-triton"]
 # raw dependency data deps = {pkg: [dep1, dep2=XX] }
 deps = {}
 filter_deps = {}
 script_path = os.path.dirname(os.path.realpath(__file__))
-# check if '.downloads/cu116' folder exists, if not create it
-if not os.path.exists('%s/.downloads/cu116' % script_path):
-    os.makedirs('%s/.downloads/cu116' % script_path)
-down_path = "%s/.downloads/cu116" % script_path
+# check if '.downloads/cu118' folder exists, if not create it
+if not os.path.exists('%s/.downloads/cu118' % script_path):
+    os.makedirs('%s/.downloads/cu118' % script_path)
+down_path = "%s/.downloads/cu118" % script_path
 print("Downloading packages to %s" % down_path)
 python_version="cp38"
 platform="linux"
@@ -67,6 +68,8 @@ def download_file(url, force=False):
         exit(1)
 
 def download_pytorch_triton(force=False):
+    if 'torch' not in filter_deps or 'pytorch-triton' not in filter_deps['torch']:
+        return
     print("Downloading pytorch-triton")
     triton_version = filter_deps["torch"]["pytorch-triton"]
     download_url = get_download_url("pytorch-triton", quote(triton_version))
@@ -89,13 +92,21 @@ def parse_dependencies(dependencies):
     return torch_deps
 
 def check_dependencies(date_str):
+    outputs = []
     for pkg in filter_deps:
         for dep_pkg in filter_deps[pkg]:
             # print(f"Package: {pkg}, Dependency: {dep}")
             dep_pkg_version = filter_deps[pkg][dep_pkg]
             if dep_pkg != "pytorch-triton" and dep_pkg_version.find(date_str) == -1:
-                print(f"Package: {pkg}, Dependency: {dep_pkg} is not the same version as the package")
-                print(f"Package: {pkg}, Dependency: {dep_pkg} version: {dep_pkg_version}")
+                outputs.append(f"Package: {pkg}, Dependency: {dep_pkg} is not the same version as the package")
+                outputs.append(f"Package: {pkg}, Dependency: {dep_pkg} version: {dep_pkg_version}")
+    if outputs:
+        max_len = max([len(line) for line in outputs]) + 4
+        print("="*max_len)
+        print("WARNING: The following packages have dependencies that are not the same version as the package")
+        for line in outputs:
+            print("| %s |" % line)
+        print("="*max_len)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -126,7 +137,6 @@ if __name__ == "__main__":
         print("Dependencies for %s: %s" % (pkg, deps[pkg]))
         torch_deps = parse_dependencies(deps[pkg])
         filter_deps[pkg] = torch_deps
-    print("=====================================")
     check_dependencies(date_str)
     download_pytorch_triton(args.force)
     
