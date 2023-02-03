@@ -10,20 +10,27 @@ from urllib.parse import unquote, quote
 
 
 # The base URL for the PyTorch nightly builds
-base_url = "https://download.pytorch.org/whl/nightly/cu118"
+base_url = None
 pkgs = ["torchdata", "torchvision", "torchtext", "torchaudio", "torch", "pytorch-triton"]
 # raw dependency data deps = {pkg: [dep1, dep2=XX] }
 deps = {}
 filter_deps = {}
 script_path = os.path.dirname(os.path.realpath(__file__))
-# check if '.downloads/cu118' folder exists, if not create it
-if not os.path.exists('%s/.downloads/cu118' % script_path):
-    os.makedirs('%s/.downloads/cu118' % script_path)
-down_path = "%s/.downloads/cu118" % script_path
-print("Downloading packages to %s" % down_path)
-python_version="cp38"
+down_path = None
+python_version=None
 platform="linux"
 
+def init(cuda_version, py_version):
+    global base_url
+    global down_path
+    global python_version
+    python_version = py_version
+    base_url = "https://download.pytorch.org/whl/nightly/%s" % cuda_version
+    down_path = "%s/.downloads/%s" % (script_path, cuda_version)
+    # check if '.downloads/cu118' folder exists, if not create it
+    if not os.path.exists(down_path):
+        os.makedirs(down_path)
+    print("Downloading packages to %s" % down_path)
 
 def get_download_url(package_name, date_str):
     # Construct the URL for the package
@@ -69,13 +76,17 @@ def download_file(url, force=False):
 
 def download_pytorch_triton(force=False):
     if 'torch' not in filter_deps or 'pytorch-triton' not in filter_deps['torch']:
-        return
+        return False
     print("Downloading pytorch-triton")
     triton_version = filter_deps["torch"]["pytorch-triton"]
     download_url = get_download_url("pytorch-triton", quote(triton_version))
     if download_url is None:
-        print("Could not find a package for %s on %s" % (pkg, triton_version))
-    download_file(download_url, force=force)
+        print("ERROR -> Could not find a package for %s on %s" % (pkg, triton_version))
+        return False
+    if download_file(download_url, force=force):
+        return True
+    else:
+        return False
 
 
 def parse_dependencies(dependencies):
@@ -91,6 +102,31 @@ def parse_dependencies(dependencies):
                 torch_deps[package_name] = package_version
     return torch_deps
 
+def summary(dependency_outputs, pytorch_triton_success):
+    max_len = max([len(line) for line in dependency_outputs]) + 4
+    max_len = max(max_len, 100)
+    print("="*(max_len + 4))
+    print(('| {:'+str(max_len)+'s} |').format("Summary"))
+    print("="*(max_len + 4))
+    global filter_deps
+    downloaded = set(filter_deps.keys())
+    missed = set(pkgs) - downloaded
+    if pytorch_triton_success:
+        missed -= set(["pytorch-triton"])
+        downloaded.add("pytorch-triton")
+    print(('| {:'+str(max_len)+'s} |').format("Downloaded Packages:"))
+    print(('| {:'+str(max_len)+'s} |').format(", ".join(downloaded)))
+    if missed:
+        print(('| {:'+str(max_len)+'s} |').format("Missed in full list:"))
+        print(('| {:'+str(max_len)+'s} |').format(", ".join(missed)))
+    if dependency_outputs:
+        print("-"*(max_len + 4))
+        print(('| {:'+str(max_len)+'s} |').format("Dependency Issues:"))
+        print(('| {:'+str(max_len)+'s} |').format("WARNING: The following packages have dependencies that are not the same version as the package"))
+        for line in dependency_outputs:
+            print(('| {:'+str(max_len)+'s} |').format(line))
+    print("="*(max_len + 4))
+
 def check_dependencies(date_str):
     outputs = []
     for pkg in filter_deps:
@@ -98,26 +134,25 @@ def check_dependencies(date_str):
             # print(f"Package: {pkg}, Dependency: {dep}")
             dep_pkg_version = filter_deps[pkg][dep_pkg]
             if dep_pkg != "pytorch-triton" and dep_pkg_version.find(date_str) == -1:
-                outputs.append(f"Package: {pkg}, Dependency: {dep_pkg} is not the same version as the package")
                 outputs.append(f"Package: {pkg}, Dependency: {dep_pkg} version: {dep_pkg_version}")
-    if outputs:
-        max_len = max([len(line) for line in outputs]) + 4
-        print("="*max_len)
-        print("WARNING: The following packages have dependencies that are not the same version as the package")
-        for line in outputs:
-            print("| %s |" % line)
-        print("="*max_len)
+    return outputs
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--date", type=str, default="20230102",
                         help="date for which you want to download PyTorch")
+    parser.add_argument("--cuda", type=str, default="cu116",
+                        help="cuda version for which you want to download PyTorch")
+    parser.add_argument("--python", type=str, default="cp38",
+                        help="python version for which you want to download PyTorch")
     parser.add_argument("--force", action="store_true",
                         help="overwrite existing files")
     # add arguments for pkg name 
     parser.add_argument("--pkgs", type=str, default="torchdata,torchvision,torchtext,torchaudio,torch,pytorch-triton",
                         help="name of the package you want to download")
     args = parser.parse_args()
+    init(args.cuda, args.python)
     date_str = args.date
     if args.pkgs:
         pkgs = args.pkgs.split(",")
@@ -127,7 +162,7 @@ if __name__ == "__main__":
         # Get the download URL for the package
         download_url = get_download_url(pkg, date_str)
         if download_url is None:
-            print("Could not find a package for %s on %s" % (pkg, date_str))
+            print("ERROR -> Could not find a package for %s on %s" % (pkg, date_str))
             continue
         # Download the package
         file_name = download_file(download_url, force=args.force)
@@ -137,6 +172,7 @@ if __name__ == "__main__":
         print("Dependencies for %s: %s" % (pkg, deps[pkg]))
         torch_deps = parse_dependencies(deps[pkg])
         filter_deps[pkg] = torch_deps
-    check_dependencies(date_str)
-    download_pytorch_triton(args.force)
+    dependency_output = check_dependencies(date_str)
+    pytorch_trition_success = download_pytorch_triton(args.force)
+    summary(dependency_output, pytorch_trition_success)
     
