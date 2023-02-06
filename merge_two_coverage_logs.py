@@ -61,7 +61,7 @@ for node in c2[4:]:
 cc1 = set(cc1)
 cc2 = set(cc2)
 # combine two sets
-cc = cc1.union(cc2)
+cc = cc1.intersection(cc2)
 used_apis = API_LIST - cc
 missing_apis = API_LIST - used_apis
 # print used apis to file
