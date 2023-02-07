@@ -1,3 +1,4 @@
+import argparse
 import torch
 
 
@@ -38,43 +39,47 @@ def generate_API_list():
 
 
 API_LIST, IGNORED_API_LIST = generate_API_list()
-f2=open("/home/yhao/d/p8/benchmark/.userbenchmark/api-coverage/logs/logs-20230206022122.json-api_coverage.csv", 'r')
-f1 = open("/home/yhao/d/p8/benchmark/.userbenchmark/api-coverage/logs/logs-20230205151329.json-api_coverage.csv", 'r')
-c1 = f1.readlines()
-c2 = f2.readlines()
-f1.close()
-f2.close()
-cc1 = []
-for node in c1[4:]:
-    if not node.strip():
-        continue
-    s = node.split(',')
-    s = [_.strip() for _ in s]
-    cc1.append((s[0], s[1]))
-cc2 = []
-for node in c2[4:]:
-    if not node.strip():
-        continue
-    s = node.split(',')
-    s = [_.strip() for _ in s]
-    cc2.append((s[0], s[1]))
-cc1 = set(cc1)
-cc2 = set(cc2)
-# combine two sets
-cc = cc1.intersection(cc2)
-used_apis = API_LIST - cc
-missing_apis = API_LIST - used_apis
-# print used apis to file
-with open("apis.txt", 'w') as fout:
-    fout.write("API coverage: %d / %d = %.2f\n" %(len(used_apis), len(API_LIST), len(used_apis) / len(API_LIST)))
-    fout.write("used apis:\n")
-    fout.write("module,func\n")
-    for item in used_apis:
-        fout.write("%s,%s\n" % (item[0], item[1]))
-    fout.write("====================================\n")
-    fout.write("missing apis:\n")
-    fout.write("module,func\n")
-    for item in missing_apis:
-        fout.write("%s,%s\n" % (item[0], item[1]))
 
 
+def read_log(log_path):
+    with open(log_path, 'r') as fin:
+        content = fin.read()
+        if content.find("missed apis") < 0:
+            print("log format error, can't find 'missed apis': ", log_path)
+        else:
+            content = content[content.find("missed apis"):]
+        lines = content.split('\n')
+        cc = []
+        for node in lines[2:]:
+            if not node.strip():
+                continue
+            s = node.split(',')
+            s = [_.strip() for _ in s]
+            cc.append((s[0], s[1]))
+        return set(cc)
+
+
+if __name__ == "__main__":
+    # add argument parser
+    parser = argparse.ArgumentParser(__doc__)
+    parser.add_argument("--log1", type=str, required=True, help="log1")
+    parser.add_argument("--log2", type=str, required=True, help="log2")
+    parser.add_argument("--output", type=str, required=True, help="output")
+    args = parser.parse_args()
+    cc1 = read_log(args.log1)
+    cc2 = read_log(args.log2)
+    cc = cc1.intersection(cc2)
+    used_apis = API_LIST - cc
+    missing_apis = API_LIST - used_apis
+    # print used apis to file
+    with open("apis.txt", 'w') as fout:
+        fout.write("API coverage: %d / %d = %.2f\n" %(len(used_apis), len(API_LIST), len(used_apis) / len(API_LIST)))
+        fout.write("used apis:\n")
+        fout.write("module,func\n")
+        for item in used_apis:
+            fout.write("%s,%s\n" % (item[0], item[1]))
+        fout.write("====================================\n")
+        fout.write("missed apis:\n")
+        fout.write("module,func\n")
+        for item in missing_apis:
+            fout.write("%s,%s\n" % (item[0], item[1]))
