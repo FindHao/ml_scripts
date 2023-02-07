@@ -44,10 +44,15 @@ API_LIST, IGNORED_API_LIST = generate_API_list()
 def read_log(log_path):
     with open(log_path, 'r') as fin:
         content = fin.read()
-        if content.find("missed apis") < 0:
+        id_missed1 = content.find("missed apis")
+        id_missed2 = content.find("missed APIs")
+        if id_missed1 == -1 and id_missed2 == -1:
             print("log format error, can't find 'missed apis': ", log_path)
         else:
-            content = content[content.find("missed apis"):]
+            if id_missed1 == -1:
+                content = content[content.find("missed APIs"):]
+            else:
+                content = content[content.find("missed apis"):]
         lines = content.split('\n')
         cc = []
         for node in lines[2:]:
@@ -64,15 +69,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument("--log1", type=str, required=True, help="log1")
     parser.add_argument("--log2", type=str, required=True, help="log2")
-    parser.add_argument("--output", type=str, required=True, help="output")
+    parser.add_argument("--output", type=str, required=False, help="output")
     args = parser.parse_args()
     cc1 = read_log(args.log1)
     cc2 = read_log(args.log2)
     cc = cc1.intersection(cc2)
     used_apis = API_LIST - cc
     missing_apis = API_LIST - used_apis
+    output_file = "merge_two_coverage_logs_output.txt"
+    if args.output:
+        output_file = args.output
     # print used apis to file
-    with open("apis.txt", 'w') as fout:
+    with open(output_file, 'w') as fout:
         fout.write("API coverage: %d / %d = %.2f\n" %(len(used_apis), len(API_LIST), len(used_apis) / len(API_LIST)))
         fout.write("used apis:\n")
         fout.write("module,func\n")
