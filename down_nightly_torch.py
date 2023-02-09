@@ -103,7 +103,10 @@ def parse_dependencies(dependencies):
     return torch_deps
 
 def summary(dependency_outputs, pytorch_triton_success):
-    max_len = max([len(line) for line in dependency_outputs]) + 4
+    if dependency_outputs:
+        max_len = max([len(line) for line in dependency_outputs]) + 4
+    else:
+        max_len = 0
     max_len = max(max_len, 100)
     print("="*(max_len + 4))
     print(('| {:'+str(max_len)+'s} |').format("Summary"))
