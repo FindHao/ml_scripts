@@ -4,8 +4,8 @@
 #   mode: train, eval
 #   tb_path: optional. if you want to specifiy where torchbench locates
 #   torchexpert_path: optional. if you want to specify where torchexpert locates
-#   tb_conda_dir: where conda locates
-#   tb_env1: the conda env you would like to test
+#   conda_dir: where conda locates
+#   env1: the conda env you would like to test
 
 var_date=$(date +'%Y%m%d%H%M')
 mode=${mode:-train}
@@ -36,6 +36,11 @@ max_iter=${max_iter:-10}
 
 echo $output
 source ${conda_dir}/bin/activate
+if [ $? -ne 0 ]; then
+    echo "can not activate conda"
+    exit 1
+fi
+
 echo "" > $output
 echo `date` >> $output
 echo "torchexpert: $torchexpert" >> $output
