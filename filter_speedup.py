@@ -4,27 +4,59 @@ import argparse
 import re
 from numpy import mean
 
+
+def check_which_first(content):
+    reg = re.compile("@Yueming Hao optimize\d+")
+    results = reg.findall(content)
+    if not results:
+        return 'origin'
+    else:
+        return 'optimize'
+
+
+def check_results(tmp_results, model_name, test_type="origin"):
+    if not tmp_results:
+        print("No %s results for %s" % (test_type, model_name))
+        return False
+    else:
+        return True
+
+
+def filter_metrics(content, opt_first):
+    speedups = {}
+    if opt_first:
+        split_str1 = "@Yueming Hao optimize\d+"
+        split_str2 = "@Yueming Hao origin"
+        id_opt = 0
+        id_origin = 1
+    else:
+        split_str1 = "@Yueming Hao origin"
+        split_str2 = "@Yueming Hao optimize\d+"
+        id_opt = 1
+        id_origin = 0
+    content_s = [_ for _ in re.split(split_str1, content) if _.strip()]
+    for amodel in content_s:
+        model_name = amodel.strip().split()[0].strip()
+        amodel_s = [_ for _ in re.split(split_str2, amodel) if _.strip()]
+        if len(amodel_s) != 2:
+            continue
+        origin_raw = amodel_s[id_origin]
+        opt_raw = amodel_s[id_opt]
+        origin_results = filter_time_bs(origin_raw)
+        if not check_results(origin_results, model_name, "origin"):
+            continue
+        opt_results = filter_time_bs(opt_raw)
+        if not check_results(opt_results, model_name, "opt"):
+            continue
+        speedups[model_name] = [origin_results, opt_results]
+    return speedups
+
+
 def work_multi_models(input_file, output_file):
     content = ''
     with open(input_file, 'r') as fin:
         content = fin.read()
-    content_s = [_ for _ in content.split(
-        "@Yueming Hao origin") if _.strip()]
-    speedups = {}
-    for amodel in content_s:
-        model_name = amodel.strip().split()[0].strip()
-        amodel_s = [_ for _ in amodel.split(
-            "@Yueming Hao optimize") if _.strip()]
-        if len(amodel_s) != 2:
-            continue
-        origin_raw = amodel_s[0]
-        opt_raw = amodel_s[1]
-        origin_results = filter_time_bs(origin_raw)
-        if not origin_results:
-            print("No original results for %s" % model_name)
-            continue
-        opt_results = filter_time_bs(opt_raw)
-        speedups[model_name] = [origin_results, opt_results]
+    speedups = filter_metrics(content, check_which_first(content))
     first_model = list(speedups.keys())[0]
     table_head = "model, origin cpu time, opt cpu time, total speedup"
     if 'gpu' in speedups[first_model][0]:
@@ -53,10 +85,13 @@ def work_multi_models(input_file, output_file):
                     print("No metric %s results for %s opt " % (metric, model))
                     opt[metric] = 0
                 if metric in ['cpu', 'gpu']:
-                    tmp_speedup = origin[metric] / opt[metric] if opt[metric] > 0 else 0
+                    tmp_speedup = origin[metric] / \
+                        opt[metric] if opt[metric] > 0 else 0
                 else:
-                    tmp_speedup = opt[metric] / origin[metric] if origin[metric] > 0 else 0
-                fout.write(", %.2f, %.2f, %.2f" % (origin[metric], opt[metric], tmp_speedup))
+                    tmp_speedup = opt[metric] / \
+                        origin[metric] if origin[metric] > 0 else 0
+                fout.write(", %.2f, %.2f, %.2f" %
+                           (origin[metric], opt[metric], tmp_speedup))
             fout.write("\n")
 
 
@@ -71,7 +106,6 @@ def reg_filter(raw_str):
     total_str = "Total "
     if not check_bs(tmp_total_str=total_str):
         if not check_bs(tmp_batch_str=batch_str):
-            print("error when processing ", raw_str)
             return None
         total_str = ""
     else:
@@ -105,6 +139,7 @@ def filter_time_bs(raw_str):
     for k in measurements:
         mean_results[k] = mean(measurements[k])
     return mean_results
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
