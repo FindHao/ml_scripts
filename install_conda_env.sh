@@ -7,7 +7,13 @@ wheel_path=${wheel_path:-/home/yhao/d/p8/ml_optimizations/.downloads/20230102}
 work_path=${work_path:-/home/yhao/d/p8/opts}
 # where the conda is installed
 conda_dir=${tb_conda_dir:-/home/yhao/d/conda}
+# whether to install torchbench
+enable_torchbench=${enable_torchbench:-1}
+# cuda_path
+cuda_env=${cuda_env:-/data/yhao/setenvs/cuda11.6.sh}
+
 source ${conda_dir}/bin/activate
+source ${cuda_env}
 
 check_folder_exist() {
     if [ ! -d $1 ]; then
@@ -29,11 +35,11 @@ else
 fi
 
 conda activate ${conda_env}
-conda install -y git-lfs 
+conda install -y git-lfs
 pip install requests bs4 argparse oauthlib pyyaml
 
 # install pytorch
-pip install ${wheel_path}/*.whl 
+pip install ${wheel_path}/*.whl
 
 # check if the last command is successful
 if [ $? -ne 0 ]; then
@@ -41,14 +47,16 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-cd ${work_path}
+if [ ${enable_torchbench} -nq 1 ]; then
+    echo "Skip torchbench installation."
+    exit 0
+fi
 
+cd ${work_path}
 # install torchbench
 git clone --depth 1 --recursive git@github.com:pytorch/benchmark.git
 cd benchmark
-git lfs install ; git lfs fetch --all ; git lfs checkout .
+git lfs install
+git lfs fetch --all
+git lfs checkout .
 python install.py
-
-
-
-

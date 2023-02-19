@@ -35,6 +35,7 @@ def init(cuda_version, py_version):
 def get_download_url(package_name, date_str):
     # Construct the URL for the package
     url = "%s/%s" % (base_url, package_name)
+    print("Downloading %s from %s" % (package_name, url))
     response = requests.get(url)
     html = response.text
     # Parse the HTML page
@@ -144,11 +145,11 @@ def check_dependencies(date_str):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--date", type=str, default="20230102",
-                        help="date for which you want to download PyTorch")
-    parser.add_argument("--cuda", type=str, default="cu116",
-                        help="cuda version for which you want to download PyTorch")
-    parser.add_argument("--python", type=str, default="cp38",
-                        help="python version for which you want to download PyTorch")
+                        help="date for which you want to download PyTorch. by default it is 20230102")
+    parser.add_argument("--cuda", type=str, default="cu118",
+                        help="cuda version for which you want to download PyTorch. by default it is cu118")
+    parser.add_argument("--python", type=str, default="cp310",
+                        help="python version for which you want to download PyTorch. by default it is cp310")
     parser.add_argument("--force", action="store_true",
                         help="overwrite existing files")
     # add arguments for pkg name 
