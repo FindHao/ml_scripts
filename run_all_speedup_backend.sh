@@ -51,28 +51,34 @@ func_torch_trt(){
     done
 }
 
-func_torchdynamo(){
+func_torchinductor(){
     for (( i = 1 ; i <= $max_iter; i++ ))
     do
         python run.py -d cuda ${tflops} -t $mode --metrics cpu_peak_mem,gpu_peak_mem --metrics-gpu-backend dcgm $model   --torchdynamo inductor >> $output 2>&1
         if [ $? -ne 0 ]; then
+            success_run=0
             break
         fi
     done
 }
 
 echo `date` >> $output
-# for model in $all_models
-for model in phlippe_densenet resnext50_32x4d phlippe_resnet mobilenet_v3_large resnet18 timm_nfnet shufflenet_v2_x1_0 timm_resnest mobilenet_v2 mnasnet1_0 timm_vision_transformer resnet152 hf_Albert vgg16 alexnet hf_T5 hf_GPT2 resnet50 Super_SloMo timm_efficientnet fastNLP_Bert hf_Bart hf_DistilBert hf_Bert_large timm_regnet hf_Bert hf_Reformer timm_vovnet
+for model in $all_models
+# for model in hf_Bart hf_Reformer doctr_det_predictor hf_Bert timm_efficientnet timm_resnest dlrm pyhpc_equation_of_state hf_T5_base attention_is_all_you_need_pytorch fambench_xlmr DALLE2_pytorch doctr_reco_predictor hf_T5_large pyhpc_turbulent_kinetic_energy timm_regnet hf_T5 hf_Longformer timm_efficientdet pyhpc_isoneutral_mixing maml timm_vovnet hf_GPT2_large hf_GPT2 hf_Bert_large hf_DistilBert timm_vision_transformer_large hf_Albert demucs timm_nfnet hf_BigBird detectron2_fcos_r_50_fpn timm_vision_transformer drq
 do 
 conda activate $env1
+echo "@Yueming Hao optimize1 $model" >>$output
+success_run=1
+func_torchinductor
 echo "@Yueming Hao origin $model" >>$output
-func
-echo "@Yueming Hao optimize0 $model" >>$output
-func_torchdynamo
+# check if success_run is 1
+if [[ $success_run -eq 1 ]]; then
+    func
+fi
 
-# func_torchscript
-# echo "@Yueming Hao optimize1 $model" >>$output
+# echo "@Yueming Hao optimize0 $model" >>$output
+# func_torchdynamo
+
 # func_fx2trt
 # echo "@Yueming Hao optimize2 $model" >>$output
 # func_torch_trt
