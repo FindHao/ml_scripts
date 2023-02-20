@@ -1,6 +1,7 @@
 
 
 import argparse
+import os
 import re
 from numpy import mean
 
@@ -10,7 +11,9 @@ def work_multi_models(input_file, output_file='/tmp/gpuactivetime.csv'):
     only works for gpu active time now
     """
     content = ''
-    with open(input_file, 'r') as fin:
+    input_file_path = os.path.abspath(input_file)
+    hostname = os.uname()[1]
+    with open(input_file_path, 'r') as fin:
         content = fin.read()
     content_s = [_ for _ in content.split(
         "@Yueming Hao origin") if _.strip()]
@@ -25,6 +28,8 @@ def work_multi_models(input_file, output_file='/tmp/gpuactivetime.csv'):
         timexratio[model_name] = [og_gputime, og_gpuratio]
     table_head = "model, gpu active time, gpu active time ratio%\n"
     with open(output_file, 'w') as fout:
+        fout.write(f"{hostname}\n")
+        fout.write(f"input file: {input_file_path}\n")
         fout.write(table_head)
         for model in timexratio:
             fout.write("%s, " % model)

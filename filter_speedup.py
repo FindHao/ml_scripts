@@ -1,6 +1,7 @@
 
 
 import argparse
+import os
 import re
 from numpy import mean
 
@@ -54,6 +55,8 @@ def filter_metrics(content, opt_first):
 
 def work_multi_models(input_file, output_file):
     content = ''
+    input_file_path = os.path.abspath(input_file)
+    hostname = os.uname()[1]
     with open(input_file, 'r') as fin:
         content = fin.read()
     speedups = filter_metrics(content, check_which_first(content))
@@ -70,6 +73,8 @@ def work_multi_models(input_file, output_file):
     table_head += "\n"
     metrics_order = ['cpu', 'gpu', 'tflops', 'cpu_mem', 'gpu_mem']
     with open(output_file, 'w') as fout:
+        fout.write(f"{hostname}\n")
+        fout.write(f"input file: {input_file_path}\n")
         fout.write(table_head)
         for model in speedups:
             fout.write("%s" % model)
