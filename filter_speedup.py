@@ -6,13 +6,13 @@ import re
 from numpy import mean
 
 
-def check_which_first(content):
+def check_opt_first(content):
     reg = re.compile("@Yueming Hao optimize\d+")
     results = reg.findall(content)
     if not results:
-        return 'origin'
+        return False
     else:
-        return 'optimize'
+        return True
 
 
 def check_results(tmp_results, model_name, test_type="origin"):
@@ -32,7 +32,7 @@ def filter_metrics(content, opt_first):
         id_origin = 1
     else:
         split_str1 = "@Yueming Hao origin"
-        split_str2 = "@Yueming Hao optimize\d+"
+        split_str2 = "@Yueming Hao optimize\d*"
         id_opt = 1
         id_origin = 0
     content_s = [_ for _ in re.split(split_str1, content) if _.strip()]
@@ -59,7 +59,10 @@ def work_multi_models(input_file, output_file):
     hostname = os.uname()[1]
     with open(input_file, 'r') as fin:
         content = fin.read()
-    speedups = filter_metrics(content, check_which_first(content))
+    speedups = filter_metrics(content, check_opt_first(content))
+    if not speedups:
+        print("No results found in %s when check speedups" % input_file_path)
+        exit(1)
     first_model = list(speedups.keys())[0]
     table_head = "model, origin cpu time, opt cpu time, total speedup"
     if 'gpu' in speedups[first_model][0]:
@@ -73,6 +76,7 @@ def work_multi_models(input_file, output_file):
     table_head += "\n"
     metrics_order = ['cpu', 'gpu', 'tflops', 'cpu_mem', 'gpu_mem']
     with open(output_file, 'w') as fout:
+        print("Write results to %s" % output_file)
         fout.write(f"{hostname}\n")
         fout.write(f"input file: {input_file_path}\n")
         fout.write(table_head)

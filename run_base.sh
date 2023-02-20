@@ -62,7 +62,7 @@ notify()
     curl -s \
     --form-string "token=${PUSHOVER_API}" \
     --form-string "user=${PUSHOVER_USER_KEY}" \
-    --form-string "message=${prefix_filename} on ${hostname} done! " \
+    --form-string "message=${prefix_filename} on ${hostname} done! Output file is ${output}. " \
     https://api.pushover.net/1/messages.json
 }
 
