@@ -16,7 +16,7 @@ def work_multi_models(input_path, output_path):
     for aline in content_s:
         aline = aline.split(",")
         model_name = aline[0]
-        # Model	memcpy	active	busy	total	memcpy ratio	active ratio	busy ratio	average occupancy
+        # Model, memcpy, active, busy, total, memcpy ratio, active ratio, busy ratio
         # ignore the first model name and the last average occupancy
         raw_logs[model_name].append(aline[1:-1])
     results = defaultdict(list)
