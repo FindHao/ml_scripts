@@ -31,6 +31,7 @@ def work_multi_models(input_path, output_path):
     with open(output_path, 'w') as fout:
         for model_name, log in results.items():
             fout.write(f"{model_name},{','.join([str(_) for _ in log])}\n")
+    print("Done! Output file: ", output_path)
 
 
 

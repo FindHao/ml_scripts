@@ -21,6 +21,10 @@ func() {
     for ((i = 1; i <= $max_iter; i++)); do
         # attention: fp32 is default
         python run.py -d cuda ${tflops} -t $mode $model --precision fp32 >>$output 2>&1
+        if [[ $? -ne 0 ]]; then
+            echo "run failed"
+            exit 1
+        fi
     done
 }
 
