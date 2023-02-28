@@ -44,7 +44,7 @@ def work(file_path, output_path):
 
 if __name__ == '__main__':
     test_input = "/home/yhao24/ncsugdrive/data/pt_new/torchexpert_train_results_202209271621.csv"
-    test_output = "model_ratios_train.csv"
+    test_output = "model_ratios.csv"
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input', type=str, default=test_input, help='input csv file')
     parser.add_argument('-o', '--output', type=str, default=test_output, help='output csv file')
