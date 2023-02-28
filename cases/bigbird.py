@@ -234,9 +234,11 @@ def _bigbird_block_rand_mask2(
         rand_attn[i] = all_tables[i][rand_i]
     return rand_attn
 
+nheads = 12
+
 t0 = time.time_ns()
+# total 432
 for i in range(432):
-    
     a=_bigbird_block_rand_mask(4096, 4096, 64, 64, 3, 1024)
     # if i == 1:
     #     print(a)
@@ -265,12 +267,15 @@ t0 = time.time_ns()
     #     print(a)
 
 generate_all_table()
+for i in range(432//12):
+    a = _bigbird_block_rand_mask_fast(4096, 4096, 64, 64, 3, 1024, 12)
 # for i,node in enumerate(all_tables):
 #     print(i, len(node))
-t1 = time.time_ns()
-for i in range(432):
-    a = _bigbird_block_rand_mask2(4096, 4096, 64, 64, 3, 1024)
+# for i in range(432):
+    # a = _bigbird_block_rand_mask2(4096, 4096, 64, 64, 3, 1024)
+    
     # if i == 1:
+t1 = time.time_ns()
     #     print(a)
 
 
@@ -316,4 +321,4 @@ print('{:<20} {:>20}'.format("Total Wall Time:", "%.3f milliseconds" % ((t1 - t0
 rand_attn_origin = [_bigbird_block_rand_mask(4096, 4096, 64, 64, 3, 1024)[:62] for _ in range(10)]
 rand_attn_opt = _bigbird_block_rand_mask_fast(4096, 4096, 64, 64, 3, 1024, 10)
 
-print(rand_attn_opt)
+# print(rand_attn_opt)
