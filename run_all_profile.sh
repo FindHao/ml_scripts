@@ -15,7 +15,7 @@ func(){
     for (( i = 1 ; i <= $max_iter; i++ ))
     do
         # python run.py -d cuda -m jit -t train $model --precision fp32 --torchdynamo nvfuser  >> $output 2>&1
-        python run.py -d cuda -t $mode --profile --profile-detailed --profile-devices cpu,cuda --profile-folder ${work_path}/${profile_suffix}/$model  $model  --precision fp32  >> $output 2>&1
+        python run.py -d cuda -t $mode --profile --profile-detailed --profile-devices cpu,cuda --profile-folder ${work_path}/${profile_suffix}/$model  $model   >> $output 2>&1
         if [ $? -ne 0 ]; then
             break
         fi
@@ -59,8 +59,8 @@ fi
 
 
 echo `date` >> $output
-
-for model in $all_models;
+for model in phlippe_densenet resnext50_32x4d hf_Reformer timm_vovnet
+# for model in $all_models;
 do 
     echo "@Yueming Hao origin $model" >>$output
     ${run_func}
