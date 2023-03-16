@@ -11,6 +11,8 @@ conda_dir=${conda_dir:-/home/yhao/d/conda}
 enable_torchbench=${enable_torchbench:-1}
 # cuda_path
 cuda_env=${cuda_env:-/data/yhao/setenvs/cuda11.6.sh}
+# python_version
+python_version=${python_version:-3.8}
 
 source ${conda_dir}/bin/activate
 source ${cuda_env}
@@ -31,7 +33,7 @@ if [ $(conda env list | grep -c ${conda_env}) -ne 0 ]; then
 else
     echo "Conda environment ${conda_env} does not exist. Will create it."
     # create the conda environment
-    conda create -y -n ${conda_env} python=3.8
+    conda create -y -n ${conda_env} python=${python_version}
 fi
 
 conda activate ${conda_env}
@@ -54,9 +56,9 @@ fi
 
 cd ${work_path}
 # install torchbench
-git clone --depth 1 --recursive git@github.com:pytorch/benchmark.git
+# git clone --depth 1 --recursive git@github.com:pytorch/benchmark.git
 cd benchmark
-git lfs install
-git lfs fetch --all
-git lfs checkout .
+# git lfs install
+# git lfs fetch --all
+# git lfs checkout .
 python install.py
