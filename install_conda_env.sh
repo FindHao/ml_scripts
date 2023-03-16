@@ -6,7 +6,7 @@ wheel_path=${wheel_path:-/home/yhao/d/p8/ml_optimizations/.downloads/20230102}
 # where you want to install torchbench
 work_path=${work_path:-/home/yhao/d/p8/opts}
 # where the conda is installed
-conda_dir=${tb_conda_dir:-/home/yhao/d/conda}
+conda_dir=${conda_dir:-/home/yhao/d/conda}
 # whether to install torchbench
 enable_torchbench=${enable_torchbench:-1}
 # cuda_path
