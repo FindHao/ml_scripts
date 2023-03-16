@@ -13,6 +13,8 @@ enable_torchbench=${enable_torchbench:-1}
 cuda_env=${cuda_env:-/data/yhao/setenvs/cuda11.6.sh}
 # python_version
 python_version=${python_version:-3.8}
+# install stable version
+stable_version=${stable_version:-0}
 
 source ${conda_dir}/bin/activate
 source ${cuda_env}
@@ -24,7 +26,10 @@ check_folder_exist() {
     fi
 }
 
-check_folder_exist $wheel_path
+# if stable_version is 1, don't need to check wheel_path
+if [ ${stable_version} -eq 0 ]; then
+    check_folder_exist $wheel_path
+fi
 check_folder_exist $work_path
 
 # check if the environment is already installed
@@ -41,7 +46,12 @@ conda install -y git-lfs
 pip install requests bs4 argparse oauthlib pyyaml
 
 # install pytorch
-pip install ${wheel_path}/*.whl
+if [ ${stable_version} -eq 1 ]; then
+    echo "Install stable version of pytorch"
+    pip3 install torch torchvision torchaudio torchtext
+else
+    pip install ${wheel_path}/*.whl
+fi
 
 # check if the last command is successful
 if [ $? -ne 0 ]; then
@@ -49,16 +59,14 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-if [ ${enable_torchbench} -nq 1 ]; then
+if [ ${enable_torchbench} -ne 1 ]; then
     echo "Skip torchbench installation."
     exit 0
 fi
 
 cd ${work_path}
 # install torchbench
-# git clone --depth 1 --recursive git@github.com:pytorch/benchmark.git
+git clone --recursive git@github.com:pytorch/benchmark.git
 cd benchmark
-# git lfs install
-# git lfs fetch --all
-# git lfs checkout .
+pip install pyyaml
 python install.py
