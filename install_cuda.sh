@@ -1,6 +1,9 @@
 #!/bin/bash
 # usage: t_cuda=118 t_cuda_path=/install/path/cuda-11.8  ./install_cuda.sh
 
+# cudnn official redist link
+# https://developer.download.nvidia.com/compute/redist/cudnn/
+
 # for variable in t_cuda t_cudnn t_cuda_path
 # do 
 #     if [ -z "${!variable}" ]; then
@@ -40,7 +43,7 @@ if [ "$t_cuda" == "1187" ] ; then
 fi
 if [ "$t_cuda" == "121" ] ; then
     cuda_download_link="https://developer.download.nvidia.com/compute/cuda/12.1.0/local_installers/cuda_12.1.0_530.30.02_linux.run"
-    cudnn_download_link="https://developer.nvidia.com/compute/redist/cudnn/v8.8.1/local_installers/12.0/cudnn-linux-x86_64-8.8.1.3_cuda12-archive.tar.xz"
+    cudnn_download_link="https://developer.nvidia.com/compute/cuda/cudnn/v8.8.1/local_installers/12.0/cudnn-linux-x86_64-8.8.1.3_cuda12-archive.tar.xz"
     cuda_file_name="cuda_12.1.0_530.30.02_linux.run"
     cudnn_file_name="cudnn-linux-x86_64-8.8.1.3_cuda12-archive"
     cudnn_file_name_with_ext="cudnn-linux-x86_64-8.8.1.3_cuda12-archive.tar.xz"
