@@ -40,7 +40,7 @@ if [ "$t_cuda" == "1187" ] ; then
 fi
 if [ "$t_cuda" == "121" ] ; then
     cuda_download_link="https://developer.download.nvidia.com/compute/cuda/12.1.0/local_installers/cuda_12.1.0_530.30.02_linux.run"
-    cudnn_download_link="https://developer.nvidia.com/downloads/compute/cudnn/secure/8.8.1/local_installers/12.0/cudnn-linux-x86_64-8.8.1.3_cuda12-archive.tar.xz/"
+    cudnn_download_link="https://developer.nvidia.com/compute/redist/cudnn/v8.8.1/local_installers/12.0/cudnn-linux-x86_64-8.8.1.3_cuda12-archive.tar.xz"
     cuda_file_name="cuda_12.1.0_530.30.02_linux.run"
     cudnn_file_name="cudnn-linux-x86_64-8.8.1.3_cuda12-archive"
     cudnn_file_name_with_ext="cudnn-linux-x86_64-8.8.1.3_cuda12-archive.tar.xz"
@@ -61,9 +61,9 @@ mkdir -p .downloads/$t_cuda
 
 function download_and_install() {
     echo "Downloading cudatoolkit"
-    wget $cuda_download_link -O .downloads/$t_cuda/$cuda_file_name
+    wget -c $cuda_download_link -O .downloads/$t_cuda/$cuda_file_name
     echo "Downloading cudnn"
-    wget $cudnn_download_link -O .downloads/$t_cuda/$cudnn_file_name_with_ext &
+    wget -c $cudnn_download_link -O .downloads/$t_cuda/$cudnn_file_name_with_ext &
     /usr/bin/bash .downloads/$t_cuda/$cuda_file_name --silent --toolkit --toolkitpath=$t_cuda_path 
     wait
     mkdir .downloads/$t_cuda/$cudnn_file_name
