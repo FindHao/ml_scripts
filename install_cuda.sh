@@ -38,8 +38,16 @@ if [ "$t_cuda" == "1187" ] ; then
     cudnn_file_name="cudnn-linux-x86_64-8.7.0.84_cuda11-archive"
     cudnn_file_name_with_ext=$cudnn_file_name."tar.xz"
 fi
+if [ "$t_cuda" == "121" ] ; then
+    cuda_download_link="https://developer.download.nvidia.com/compute/cuda/12.1.0/local_installers/cuda_12.1.0_530.30.02_linux.run"
+    cudnn_download_link="https://developer.nvidia.com/downloads/compute/cudnn/secure/8.8.1/local_installers/12.0/cudnn-linux-x86_64-8.8.1.3_cuda12-archive.tar.xz/"
+    cuda_file_name="cuda_12.1.0_530.30.02_linux.run"
+    cudnn_file_name="cudnn-linux-x86_64-8.8.1.3_cuda12-archive"
+    cudnn_file_name_with_ext="cudnn-linux-x86_64-8.8.1.3_cuda12-archive.tar.xz"
+fi
+
 if [ -z "$cuda_download_link" ]; then
-    echo "t_cuda is only available for 116, 117, 118"
+    echo "t_cuda is only available for 116, 117, 118, 1187, 121"
     exit 1
 fi
 if [ -z "$t_cuda_path" ]; then

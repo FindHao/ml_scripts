@@ -12,9 +12,11 @@ enable_torchbench=${enable_torchbench:-1}
 # cuda_path
 cuda_env=${cuda_env:-/data/yhao/setenvs/cuda11.6.sh}
 # python_version
-python_version=${python_version:-3.8}
+python_version=${python_version:-3.10}
 # install stable version
 stable_version=${stable_version:-0}
+# where torchbench is installed
+torhcbench_path=${torchbench_path:-${work_path}/benchmark_dev2}
 
 source ${conda_dir}/bin/activate
 source ${cuda_env}
@@ -66,7 +68,7 @@ fi
 
 cd ${work_path}
 # install torchbench
-git clone --recursive git@github.com:pytorch/benchmark.git
-cd benchmark
+git clone --recursive git@github.com:pytorch/benchmark.git ${torhcbench_path}
+cd ${torhcbench_path}
 pip install pyyaml
 python install.py
