@@ -22,14 +22,14 @@ if [ "$t_cuda" == "116" ] ; then
 fi
 if [ "$t_cuda" == "117" ] ; then
     cuda_download_link="https://developer.download.nvidia.com/compute/cuda/11.7.0/local_installers/cuda_11.7.0_515.43.04_linux.run"
-    cudnn_download_link="https://ossci-linux.s3.amazonaws.com/cudnn-linux-x86_64-8.5.0.96_cuda11-archive.tar.xz"
+    cudnn_download_link="https://developer.download.nvidia.com/compute/redist/cudnn/v8.5.0/local_installers/11.7/cudnn-linux-x86_64-8.5.0.96_cuda11-archive.tar.xz"
     cuda_file_name="cuda_11.7.0_515.43.04_linux.run"
     cudnn_file_name="cudnn-linux-x86_64-8.5.0.96_cuda11-archive"
     cudnn_file_name_with_ext="cudnn-linux-x86_64-8.5.0.96_cuda11-archive.tar.xz"
 fi
 if [ "$t_cuda" == "118" ] ; then
     cuda_download_link="https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda_11.8.0_520.61.05_linux.run"
-    cudnn_download_link="https://ossci-linux.s3.amazonaws.com/cudnn-linux-x86_64-8.5.0.96_cuda11-archive.tar.xz"
+    cudnn_download_link="https://developer.download.nvidia.com/compute/redist/cudnn/v8.5.0/local_installers/11.7/cudnn-linux-x86_64-8.5.0.96_cuda11-archive.tar.xz"
     cuda_file_name="cuda_11.8.0_520.61.05_linux.run"
     cudnn_file_name="cudnn-linux-x86_64-8.5.0.96_cuda11-archive"
     cudnn_file_name_with_ext="cudnn-linux-x86_64-8.5.0.96_cuda11-archive.tar.xz"
