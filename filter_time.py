@@ -86,8 +86,10 @@ def work_multi_models2(input_file, output_file):
         table_head += ', cpu mem'
     if 'gpu_mem' in results[first_model]:
         table_head += ', gpu mem'
+    if 'batch_size' in results[first_model]:
+        table_head += ', batch size'
     table_head += '\n'
-    metrics_order = ['cpu', 'gpu', 'tflops', 'cpu_mem', 'gpu_mem']
+    metrics_order = ['cpu', 'gpu', 'tflops', 'cpu_mem', 'gpu_mem', 'batch_size']
     with open(output_file, 'w') as fout:
         print("writing to file %s" % output_file)
         fout.write(table_head)
@@ -121,12 +123,14 @@ def reg_filter(raw_str):
     reg_flops = re.compile(r"FLOPS:(.*) TFLOPs per second")
     reg_cpu_mem = re.compile(r"CPU Peak Memory:(.*) GB")
     reg_gpu_mem = re.compile(r"GPU Peak Memory:(.*) GB")
+    reg_batch_size = re.compile(r"with input batch size (\d+)")
     regs = {
         'cpu': reg_cpu,
         'gpu': reg_gpu,
         'tflops': reg_flops,
         'cpu_mem': reg_cpu_mem,
-        'gpu_mem': reg_gpu_mem
+        'gpu_mem': reg_gpu_mem,
+        'batch_size': reg_batch_size
     }
     for k in regs:
         result = regs[k].findall(raw_str)
@@ -141,6 +145,6 @@ if __name__ == '__main__':
     parser.add_argument('-i', '--input', type=str,
                         default='/home/yhao/d/tmp/run_all_speedup_aug4.log')
     parser.add_argument('-o', '--output', type=str,
-                        default='/tmp/filter_time.csv')
+                        default='filter_time.csv')
     args = parser.parse_args()
     work_multi_models2(args.input, args.output)
