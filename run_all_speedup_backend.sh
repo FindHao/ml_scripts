@@ -17,14 +17,14 @@ fi
 func(){
     for (( i = 1 ; i <= $max_iter; i++ ))
     do
-        python run.py -d cuda ${tflops} -t $mode --metrics cpu_peak_mem,gpu_peak_mem --metrics-gpu-backend dcgm $model   >> $output 2>&1
+        python run.py -d cuda ${tflops} -t $mode --metrics cpu_peak_mem,gpu_peak_mem --metrics-gpu-backend ${metrics_gpu_backend} $model   >> $output 2>&1
     done
 }
 
 func_torchscript(){
     for (( i = 1 ; i <= $max_iter; i++ ))
     do
-        python run.py -d cuda ${tflops} -t $mode $model  --metrics cpu_peak_mem,gpu_peak_mem --metrics-gpu-backend dcgm --backend torchscript  >> $output 2>&1
+        python run.py -d cuda ${tflops} -t $mode $model  --metrics cpu_peak_mem,gpu_peak_mem --metrics-gpu-backend ${metrics_gpu_backend} --backend torchscript  >> $output 2>&1
         if [ $? -ne 0 ]; then
             break
         fi
@@ -54,7 +54,8 @@ func_torch_trt(){
 func_torchinductor(){
     for (( i = 1 ; i <= $max_iter; i++ ))
     do
-        python run.py -d cuda ${tflops} -t $mode --metrics cpu_peak_mem,gpu_peak_mem --metrics-gpu-backend dcgm $model   --torchdynamo inductor >> $output 2>&1
+        # python run.py -d cuda ${tflops} -t $mode --metrics cpu_peak_mem,gpu_peak_mem --metrics-gpu-backend dcgm $model   --torchdynamo inductor >> $output 2>&1
+        python run.py -d cuda ${tflops} -t $mode --metrics cpu_peak_mem,gpu_peak_mem  --metrics-gpu-backend ${metrics_gpu_backend} $model   --torchdynamo inductor >> $output 2>&1
         if [ $? -ne 0 ]; then
             success_run=0
             break

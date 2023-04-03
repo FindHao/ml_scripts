@@ -33,6 +33,7 @@ enable_jit=${enable_jit:-0}
 cuda_env1=${cuda_env1:-/home/yhao/setenvs/set11.6-cudnn8.3.3.sh}
 cuda_env2=${cuda_env2:-/home/yhao/setenvs/set11.6-cudnn8.5.0.sh}
 max_iter=${max_iter:-10}
+metrics_gpu_backend=${metrics_gpu_backend:-default}
 
 echo $output
 source ${conda_dir}/bin/activate
@@ -55,6 +56,7 @@ echo "env2" $env2 >> $output
 if [ $enable_jit -eq 1 ]; then
     echo "enable_jit: True" >> $output
 fi
+echo "metrics_gpu_backend: $metrics_gpu_backend" >> $output
 
 notify()
 {
