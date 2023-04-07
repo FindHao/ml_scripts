@@ -124,7 +124,7 @@ def reg_filter(raw_str):
     reg_gpu = re.compile(r"GPU Time%s:(.*) milliseconds" % batch_str)
     reg_flops = re.compile(r"FLOPS:(.*) TFLOPs per second")
     reg_cpu_mem = re.compile(r"CPU Peak Memory:(.*) GB")
-    reg_gpu_mem = re.compile(r"GPU Peak Memory:(.*) GB")
+    reg_gpu_mem = re.compile(r"GPU \d* Peak Memory:(.*) GB")
     regs = {
         'cpu': reg_cpu,
         'gpu': reg_gpu,
