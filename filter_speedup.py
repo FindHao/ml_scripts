@@ -78,7 +78,7 @@ def work_multi_models(input_file, output_file):
     with open(output_file, 'w') as fout:
         print("Write results to %s" % output_file)
         fout.write(f"{hostname}\n")
-        fout.write(f"input file: {input_file_path}\n")
+        fout.write(f"input file, {input_file_path}\n")
         fout.write(table_head)
         for model in speedups:
             fout.write("%s" % model)
