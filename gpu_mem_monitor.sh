@@ -8,7 +8,7 @@ while true; do
   if [[ $gpu_mem -gt 70000 ]]; then
 
     # Call the test.py script using Python
-    python test.py
+    bash training_scripts/single_gpu/run_350m.sh
     
     # Check the return code of the script
     if [[ $? -eq 0 ]]; then
