@@ -13,10 +13,10 @@ while true; do
     # Check the return code of the script
     if [[ $? -eq 0 ]]; then
       # If the script returns successfully, send a "successfully" notification
-      notify-send "GPU Memory Alert" "Available GPU memory is larger than 50GB. Script test.py completed successfully."
+      notify "Task completed successfully."
     else
       # If the script fails, send a "fail" notification
-      notify-send "GPU Memory Alert" "Available GPU memory is larger than 50GB. Script test.py failed."
+      notify "Task failed."
     fi
     
     exit 0
