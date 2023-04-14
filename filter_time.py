@@ -44,6 +44,14 @@ def work_multi_models(input_file, output_file):
                     fout.write("%.2f, " % results[model][metric])
             fout.write('\n')
 
+def guard_checks(raw_str):
+    from collections import Counter
+    reg = re.compile(r"guard_types: (.*),")
+    all_results = reg.findall(raw_str)
+    if all_results:
+        return Counter(all_results)
+    return None
+        
 
 def reg_filter(raw_str):
     measurements = {}
@@ -83,10 +91,12 @@ def reg_filter(raw_str):
             tmp = [float(_.strip()) for _ in result]
             measurements[k] = tmp
     reg2 = {
-        'guard_checks': lambda x: x.count("guard_types")
+        'guard_checks': lambda x: guard_checks(x)
     }
     for k in reg2:
-        measurements[k] = reg2[k](raw_str)
+        result = reg2[k](raw_str)
+        if result:
+            measurements[k] = result
 
     return measurements
 
