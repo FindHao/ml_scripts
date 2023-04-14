@@ -83,7 +83,7 @@ def reg_filter(raw_str):
             tmp = [float(_.strip()) for _ in result]
             measurements[k] = tmp
     reg2 = {
-        'guard_checks': lambda x: x.count("guard_checks")
+        'guard_checks': lambda x: x.count("guard_types")
     }
     for k in reg2:
         measurements[k] = reg2[k](raw_str)
