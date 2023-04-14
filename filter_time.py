@@ -1,61 +1,13 @@
-
-
+"""
+This script is used to filter the metric valus, such as execution time, memory usage etc., from the log file.
+"""
 import argparse
 import os
 import re
 from numpy import mean
+import time
 
-
-def work_multi_models(input_file, output_file='/tmp/gpuactivetime.csv'):
-    """
-    only works for gpu active time now
-    """
-    content = ''
-    input_file_path = os.path.abspath(input_file)
-    hostname = os.uname()[1]
-    with open(input_file_path, 'r') as fin:
-        content = fin.read()
-    content_s = [_ for _ in content.split(
-        "@Yueming Hao origin") if _.strip()]
-    timexratio = {}
-    for amodel in content_s:
-        model_name = amodel.strip().split()[0].strip()
-        origin_raw = amodel
-        og_gputime, og_gpuratio = filter_time_gpuactive(origin_raw)
-        if not og_gputime or not og_gpuratio:
-            print(f"Error when process {model_name}")
-            continue
-        timexratio[model_name] = [og_gputime, og_gpuratio]
-    table_head = "model, gpu active time, gpu active time ratio%\n"
-    with open(output_file, 'w') as fout:
-        fout.write(f"{hostname}\n")
-        fout.write(f"input file: {input_file_path}\n")
-        fout.write(table_head)
-        for model in timexratio:
-            fout.write("%s, " % model)
-            for v in timexratio[model]:
-                fout.write("%.2f, " % v)
-            fout.write('\n')
-
-
-def filter_time_gpuactive(raw_str):
-    gpu_active_time = []
-    gpu_active_ratio = []
-#     GPU active time: 106.609 ms
-# GPU active time ratio: 47.93%
-    reg1 = re.compile(
-        r"GPU active time: (.*) ms\nGPU active time ratio: (.*)\%")
-    results = reg1.findall(raw_str)
-    if not results:
-        return None, None
-    for it in results:
-        it = [float(_) for _ in it]
-        gpu_active_time.append(it[0])
-        gpu_active_ratio.append(it[1])
-    return mean(gpu_active_time), mean(gpu_active_ratio)
-
-
-def work_multi_models2(input_file, output_file):
+def work_multi_models(input_file, output_file):
     content = ''
     with open(input_file, 'r') as fin:
         content = fin.read()
@@ -75,21 +27,13 @@ def work_multi_models2(input_file, output_file):
             mean_results[k] = mean(measurements[k])
         results[model_name] = mean_results
     first_model = list(results.keys())[0]
+    metrics_order = ['cpu', 'gpu', 'tflops', 'cpu_mem', 'gpu_mem', 'batch_size', 'guard_checks']
     table_head = 'model'
-    if 'gpu' in results[first_model]:
-        table_head += ', gpu time'
-    if 'cpu' in results[first_model]:
-        table_head += ', cpu time'
-    if 'tflops' in results[first_model]:
-        table_head += ', tflops'
-    if 'cpu_mem' in results[first_model]:
-        table_head += ', cpu mem'
-    if 'gpu_mem' in results[first_model]:
-        table_head += ', gpu mem'
-    if 'batch_size' in results[first_model]:
-        table_head += ', batch size'
+    for metric in metrics_order:
+        if metric in results[first_model]:
+            table_head += ', %s' % metric
     table_head += '\n'
-    metrics_order = ['cpu', 'gpu', 'tflops', 'cpu_mem', 'gpu_mem', 'batch_size']
+    
     with open(output_file, 'w') as fout:
         print("writing to file %s" % output_file)
         fout.write(table_head)
@@ -132,19 +76,28 @@ def reg_filter(raw_str):
         'gpu_mem': reg_gpu_mem,
         'batch_size': reg_batch_size
     }
+    
     for k in regs:
         result = regs[k].findall(raw_str)
         if result:
             tmp = [float(_.strip()) for _ in result]
             measurements[k] = tmp
+    reg2 = {
+        'guard_checks': lambda x: x.count("guard_checks")
+    }
+    for k in reg2:
+        measurements[k] = reg2[k](raw_str)
+
     return measurements
 
 
 if __name__ == '__main__':
+    # get current time and date like 202304141010
+    current_time = time.strftime("%Y%m%d%H%M", time.localtime())
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input', type=str,
                         default='/home/yhao/d/tmp/run_all_speedup_aug4.log')
     parser.add_argument('-o', '--output', type=str,
-                        default='filter_time.csv')
+                        default='filter_time_%s.csv' % current_time)
     args = parser.parse_args()
-    work_multi_models2(args.input, args.output)
+    work_multi_models(args.input, args.output)

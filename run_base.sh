@@ -1,15 +1,13 @@
 #!/bin/bash
-# Environment variables:
-#   work_path: where benchmark folder locates
-#   mode: train, eval
-#   tb_path: optional. if you want to specifiy where torchbench locates
-#   torchexpert_path: optional. if you want to specify where torchexpert locates
-#   conda_dir: where conda locates
-#   env1: the conda env you would like to test
+# This is a base script for all other scripts. It contains some common configs and checks.
 
 var_date=$(date +'%Y%m%d%H%M')
-mode=${mode:-train}
 
+
+# ====config begin======
+# mode: train or eval
+mode=${mode:-train}
+# the main work path
 work_path=${work_path:-/home/yhao/d}
 if [ ! -d $work_path ]; then
     echo "work_path not exist"
@@ -21,19 +19,21 @@ torchexpert_path=${torchexpert_path:-${work_path}/TorchExpert}
 torchexpert=${torchexpert_path}/torchexpert.py
 cur_filename=$(basename $0)
 prefix_filename=${cur_filename%.*}
-logs_path=${work_path}/logs/logs_${prefix_filename}
-if [ ! -d $logs_path ]; then
-    mkdir -p $logs_path
-fi
 output=${work_path}/logs/${prefix_filename}_${mode}_${var_date}.log
 conda_dir=${conda_dir:-/home/yhao/d/conda}
+# env1 is the default environment
 env1=${env1:-pt_jan02}
+# env2 is used to speedup comparion scripts like run_all_speedup*
 env2=${env2:-pt_jan02_all}
 enable_jit=${enable_jit:-0}
 cuda_env1=${cuda_env1:-/home/yhao/setenvs/set11.6-cudnn8.3.3.sh}
+# cuda_env2 is used to speedup comparion scripts like run_all_speedup_cuda
 cuda_env2=${cuda_env2:-/home/yhao/setenvs/set11.6-cudnn8.5.0.sh}
 max_iter=${max_iter:-10}
 metrics_gpu_backend=${metrics_gpu_backend:-default}
+# ====config end======
+
+
 
 echo $output
 source ${conda_dir}/bin/activate
@@ -58,6 +58,7 @@ if [ $enable_jit -eq 1 ]; then
 fi
 echo "metrics_gpu_backend: $metrics_gpu_backend" >> $output
 
+# use pushover to notify the end of the script, need extra environment variables PUSHOVER_API PUSHOVER_USER_KEY
 notify()
 {
     hostname=`cat /proc/sys/kernel/hostname`
