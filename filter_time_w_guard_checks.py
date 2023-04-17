@@ -6,6 +6,11 @@ import os
 import re
 from numpy import mean
 import time
+from collections import Counter
+from typing import List, Tuple, Union
+
+guard_check_set = set()
+
 
 def work_multi_models(input_file, output_file):
     content = ''
@@ -25,16 +30,20 @@ def work_multi_models(input_file, output_file):
         mean_results = {}
         for k in measurements:
             if k == 'guard_checks':
-                mean_results[k] = str(measurements[k])
+                mean_results[k] = measurements[k]
             else:
                 mean_results[k] = mean(measurements[k])
         results[model_name] = mean_results
+    guard_checks_set_list = sorted(guard_check_set)
     first_model = list(results.keys())[0]
-    metrics_order = ['cpu', 'gpu', 'tflops', 'cpu_mem', 'gpu_mem', 'batch_size', 'guard_checks']
+    metrics_order = ['cpu', 'gpu', 'tflops', 'cpu_mem', 'gpu_mem', 'batch_size']
+    
     table_head = 'model'
     for metric in metrics_order:
         if metric in results[first_model]:
             table_head += ', %s' % metric
+    for guard_check_item in guard_checks_set_list:
+        table_head += f', {guard_check_item}'
     table_head += '\n'
     
     with open(output_file, 'w') as fout:
@@ -45,15 +54,47 @@ def work_multi_models(input_file, output_file):
             for metric in metrics_order:
                 if metric in results[model]:
                     fout.write(f"{results[model][metric]}" + ', ')
+            for guard_check_item in guard_checks_set_list:
+                if guard_check_item in results[model]['guard_checks']:
+                    fout.write(f"{results[model]['guard_checks'][guard_check_item]}" + ', ')
+                else:
+                    fout.write('0, ')
             fout.write('\n')
 
+
+
+def counter_to_sorted_list(counter_obj: Counter) -> List[Tuple[str, Union[int, str]]]:
+    # Convert counter to regular dictionary
+    global guard_check_set
+    map_obj = {}
+    for k, v in counter_obj.items():
+        k = k.strip("[]").replace("'", "").replace(", ", ",")
+        if "," in k:
+            k = k.split(",")
+            for sub_k in k:
+                if sub_k in map_obj:
+                    map_obj[sub_k] += v
+                else:
+                    map_obj[sub_k] = v
+        else:
+            if k in map_obj:
+                map_obj[k] += v
+            else:
+                map_obj[k] = v
+    # use keys of map_obj to update guard_check_set
+    guard_check_set.update(map_obj.keys())
+    return map_obj
+
+
+
+
 def guard_checks(raw_str):
-    from collections import Counter
     reg = re.compile(r"guard_types': (.*),")
     all_results = reg.findall(raw_str)
     if all_results:
-        return Counter(all_results)
-    return None
+        return counter_to_sorted_list(Counter(all_results))
+    else:
+        return None
         
 
 def reg_filter(raw_str):
