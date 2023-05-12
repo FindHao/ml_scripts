@@ -47,6 +47,9 @@ if [ "$t_cuda" == "121" ] ; then
     cuda_file_name="cuda_12.1.0_530.30.02_linux.run"
     cudnn_file_name="cudnn-linux-x86_64-8.8.1.3_cuda12-archive"
     cudnn_file_name_with_ext="cudnn-linux-x86_64-8.8.1.3_cuda12-archive.tar.xz"
+    nccl_download_link="https://developer.download.nvidia.com/compute/redist/nccl/v2.18.1/nccl_2.18.1-1+cuda12.1_x86_64.txz"
+    nccl_file_name="nccl_2.18.1-1+cuda12.1_x86_64"
+    nccl_file_name_with_ext="nccl_2.18.1-1+cuda12.1_x86_64.txz"
 fi
 
 if [ -z "$cuda_download_link" ]; then
@@ -74,6 +77,14 @@ function download_and_install() {
     cp .downloads/$t_cuda/$cudnn_file_name/include/cudnn*.h $t_cuda_path/include
     cp .downloads/$t_cuda/$cudnn_file_name/lib/libcudnn* $t_cuda_path/lib64
     chmod a+r $t_cuda_path/include/cudnn*.h $t_cuda_path/lib64/libcudnn*
+    if [ ! -z "$nccl_download_link" ]; then
+        echo "Downloading nccl"
+        wget -c $nccl_download_link -O .downloads/$t_cuda/$nccl_file_name_with_ext
+        tar -xf .downloads/$t_cuda/$nccl_file_name_with_ext -C .downloads/$t_cuda/
+        cp -r .downloads/$t_cuda/$nccl_file_name/include/* $t_cuda_path/include/
+        cp -r .downloads/$t_cuda/$nccl_file_name/lib/* $t_cuda_path/lib64/
+        chmod a+r $t_cuda_path/include/nccl*.h $t_cuda_path/lib64/libnccl*
+    fi
 }
 
 download_and_install
