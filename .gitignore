@@ -141,3 +141,5 @@ report*
 
 *.csv
 .downloads/
+
+torch_compile_debug/
