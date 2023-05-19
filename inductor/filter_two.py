@@ -20,6 +20,7 @@ def work_multi_inputs(origin_file, optimized_file, output_file):
     table_head = 'model, origin, optimized, speedup_change\n'
     with open(output_file, 'w') as fout:
         print("writing to file %s" % output_file)
+        fout.write("this file: %s\n" % output_file)
         fout.write("origin file: %s\n" % origin_file)
         fout.write("optimized file: %s\n" % optimized_file)
         fout.write(table_head)
