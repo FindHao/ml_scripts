@@ -74,7 +74,7 @@ def work(input_file, output_file):
         for j in range(i+1, len_results):
             num_diff, num_same, num_total, diff_lines = compare_kernels(results[i], results[j])
             # if num_diff / num_total < 0.1:
-            if num_diff == 1:
+            if num_diff <= 2:
                 print("kernel %s and kernel %s are similar" % (kernel_names[i], kernel_names[j]))
                 print("num_diff: %d, num_same: %d, num_total: %d" % (num_diff, num_same, num_total))
                 dsu.union(i, j)
