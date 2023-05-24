@@ -49,6 +49,10 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+if [ ! -d ${work_path}/logs ]; then
+    mkdir ${work_path}/logs
+fi
+
 echo "" > $output
 echo `date` >> $output
 echo "torchexpert: $torchexpert" >> $output
@@ -65,9 +69,7 @@ if [ $enable_jit -eq 1 ]; then
 fi
 echo "metrics_gpu_backend: $metrics_gpu_backend" >> $output
 
-if [ ! -d ${work_path}/logs ]; then
-    mkdir ${work_path}/logs
-fi
+
 
 # use pushover to notify the end of the script, need extra environment variables PUSHOVER_API PUSHOVER_USER_KEY
 notify()

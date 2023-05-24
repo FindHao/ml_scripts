@@ -5,10 +5,8 @@ work_path=${work_path:-/scratch/yhao24/p9_inductor}
 export USE_ROCM=0
 export USE_NCCL=1
 
-conda install -c pytorch magma-cuda121
-conda install cmake ninja
-conda install mkl mkl-include
-conda install libpng
+conda install -c pytorch magma-cuda121 -y
+conda install -y cmake ninja mkl mkl-include libpng -y
 
 # !!! warning need to use same numpy version with torchbench!!!!! 
 pip install numpy==1.21.2
@@ -41,3 +39,9 @@ cd $work_path
 git clone git@github.com:pytorch/audio.git
 cd audio
 python setup.py install
+
+cd $work_path
+git clone git@github.com:pytorch/benchmark.git
+pip install pyyaml
+cd benchmark
+python install.py

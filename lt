@@ -1,0 +1,6 @@
+#!/bin/bash
+conda_dir=${conda_dir:-/scratch/yhao24/miniconda3}
+source ${conda_dir}/bin/activate
+conda activate linter
+lintrunner -a 
+conda deactivate
