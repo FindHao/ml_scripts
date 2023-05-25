@@ -3,9 +3,34 @@ import torch
 import torch.nn.functional as F
 import argparse
 
-def run_conv2d(input_shape, weight_shape, other_args, profile_folder):
-    input = torch.ones(input_shape, dtype=torch.float32, device='cuda')
-    weight = torch.ones(weight_shape, dtype=torch.float32, device='cuda')
+import time
+
+def timer(func):
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        end = time.time()
+        print(f"{func.__name__} executed in {end - start} seconds")
+        return result
+    return wrapper
+
+def gpu_timer(func):
+    def wrapper(*args, **kwargs):
+        torch.cuda.synchronize()
+        start = time.time_ns()
+        result = func(*args, **kwargs)
+        torch.cuda.synchronize()
+        end = time.time_ns()
+        duration_ms = (end - start) / 1e6
+        if duration_ms > 1000:
+            print(f"{func.__name__} executed in {duration_ms / 1000:.2f} seconds")
+        else:
+            print(f"{func.__name__} executed in {duration_ms:.2f} milliseconds")
+        return result
+    return wrapper
+
+@gpu_timer
+def run_conv2d(input, weight, other_args, profile_folder):
     bias = other_args[0]
     stride = other_args[1]
     padding = other_args[2]
@@ -49,7 +74,7 @@ def profile(input_shape, weight_shape, other_args, profile_folder):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(__doc__)
     SUPPORT_BATCHSIZE_LIST = ['32', '64']
-    parser.add_argument("--bs", choices=SUPPORT_BATCHSIZE_LIST, required=True,
+    parser.add_argument("--bs", choices=SUPPORT_BATCHSIZE_LIST, required=False,default='64',
                         help="Specify batch size to the test.")
     parser.add_argument("--profile-folder", default="./logs", help="Save profiling model traces to this directory.")
     args, extra_args = parser.parse_known_args()
@@ -61,5 +86,7 @@ if __name__ == "__main__":
         input_shape = (32, 224, 56, 56)
         other_args = [None, (1, 1), (1, 1), (1, 1), 2]
     weight_shape = (224, 112, 3, 3)
+    input = torch.ones(input_shape, dtype=torch.float32, device='cuda')
+    weight = torch.ones(weight_shape, dtype=torch.float32, device='cuda')
     # profile(input_shape, weight_shape, other_args, args.profile_folder)
-    run_conv2d(input_shape, weight_shape, other_args, args.profile_folder)
+    run_conv2d(input, weight, other_args, args.profile_folder)
