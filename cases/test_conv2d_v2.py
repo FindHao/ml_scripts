@@ -2,7 +2,7 @@ from torch import profiler
 import torch
 import torch.nn.functional as F
 import argparse
-
+from utils import gpu_timer
 import time
 
 def timer(func):
@@ -14,20 +14,7 @@ def timer(func):
         return result
     return wrapper
 
-def gpu_timer(func):
-    def wrapper(*args, **kwargs):
-        torch.cuda.synchronize()
-        start = time.time_ns()
-        result = func(*args, **kwargs)
-        torch.cuda.synchronize()
-        end = time.time_ns()
-        duration_ms = (end - start) / 1e6
-        if duration_ms > 1000:
-            print(f"{func.__name__} executed in {duration_ms / 1000:.2f} seconds")
-        else:
-            print(f"{func.__name__} executed in {duration_ms:.2f} milliseconds")
-        return result
-    return wrapper
+
 
 @gpu_timer
 def run_conv2d(input, weight, other_args, profile_folder):
@@ -39,7 +26,7 @@ def run_conv2d(input, weight, other_args, profile_folder):
     # warmup
     for i in range(11):
         x = F.conv2d(input, weight, bias, stride, padding, dilation, groups)
-    for i in range(1000):
+    for i in range(10000):
         x = F.conv2d(input, weight, bias, stride, padding, dilation, groups)
     return x
 
