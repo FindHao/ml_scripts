@@ -30,6 +30,19 @@ else
     debug_placeholder=""
 fi
 
+enable_cuda_graphs=${enable_cuda_graphs:-0}
+if [ $enable_cuda_graphs -eq 1 ]; then
+    cuda_graphs_placeholder=""
+else
+    cuda_graphs_placeholder="--disable-cudagraphs"
+fi
+
+enable_dynamic_shapes=${enable_dynamic_shapes:-0}
+if [ $enable_dynamic_shapes -eq 1 ]; then
+    dynamic_shapes_placeholder="--dynamic-shapes --dynamic-batch-only"
+else
+    dynamic_shapes_placeholder=""
+fi
 
 # get date
 date_suffix=$(date +%Y%m%d_%H%M%S)
@@ -41,6 +54,14 @@ elif [ "$mode" == "eval" ]; then
     mode="--inference"
 fi
 
-${debug_placeholder} python benchmarks/dynamo/huggingface.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor --disable-cudagraphs --device cuda >>$output  2>&1
+
+echo "${debug_placeholder} python benchmarks/dynamo/torchbench.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder} --device cuda" >>$output  2>&1
+${debug_placeholder} python benchmarks/dynamo/huggingface.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder} --device cuda >>$output  2>&1
+
+echo "${debug_placeholder} python benchmarks/dynamo/timm_models.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder} --device cuda" >>$output  2>&1
+${debug_placeholder} python benchmarks/dynamo/torchbench.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder} --device cuda >>$output  2>&1
+
+echo "${debug_placeholder} python benchmarks/dynamo/huggingface.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder} --device cuda" >>$output  2>&1
+${debug_placeholder} python benchmarks/dynamo/timm_models.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder} --device cuda >>$output  2>&1
 
 notify 
