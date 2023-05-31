@@ -6,10 +6,9 @@ SHELL_FOLDER=$(
 )
 source ${SHELL_FOLDER}/run_base.sh
 
-profile_suffix=logs_profile_${mode}_$env1_$(date +'%Y%m%d%H%M')
+profile_suffix=logs_profile_${mode}_$(date +'%Y%m%d%H%M')
 
-enable_inductor=${enable_inductor:-0}
-
+max_iter=1
 cd $tb_path
 func() {
     for ((i = 1; i <= $max_iter; i++)); do
@@ -30,10 +29,9 @@ fi
 if [ $enable_inductor -eq 1 ]; then
     profile_suffix=${profile_suffix}_inductor
 fi
-
+echo "profile suffix: $profile_suffix" >>$output
 echo $(date) >>$output
-# for model in phlippe_densenet resnext50_32x4d hf_Reformer timm_vovnet
-for model in $all_models; do
+for model in timm_efficientdet; do # for model in $all_models
     echo "@Yueming Hao origin $model" >>$output
     func
 done
