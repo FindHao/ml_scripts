@@ -44,6 +44,13 @@ else
     dynamic_shapes_placeholder=""
 fi
 
+enable_profile=${enable_profile:-0}
+if [ $enable_profile -eq 1 ]; then
+    profile_placeholder="--export-profiler-trace"
+else
+    profile_placeholder=""
+fi
+
 # get date
 date_suffix=$(date +%Y%m%d_%H%M%S)
 cd $pytorch_path
@@ -55,13 +62,13 @@ elif [ "$mode" == "eval" ]; then
 fi
 
 
-echo "${debug_placeholder} python benchmarks/dynamo/torchbench.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder} --device cuda" >>$output  2>&1
-${debug_placeholder} python benchmarks/dynamo/huggingface.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder} --device cuda >>$output  2>&1
+echo "${debug_placeholder} python benchmarks/dynamo/torchbench.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder}  ${profile_placeholder} --device cuda" >>$output  2>&1
+${debug_placeholder} python benchmarks/dynamo/huggingface.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder}  ${profile_placeholder} --device cuda >>$output  2>&1
 
-echo "${debug_placeholder} python benchmarks/dynamo/timm_models.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder} --device cuda" >>$output  2>&1
-${debug_placeholder} python benchmarks/dynamo/torchbench.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder} --device cuda >>$output  2>&1
+echo "${debug_placeholder} python benchmarks/dynamo/timm_models.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder}  ${profile_placeholder} --device cuda" >>$output  2>&1
+${debug_placeholder} python benchmarks/dynamo/torchbench.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder}  ${profile_placeholder} --device cuda >>$output  2>&1
 
-echo "${debug_placeholder} python benchmarks/dynamo/huggingface.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder} --device cuda" >>$output  2>&1
-${debug_placeholder} python benchmarks/dynamo/timm_models.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder} --device cuda >>$output  2>&1
+echo "${debug_placeholder} python benchmarks/dynamo/huggingface.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder}  ${profile_placeholder} --device cuda" >>$output  2>&1
+${debug_placeholder} python benchmarks/dynamo/timm_models.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder}  ${profile_placeholder} --device cuda >>$output  2>&1
 
 notify 
