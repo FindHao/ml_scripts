@@ -70,6 +70,13 @@ elif [ "$mode" == "eval" ]; then
 fi
 
 
+
+start_time=$(date +%s)
+
+
+
+
+
 export PROFILE_FOLDER=${BASE_PROFILE_FOLDER}/huggingface/
 echo "${debug_placeholder} python benchmarks/dynamo/huggingface.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder}  ${profile_placeholder} --device cuda" >>$output  2>&1
 ${debug_placeholder} python benchmarks/dynamo/huggingface.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder}  ${profile_placeholder} --device cuda >>$output  2>&1
@@ -82,4 +89,6 @@ export PROFILE_FOLDER=${BASE_PROFILE_FOLDER}/timm_models/
 echo "${debug_placeholder} python benchmarks/dynamo/timm_models.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder}  ${profile_placeholder} --device cuda" >>$output  2>&1
 ${debug_placeholder} python benchmarks/dynamo/timm_models.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder}  ${profile_placeholder} --device cuda >>$output  2>&1
 
+end_time=$(date +%s)
+duration=$((end_time - start_time))
 notify 

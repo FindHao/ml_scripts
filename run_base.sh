@@ -88,10 +88,22 @@ echo "metrics_gpu_backend: $metrics_gpu_backend" >>$output
 # use pushover to notify the end of the script, need extra environment variables PUSHOVER_API PUSHOVER_USER_KEY
 notify() {
     hostname=$(cat /proc/sys/kernel/hostname)
+    if [ ! -z "$duration" ]; then
+        if ((duration >= 3600)); then
+            duration_str="Elapsed time: $((duration / 3600)) hour(s)"
+        elif ((duration >= 60)); then
+            duration_str="Elapsed time: $((duration / 60)) minute(s)"
+        else
+            duration_str="Elapsed time: $duration second(s)"
+        fi 
+        echo $duration_str >>$output
+    else
+        duration_str=""
+    fi
     curl -s \
         --form-string "token=${PUSHOVER_API}" \
         --form-string "user=${PUSHOVER_USER_KEY}" \
-        --form-string "message=${prefix_filename} on ${hostname} done! Output file is ${output}. " \
+        --form-string "message=${prefix_filename} on ${hostname} done! Output file is ${output}. ${duration_str} " \
         https://api.pushover.net/1/messages.json
 }
 
