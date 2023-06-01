@@ -32,7 +32,7 @@ cuda_env1=${cuda_env1:-/home/yhao/setenvs/set11.6-cudnn8.3.3.sh}
 cuda_env2=${cuda_env2:-/home/yhao/setenvs/set11.6-cudnn8.5.0.sh}
 max_iter=${max_iter:-10}
 # pytorch path
-pytorch_path=${pytorch_path:-$work_path/pytorch}
+pytorch_path=${pytorch_path:-${work_path}/pytorch}
 
 # run.py arguments
 metrics_gpu_backend=${metrics_gpu_backend:-default}

@@ -80,14 +80,27 @@ start_time=$(date +%s)
 export PROFILE_FOLDER=${BASE_PROFILE_FOLDER}/huggingface/
 echo "${debug_placeholder} python benchmarks/dynamo/huggingface.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder}  ${profile_placeholder} --device cuda" >>$output  2>&1
 ${debug_placeholder} python benchmarks/dynamo/huggingface.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder}  ${profile_placeholder} --device cuda >>$output  2>&1
+mv ${pytorch_path}/speedup_inductor.csv ${pytorch_path}/speedup_inductor_huggingface_${var_date}.csv
+mv ${pytorch_path}/speedup_inductor_compilation_metrics.csv ${pytorch_path}/speedup_inductor_compilation_metrics_huggingface_${var_date}.csv
+echo "${pytorch_path}/speedup_inductor_huggingface_${var_date}.csv" >>$output  2>&1
+echo "${pytorch_path}/speedup_inductor_compilation_metrics_huggingface_${var_date}.csv" >>$output  2>&1
+
 
 export PROFILE_FOLDER=${BASE_PROFILE_FOLDER}/torchbench/
 echo "${debug_placeholder} python benchmarks/dynamo/torchbench.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder}  ${profile_placeholder} --device cuda" >>$output  2>&1
 ${debug_placeholder} python benchmarks/dynamo/torchbench.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder}  ${profile_placeholder} --device cuda >>$output  2>&1
+mv ${pytorch_path}/speedup_inductor.csv ${pytorch_path}/speedup_inductor_torchbench_${var_date}.csv
+mv ${pytorch_path}/speedup_inductor_compilation_metrics.csv ${pytorch_path}/speedup_inductor_compilation_metrics_torchbench_${var_date}.csv
+echo "${pytorch_path}/speedup_inductor_torchbench_${var_date}.csv" >>$output  2>&1
+echo "${pytorch_path}/speedup_inductor_compilation_metrics_torchbench_${var_date}.csv" >>$output  2>&1
 
 export PROFILE_FOLDER=${BASE_PROFILE_FOLDER}/timm_models/
 echo "${debug_placeholder} python benchmarks/dynamo/timm_models.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder}  ${profile_placeholder} --device cuda" >>$output  2>&1
 ${debug_placeholder} python benchmarks/dynamo/timm_models.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder}  ${profile_placeholder} --device cuda >>$output  2>&1
+mv ${pytorch_path}/speedup_inductor.csv ${pytorch_path}/speedup_inductor_timm_models_${var_date}.csv
+mv ${pytorch_path}/speedup_inductor_compilation_metrics.csv ${pytorch_path}/speedup_inductor_compilation_metrics_timm_models_${var_date}.csv
+echo "${pytorch_path}/speedup_inductor_timm_models_${var_date}.csv" >>$output  2>&1
+echo "${pytorch_path}/speedup_inductor_compilation_metrics_timm_models_${var_date}.csv" >>$output  2>&1
 
 end_time=$(date +%s)
 duration=$((end_time - start_time))
