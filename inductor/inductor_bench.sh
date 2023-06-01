@@ -46,6 +46,14 @@ fi
 
 enable_profile=${enable_profile:-0}
 if [ $enable_profile -eq 1 ]; then
+    # check if profile folder is set
+    if [ -z "$profile_folder" ]; then
+        echo "profile_folder is not set. use default path ~/b/p9/logs_profile_$(date +'%Y%m%d%H%M')"
+        BASE_PROFILE_FOLDER=~/b/p9/logs_profile_${mode}_$(date +'%Y%m%d%H%M')
+    else
+        echo "PROFILE_FOLDER is set to $profile_folder"
+        BASE_PROFILE_FOLDER=$profile_folder
+    fi
     profile_placeholder="--export-profiler-trace"
 else
     profile_placeholder=""
@@ -62,13 +70,16 @@ elif [ "$mode" == "eval" ]; then
 fi
 
 
-echo "${debug_placeholder} python benchmarks/dynamo/torchbench.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder}  ${profile_placeholder} --device cuda" >>$output  2>&1
+export PROFILE_FOLDER=${BASE_PROFILE_FOLDER}/huggingface/
+echo "${debug_placeholder} python benchmarks/dynamo/huggingface.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder}  ${profile_placeholder} --device cuda" >>$output  2>&1
 ${debug_placeholder} python benchmarks/dynamo/huggingface.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder}  ${profile_placeholder} --device cuda >>$output  2>&1
 
-echo "${debug_placeholder} python benchmarks/dynamo/timm_models.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder}  ${profile_placeholder} --device cuda" >>$output  2>&1
+export PROFILE_FOLDER=${BASE_PROFILE_FOLDER}/torchbench/
+echo "${debug_placeholder} python benchmarks/dynamo/torchbench.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder}  ${profile_placeholder} --device cuda" >>$output  2>&1
 ${debug_placeholder} python benchmarks/dynamo/torchbench.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder}  ${profile_placeholder} --device cuda >>$output  2>&1
 
-echo "${debug_placeholder} python benchmarks/dynamo/huggingface.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder}  ${profile_placeholder} --device cuda" >>$output  2>&1
+export PROFILE_FOLDER=${BASE_PROFILE_FOLDER}/timm_models/
+echo "${debug_placeholder} python benchmarks/dynamo/timm_models.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder}  ${profile_placeholder} --device cuda" >>$output  2>&1
 ${debug_placeholder} python benchmarks/dynamo/timm_models.py --performance ${cold_start_latency_placeholder} $mode  --amp --backend inductor ${dynamic_shapes_placeholder} ${cuda_graphs_placeholder}  ${profile_placeholder} --device cuda >>$output  2>&1
 
 notify 
