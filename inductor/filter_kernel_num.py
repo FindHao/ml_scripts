@@ -75,7 +75,7 @@ def work(input_file, input_dir, output_file):
         input_dir = os.path.abspath(input_dir)
         for root, dirs, files in os.walk(input_dir):
             for file in files:
-                if file.endswith("_profile.json"):
+                if file == 'output_code.py':
                     input_file_path = os.path.join(root, file)
                     work_single_file(input_file_path, output_file)
     elif input_file:
@@ -88,7 +88,7 @@ def work_single_file(input_file, output_file):
     # BertForMaskedLM__0_forward_13.0
     # model_name_raw = os.path.basename(os.path.dirname(os.path.abspath(input_file)))
     print("processing file %s" % input_file)
-    model_name_raw = os.path.basename(os.path.abspath(input_file))
+    model_name_raw = os.path.basename(os.path.dirname(os.path.abspath(input_file)))
     model_name, sub_name = model_name_raw.split('__')
     with open(input_file, 'r') as fin:
         content = fin.read()
