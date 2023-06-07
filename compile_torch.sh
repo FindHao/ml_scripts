@@ -5,6 +5,7 @@ work_path=${work_path:-/scratch/yhao24/p9_inductor}
 export USE_ROCM=0
 export USE_NCCL=1
 export ROCR_VISIBLE_DEVICES=3
+export CUDA_VISIBLE_DEVICES=1
 
 conda install -c pytorch magma-cuda121 -y
 conda install -y cmake ninja mkl mkl-include libpng -y
@@ -56,6 +57,9 @@ python setup.py install
 cd $work_path
 git clone git@github.com:pytorch/audio.git
 cd audio
+git submodule update --init --recursive
+pip uninstall -y torchaudio
+python setup.py clean
 python setup.py install
 
 cd $work_path
