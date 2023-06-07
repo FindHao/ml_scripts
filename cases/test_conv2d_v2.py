@@ -5,6 +5,8 @@ import argparse
 from utils import gpu_timer
 import time
 
+# the execution time on A100-40GB should be about 24 seconds.
+
 def timer(func):
     def wrapper(*args, **kwargs):
         start = time.time()
