@@ -79,3 +79,4 @@ if __name__ == "__main__":
     weight = torch.ones(weight_shape, dtype=torch.float32, device='cuda')
     # profile(input_shape, weight_shape, other_args, args.profile_folder)
     run_conv2d(input, weight, other_args, args.profile_folder)
+    print("Standard execution time is about 24 seconds.")
