@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# initialize sum variables
+sum_output=0
+sum_output_opt=0
+total_iterations=3
+
+printf "\rProgress: [%-50s] %d%%" $(printf '%.0s#' $(seq 1 $((0*50/total_iterations)))) $((0*100/total_iterations))
+# Start the progress bar
+for i in $(seq 1 $total_iterations); do
+    # run output_code.py, add output to sum_output
+    output=$(python output_code.py)
+    sum_output=$(echo "$sum_output + $output" | bc -l)
+
+    # run output_code_opt.py, add output to sum_output_opt
+    output_opt=$(python output_code_opt.py)
+    sum_output_opt=$(echo "$sum_output_opt + $output_opt" | bc -l)
+    # echo "Output: $output, Output_opt: $output_opt"
+    # echo "Sum_output: $sum_output, Sum_output_opt: $sum_output_opt"
+
+    # update the progress bar
+    printf "\rProgress: [%-50s] %d%%" $(printf '%.0s#' $(seq 1 $((i*50/total_iterations)))) $((i*100/total_iterations))
+done 
+
+# calculate averages
+avg_output=$(echo "scale=6; $sum_output / ${total_iterations}" | bc -l)
+avg_output_opt=$(echo "scale=6; $sum_output_opt / ${total_iterations}" | bc -l)
+
+# calculate speedup
+speedup=$(echo "scale=6; $avg_output / $avg_output_opt" | bc -l)
+
+# print speedup
+echo -e "\nAverage output: $avg_output"
+echo -e "Average output_opt: $avg_output_opt"
+echo -e "Speedup: $speedup"
