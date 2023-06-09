@@ -3,7 +3,7 @@
 # initialize sum variables
 sum_output=0
 sum_output_opt=0
-total_iterations=3
+total_iterations=5
 
 printf "\rProgress: [%-50s] %d%%" $(printf '%.0s#' $(seq 1 $((0*50/total_iterations)))) $((0*100/total_iterations))
 # Start the progress bar
