@@ -4,6 +4,10 @@
 sum_output=0
 sum_output_opt=0
 total_iterations=5
+opt=${opt:-1}
+break_long=${break_long:-0}
+
+echo "Test output_code${opt}.py"
 
 printf "\rProgress: [%-50s] %d%%" $(printf '%.0s#' $(seq 1 $((0*50/total_iterations)))) $((0*100/total_iterations))
 # Start the progress bar
@@ -13,13 +17,19 @@ for i in $(seq 1 $total_iterations); do
     sum_output=$(echo "$sum_output + $output" | bc -l)
 
     # run output_code_opt.py, add output to sum_output_opt
-    output_opt=$(python output_code_opt.py)
+    output_opt=$(python output_code_opt${opt}.py)
     sum_output_opt=$(echo "$sum_output_opt + $output_opt" | bc -l)
     # echo "Output: $output, Output_opt: $output_opt"
     # echo "Sum_output: $sum_output, Sum_output_opt: $sum_output_opt"
 
     # update the progress bar
     printf "\rProgress: [%-50s] %d%%" $(printf '%.0s#' $(seq 1 $((i*50/total_iterations)))) $((i*100/total_iterations))
+    # if output is larger than 1, break_long is not 0, and i is larger than break_long, break
+    if (( $(echo "$output > 1" | bc -l) )) && (( $break_long != 0 )) && (( $i > $break_long )); then
+        echo "break after iteration $i since the iteration is too long"
+        break
+    fi
+
 done 
 
 # calculate averages
