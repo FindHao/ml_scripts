@@ -7,7 +7,7 @@ total_iterations=5
 opt=${opt:-1}
 break_long=${break_long:-0}
 
-echo "Test output_code${opt}.py"
+echo "Test output_code_opt${opt}.py"
 
 printf "\rProgress: [%-50s] %d%%" $(printf '%.0s#' $(seq 1 $((0*50/total_iterations)))) $((0*100/total_iterations))
 # Start the progress bar
