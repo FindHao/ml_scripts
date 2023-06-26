@@ -30,28 +30,35 @@ def work_multi_models(input_file, output_file):
             continue
         results[model_name] = float(speedup[0].strip())
     last_content = content_s[-1]
-    reg_summary = re.compile(r"\n\d+?\.?\d*?x\n([\s\S]*)")
-    last_content = reg_summary.findall(last_content)[0]
+    find_summary = True
+    reg_split = re.compile(r"\nspeedup.*gmean")
+    if not reg_split.findall(last_content):
+        print("warning: cannot find summary in the log file")
+        find_summary = False
+    else:
+        last_content = f"speedup gmean{re.split(reg_split, last_content)[1]}"
     summary_metric = {}
-    for metric_line in last_content.split('\n'):
-        if not metric_line.strip():
-            continue
-        metric_line = metric_line.strip().split()
-        metric_name = metric_line[0]
-        summary_metric[metric_name] = {}
-        if metric_name == 'compilation_latency':
-            mean_name = metric_line[1].split('=')[0]
-            mean_value = metric_line[1].split('=')[1] + ' ' + metric_line[2]
-            summary_metric[metric_name][mean_name] = mean_value
-        else:
-            for mean_line in metric_line[1:]:
-                mean_name = mean_line.split('=')[0]
-                mean_value = mean_line.split('=')[1]
+    if find_summary:
+        for metric_line in last_content.split('\n'):
+            if not metric_line.strip():
+                continue
+            metric_line = metric_line.strip().split()
+            metric_name = metric_line[0]
+            summary_metric[metric_name] = {}
+            if metric_name == 'compilation_latency':
+                mean_name = metric_line[1].split('=')[0]
+                mean_value = metric_line[1].split('=')[1] + ' ' + metric_line[2]
                 summary_metric[metric_name][mean_name] = mean_value
+            else:
+                for mean_line in metric_line[1:]:
+                    mean_name = mean_line.split('=')[0]
+                    mean_value = mean_line.split('=')[1]
+                    summary_metric[metric_name][mean_name] = mean_value
 
     table_head = 'model, speedup\n'
     with open(output_file, 'w') as fout:
-        print("writing to file %s" % output_file)
+        # full path
+        print(f"writing to file {os.path.abspath(output_file)}")
         fout.write("input file: %s\n" % input_file)
         fout.write(table_head)
         for model in results:
