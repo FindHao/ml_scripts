@@ -9,6 +9,7 @@ import time
 import re
 import os
 
+tmp_file="/tmp/inductor_tmp.txt"
 
 def run_models(model_list, collections, test_accuracy=False, mode="inference"):
     result_dict = {}
@@ -32,6 +33,11 @@ def run_models(model_list, collections, test_accuracy=False, mode="inference"):
                 stdout, stderr = process.communicate()
                 stdout = stdout.decode('utf-8')  # decoding the output
                 stderr = stderr.decode('utf-8')  # decoding the error
+                # write stdout and stderr to tmp_file
+                with open(tmp_file, "a") as f:
+                    f.write(f"model: {model}\n")
+                    f.write(f"stdout: {stdout}\n")
+                    f.write(f"stderr: {stderr}\n")
                 if process.returncode != 0:  # process ended with an error
                     result_dict[model] = f"error is {stderr}"
                 else:
@@ -42,7 +48,9 @@ def run_models(model_list, collections, test_accuracy=False, mode="inference"):
                     else:
                         match = re.search('pass', stdout)
                         if match:
-                            result_dict[model] = "passed"
+                            result_dict[model] = "pass"
+                        else:
+                            result_dict[model] = "fail"
                 break
 
             elif time.time() - start_time > 600:  # if process is running more than 10 minutes
@@ -59,7 +67,7 @@ def write_results(results, output_file):
     successed = []
     failed = []
     for key in results:
-        if isinstance(results[key], float):
+        if isinstance(results[key], float) or results[key] == "pass":
             successed.append(key)
         else:
             failed.append(key)
@@ -96,7 +104,6 @@ if __name__ == "__main__":
     directory = args.work_dir
     os.chdir(directory)
     output_file = args.output
-    # clear the file
     start_time = datetime.datetime.now()
     with open(output_file, "w") as f:
         f.write(start_time.strftime("%Y-%m-%d %H:%M:%S") + "\n")
