@@ -92,6 +92,7 @@ huggingface_list = "AlbertForMaskedLM AlbertForQuestionAnswering AllenaiLongform
 huggingface_list = huggingface_list.split(" ")
 huggingface_collection = "huggingface"
 
+target_models = "beit_base_patch16_224 cait_m36_384 crossvit_9_240 cspdarknet53 eca_botnext26ts_256 mobilevit_s pnasnet5large sebotnet33ts_256 Background_Matting attention_is_all_you_need_pytorch basic_gnn_sage cm3leon_generate detectron2_fcos_r_50_fpn hf_BigBird hf_GPT2 hf_Longformer hf_T5 llama nanogpt_generate pyhpc_turbulent_kinetic_energy yolov3 AllenaiLongformerBase OPTForCausalLM".split()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -99,7 +100,7 @@ if __name__ == "__main__":
     parser.add_argument("--performance", action="store_true")
     parser.add_argument("--mode", type=str, default="inference")
     parser.add_argument("--output", type=str, default="final_results.txt")
-    parser.add_argument("--work-dir", type=str, required=True)
+    parser.add_argument("--work-dir", type=str, required=True, help="The directory where the pytorch is located")
 
     args = parser.parse_args()
     test_accuracy = args.accuracy
@@ -110,6 +111,11 @@ if __name__ == "__main__":
     start_time = datetime.datetime.now()
     with open(output_file, "w") as f:
         f.write(start_time.strftime("%Y-%m-%d %H:%M:%S") + "\n")
+    if target_models:
+        timm_models_list = [_ for _ in timm_models_list if _ in target_models]
+        torchbench_list = [_ for _ in torchbench_list if _ in target_models]
+        huggingface_list = [_ for _ in huggingface_list if _ in target_models]
+
     for collection, model_list in zip([timm_models_collection, torchbench_collection, huggingface_collection], [timm_models_list, torchbench_list, huggingface_list]):
         results = run_models(model_list, collection, test_accuracy, mode)
         write_results(results, output_file)
