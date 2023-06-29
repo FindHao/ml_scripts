@@ -52,6 +52,8 @@ def run_models(model_list, collections, test_accuracy=False, mode="inference"):
                         match = re.search('pass', stdout)
                         if match:
                             result_dict[model] = "pass"
+                        elif re.search("fail_to_run", stdout):
+                            result_dict[model] = "fail_to_run"
                         else:
                             result_dict[model] = "fail"
                 break
@@ -95,7 +97,8 @@ huggingface_list = "AlbertForMaskedLM AlbertForQuestionAnswering AllenaiLongform
 huggingface_list = huggingface_list.split(" ")
 huggingface_collection = "huggingface"
 
-target_models = "".split()
+# target_models = "beit_base_patch16_224 cait_m36_384 crossvit_9_240 cspdarknet53 eca_botnext26ts_256 mobilevit_s pnasnet5large sebotnet33ts_256 Background_Matting attention_is_all_you_need_pytorch basic_gnn_sage cm3leon_generate detectron2_fcos_r_50_fpn hf_BigBird hf_GPT2 hf_Longformer hf_T5 llama nanogpt_generate pyhpc_turbulent_kinetic_energy yolov3 AllenaiLongformerBase OPTForCausalLM".split()
+target_models=[]
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
