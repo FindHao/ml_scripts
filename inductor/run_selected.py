@@ -9,7 +9,10 @@ import time
 import re
 import os
 
-tmp_file="/tmp/inductor_tmp.txt"
+# get current date time in a btter format
+now = datetime.datetime.now()
+now = now.strftime("%Y-%m-%d_%H-%M-%S")
+tmp_file=f"/tmp/inductor_tmp_{now}.txt"
 
 def run_models(model_list, collections, test_accuracy=False, mode="inference"):
     result_dict = {}
@@ -92,14 +95,14 @@ huggingface_list = "AlbertForMaskedLM AlbertForQuestionAnswering AllenaiLongform
 huggingface_list = huggingface_list.split(" ")
 huggingface_collection = "huggingface"
 
-target_models = "beit_base_patch16_224 cait_m36_384 crossvit_9_240 cspdarknet53 eca_botnext26ts_256 mobilevit_s pnasnet5large sebotnet33ts_256 Background_Matting attention_is_all_you_need_pytorch basic_gnn_sage cm3leon_generate detectron2_fcos_r_50_fpn hf_BigBird hf_GPT2 hf_Longformer hf_T5 llama nanogpt_generate pyhpc_turbulent_kinetic_energy yolov3 AllenaiLongformerBase OPTForCausalLM".split()
+target_models = "".split()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--accuracy", action="store_true")
     parser.add_argument("--performance", action="store_true")
     parser.add_argument("--mode", type=str, default="inference")
-    parser.add_argument("--output", type=str, default="final_results.txt")
+    parser.add_argument("--output", type=str, default=f"final_results_{now}.txt")
     parser.add_argument("--work-dir", type=str, required=True, help="The directory where the pytorch is located")
 
     args = parser.parse_args()
@@ -107,10 +110,12 @@ if __name__ == "__main__":
     mode = args.mode
     directory = args.work_dir
     os.chdir(directory)
-    output_file = args.output
+    output_file = args.outputiang
     start_time = datetime.datetime.now()
     with open(output_file, "w") as f:
         f.write(start_time.strftime("%Y-%m-%d %H:%M:%S") + "\n")
+    # get full path 
+    print(f"write results to {os.path.abspath(output_file)}")
     if target_models:
         timm_models_list = [_ for _ in timm_models_list if _ in target_models]
         torchbench_list = [_ for _ in torchbench_list if _ in target_models]
