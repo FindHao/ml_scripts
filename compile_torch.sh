@@ -11,6 +11,7 @@ conda install -c pytorch magma-cuda121 -y
 conda install -y cmake ninja mkl mkl-include libpng -y
 
 # !!! warning need to use same numpy version with torchbench!!!!! 
+# https://github.com/pytorch/benchmark/blob/main/requirements.txt
 pip install numpy==1.21.2
 
 git clone --recursive git@github.com:pytorch/pytorch.git
