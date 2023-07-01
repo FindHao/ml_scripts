@@ -7,11 +7,13 @@ export USE_NCCL=1
 export ROCR_VISIBLE_DEVICES=3
 export CUDA_VISIBLE_DEVICES=1
 
-conda install -c pytorch magma-cuda121 -y
-conda install -y cmake ninja mkl mkl-include libpng -y
 
-# conda install -c conda-forge gxx=11.3.0
-# conda install -c conda-forge gcc=11.3.0
+
+conda install -c pytorch magma-cuda121 -y
+
+# if you have an error named like version `GLIBCXX_3.4.30' not found, you can add `-c conda-forge` to the following command. And also for your `conda create -n pt_compiled -c conda-forge python=3.10` command
+
+conda install -y cmake ninja mkl mkl-include libpng 
 
 # !!! warning need to use same numpy version with torchbench!!!!! 
 # https://github.com/pytorch/benchmark/blob/main/requirements.txt
