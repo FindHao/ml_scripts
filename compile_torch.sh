@@ -10,14 +10,17 @@ export CUDA_VISIBLE_DEVICES=1
 conda install -c pytorch magma-cuda121 -y
 conda install -y cmake ninja mkl mkl-include libpng -y
 
+# conda install -c conda-forge gxx=11.3.0
+# conda install -c conda-forge gcc=11.3.0
+
 # !!! warning need to use same numpy version with torchbench!!!!! 
 # https://github.com/pytorch/benchmark/blob/main/requirements.txt
 pip install numpy==1.21.2
 cd $work_path
-git clone --recursive git@github.com:pytorch/pytorch.git
+# git clone --recursive git@github.com:pytorch/pytorch.git
 cd pytorch
-git submodule sync
-git submodule update --init --recursive
+# git submodule sync
+# git submodule update --init --recursive
 pip install -r requirements.txt
 make triton
 
@@ -32,6 +35,7 @@ git submodule update --init --recursive
 pip uninstall -y  torchdata
 python setup.py clean
 python setup.py install
+echo "pytorch installation is done"
 
 # install torchtext
 cd $work_path
@@ -41,6 +45,7 @@ git submodule update --init --recursive
 pip uninstall -y  torchtext
 python setup.py clean
 python setup.py install
+echo "torchtext installation is done"
 
 
 # install torchvision
@@ -53,6 +58,7 @@ git submodule update --init --recursive
 pip uninstall -y torchvision
 python setup.py clean
 python setup.py install
+echo "torchvision installation is done"
 
 # install torchaudio
 cd $work_path
@@ -62,9 +68,11 @@ git submodule update --init --recursive
 pip uninstall -y torchaudio
 python setup.py clean
 python setup.py install
+echo "torchaudio installation is done"
 
 cd $work_path
 git clone git@github.com:pytorch/benchmark.git
 pip install pyyaml
 cd benchmark
 python install.py
+echo "torchbench installation is done"
