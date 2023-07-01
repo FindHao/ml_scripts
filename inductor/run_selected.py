@@ -85,7 +85,7 @@ def write_results(results, output_file):
             f.write(f"{model}, {results[model]}\n")
 
 
-timm_models_list = "SelecSls42b adv_inception_v3 beit_base_patch16_224 botnet26t_256 cait_m36_384 coat_lite_mini convit_base convmixer_768_32 convnext_base crossvit_9_240 cspdarknet53 deit_base_distilled_patch16_224 dla102 dm_nfnet_f0 dpn107 eca_botnext26ts_256 eca_halonext26ts ese_vovnet19b_dw fbnetc_100 fbnetv3_b gernet_l ghostnet_100 gluon_inception_v3 gmixer_24_224 gmlp_s16_224 hrnet_w18 inception_v3 jx_nest_base lcnet_050 levit_128 mixer_b16_224 mixnet_l mnasnet_100 mobilenetv2_100 mobilenetv3_large_100 mobilevit_s nfnet_l0 pit_b_224 pnasnet5large poolformer_m36 regnety_002 repvgg_a2 res2net101_26w_4s res2net50_14w_8s res2next50 resmlp_12_224 resnest101e rexnet_100 sebotnet33ts_256 spnasnet_100 swin_base_patch4_window7_224 swsl_resnext101_32x16d tf_efficientnet_b0 tf_mixnet_l tinynet_a tnt_s_patch16_224 twins_pcpvt_base vit_base_patch16_224 volo_d1_224 xcit_large_24_p8_224"
+timm_models_list = "adv_inception_v3 beit_base_patch16_224 botnet26t_256 cait_m36_384 coat_lite_mini convit_base convmixer_768_32 convnext_base crossvit_9_240 cspdarknet53 deit_base_distilled_patch16_224 dla102 dm_nfnet_f0 dpn107 eca_botnext26ts_256 eca_halonext26ts ese_vovnet19b_dw fbnetc_100 fbnetv3_b gernet_l ghostnet_100 gluon_inception_v3 gmixer_24_224 gmlp_s16_224 hrnet_w18 inception_v3 jx_nest_base lcnet_050 levit_128 mixer_b16_224 mixnet_l mnasnet_100 mobilenetv2_100 mobilenetv3_large_100 mobilevit_s nfnet_l0 pit_b_224 pnasnet5large poolformer_m36 regnety_002 repvgg_a2 res2net101_26w_4s res2net50_14w_8s res2next50 resmlp_12_224 resnest101e rexnet_100 sebotnet33ts_256 spnasnet_100 swin_base_patch4_window7_224 swsl_resnext101_32x16d tf_efficientnet_b0 tf_mixnet_l tinynet_a tnt_s_patch16_224 twins_pcpvt_base vit_base_patch16_224 volo_d1_224 xcit_large_24_p8_224"
 timm_models_list = timm_models_list.split(" ")
 timm_models_collection = "timm_models"
 
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     mode = args.mode
     directory = args.work_dir
     os.chdir(directory)
-    output_file = args.outputiang
+    output_file = args.output
     start_time = datetime.datetime.now()
     with open(output_file, "w") as f:
         f.write(start_time.strftime("%Y-%m-%d %H:%M:%S") + "\n")
