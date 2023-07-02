@@ -12,9 +12,11 @@ import os
 # get current date time in a btter format
 now = datetime.datetime.now()
 now = now.strftime("%Y-%m-%d_%H-%M-%S")
-tmp_file=f"/tmp/inductor_tmp_{now}.txt"
+tmp_file = f"/tmp/inductor_tmp_{now}.txt"
+default_profiler_trace_path = "/mnt/beegfs/users/yhao24/tmp/profile_all/"
 
-def run_models(model_list, collections, test_accuracy=False, mode="inference"):
+
+def run_models(model_list, collections, test_accuracy=False, mode="inference", profile=False):
     result_dict = {}
     if test_accuracy:
         test_acc_or_perf = "--accuracy"
@@ -22,10 +24,18 @@ def run_models(model_list, collections, test_accuracy=False, mode="inference"):
         test_acc_or_perf = "--performance"
     if mode == "inference":
         mode = "--inference"
+        precision_place_holder = "--bfloat16"
     else:
         mode = "--training"
+        precision_place_holder = "--amp"
+
     for model in model_list:
-        command = f'python benchmarks/dynamo/{collections}.py {test_acc_or_perf} --bfloat16 -dcuda {mode} --inductor --disable-cudagraphs --only {model}'
+
+        if profile:
+            profile_place_holder = f"--export-profiler-trace --profiler-trace-name={default_profiler_trace_path}{model}"
+        else:
+            profile_place_holder = ""
+        command = f'python benchmarks/dynamo/{collections}.py {test_acc_or_perf} {precision_place_holder} {profile_place_holder} -dcuda {mode} --inductor --disable-cudagraphs --only {model}'
         start_time = time.time()
 
         process = subprocess.Popen(
@@ -98,16 +108,19 @@ huggingface_list = huggingface_list.split(" ")
 huggingface_collection = "huggingface"
 
 # target_models = "beit_base_patch16_224 cait_m36_384 crossvit_9_240 cspdarknet53 eca_botnext26ts_256 mobilevit_s pnasnet5large sebotnet33ts_256 Background_Matting attention_is_all_you_need_pytorch basic_gnn_sage cm3leon_generate detectron2_fcos_r_50_fpn hf_BigBird hf_GPT2 hf_Longformer hf_T5 llama nanogpt_generate pyhpc_turbulent_kinetic_energy yolov3 AllenaiLongformerBase OPTForCausalLM".split()
-target_models=[]
+target_models = []
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--accuracy", action="store_true")
     parser.add_argument("--performance", action="store_true")
     parser.add_argument("--mode", type=str, default="inference")
-    parser.add_argument("--output", type=str, default=f"final_results_{now}.txt")
-    parser.add_argument("--work-dir", type=str, required=True, help="The directory where the pytorch is located")
-
+    parser.add_argument("--output", type=str,
+                        default=f"final_results_{now}.txt")
+    parser.add_argument("--work-dir", type=str, required=True,
+                        help="The directory where the pytorch is located")
+    parser.add_argument("--profile", action="store_true",
+                        help="profile trace path")
     args = parser.parse_args()
     test_accuracy = args.accuracy
     mode = args.mode
@@ -117,7 +130,7 @@ if __name__ == "__main__":
     start_time = datetime.datetime.now()
     with open(output_file, "w") as f:
         f.write(start_time.strftime("%Y-%m-%d %H:%M:%S") + "\n")
-    # get full path 
+    # get full path
     print(f"write results to {os.path.abspath(output_file)}")
     if target_models:
         timm_models_list = [_ for _ in timm_models_list if _ in target_models]
@@ -125,7 +138,8 @@ if __name__ == "__main__":
         huggingface_list = [_ for _ in huggingface_list if _ in target_models]
 
     for collection, model_list in zip([timm_models_collection, torchbench_collection, huggingface_collection], [timm_models_list, torchbench_list, huggingface_list]):
-        results = run_models(model_list, collection, test_accuracy, mode)
+        results = run_models(model_list, collection,
+                             test_accuracy, mode, args.profile)
         write_results(results, output_file)
     end_time = datetime.datetime.now()
     with open(output_file, "a") as f:
