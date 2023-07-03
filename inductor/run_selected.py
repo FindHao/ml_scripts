@@ -16,7 +16,7 @@ tmp_file = f"/tmp/inductor_tmp_{now}.txt"
 default_profiler_trace_path = "/mnt/beegfs/users/yhao24/tmp/profile_all/"
 
 
-def run_models(model_list, collections, test_accuracy=False, mode="inference", profile=False):
+def run_models(model_list, collections, test_accuracy=False, mode="inference", profile=False, disable_streams=False):
     result_dict = {}
     if test_accuracy:
         test_acc_or_perf = "--accuracy"
@@ -29,13 +29,18 @@ def run_models(model_list, collections, test_accuracy=False, mode="inference", p
         mode = "--training"
         precision_place_holder = "--amp"
 
+    if disable_streams:
+        stream_place_holder = "TORCHINDUCTOR_MULTIPLE_STREAMS=0"
+    else:
+        stream_place_holder = ""
+
     for model in model_list:
 
         if profile:
             profile_place_holder = f"--export-profiler-trace --profiler-trace-name={default_profiler_trace_path}{model}"
         else:
             profile_place_holder = ""
-        command = f'python benchmarks/dynamo/{collections}.py {test_acc_or_perf} {precision_place_holder} {profile_place_holder} -dcuda {mode} --inductor --disable-cudagraphs --only {model}'
+        command = f'{stream_place_holder} python benchmarks/dynamo/{collections}.py {test_acc_or_perf} {precision_place_holder} {profile_place_holder} -dcuda {mode} --inductor --disable-cudagraphs --only {model}'
         start_time = time.time()
 
         process = subprocess.Popen(
@@ -121,6 +126,7 @@ if __name__ == "__main__":
                         help="The directory where the pytorch is located")
     parser.add_argument("--profile", action="store_true",
                         help="profile trace path")
+    parser.add_argument("--disable_streams", action="store_true",)
     args = parser.parse_args()
     test_accuracy = args.accuracy
     mode = args.mode
@@ -139,7 +145,7 @@ if __name__ == "__main__":
 
     for collection, model_list in zip([timm_models_collection, torchbench_collection, huggingface_collection], [timm_models_list, torchbench_list, huggingface_list]):
         results = run_models(model_list, collection,
-                             test_accuracy, mode, args.profile)
+                             test_accuracy, mode, args.profile, args.disable_streams)
         write_results(results, output_file)
     end_time = datetime.datetime.now()
     with open(output_file, "a") as f:
