@@ -1,12 +1,13 @@
 #!/bin/bash
 source ~/.notify.sh
 # =================== Configurations ====================
-work_path=${work_path:-"/home/users/yhao24/b/p9/pytorch"}
+work_path=${work_path:-"/home/users/yhao24/b/p9"}
+pt_path=${pt_path:-${work_path}/pytorch}
 test=${test:-"perf"}
 mode=${mode:-"inference"}
 var_date=$(date +%Y%m%d_%H%M%S)
 single_stream=${single_stream:-0}
-log_path=${log_path:-"/mnt/beegfs/users/yhao24/p9/inductor_logs"}
+log_path=${log_path:-${work_path}/logs}
 output_file=${log_path}/run_${mode}_${test}_${var_date}.log
 conda_dir=${conda_dir:-/mnt/beegfs/users/yhao24/miniconda3}
 # env1 is the default environment
@@ -18,6 +19,9 @@ if [ $? -ne 0 ]; then
     echo "can not activate conda"
     exit 1
 fi
+if [ ! -d ${work_path}/logs ]; then
+    mkdir ${work_path}/logs
+fi
 check_conda_env_exist() {
     if [[ $(conda env list | grep -c "${conda_env}") -eq 0 ]]; then
         echo "Conda environment ${conda_env} does not exist."
@@ -27,7 +31,7 @@ check_conda_env_exist() {
 check_conda_env_exist $env1
 conda activate $env1
 
-cd $work_path
+cd $pt_path
 
 if [ $test == "perf" ]; then
     test_name="performance"
