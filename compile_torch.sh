@@ -19,10 +19,10 @@ conda install -y cmake ninja mkl mkl-include libpng
 # https://github.com/pytorch/benchmark/blob/main/requirements.txt
 pip install numpy==1.21.2
 cd $work_path
-# git clone --recursive git@github.com:pytorch/pytorch.git
+git clone --recursive git@github.com:pytorch/pytorch.git
 cd pytorch
-# git submodule sync
-# git submodule update --init --recursive
+git submodule sync
+git submodule update --init --recursive
 pip install -r requirements.txt
 make triton
 
