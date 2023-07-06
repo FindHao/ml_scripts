@@ -48,7 +48,7 @@ else
     mode_place_holder="--training"
 fi
 if [ $single_stream -eq 1 ]; then
-    stream_place_holder="TORCHINDUCTOR_MULTIPLE_STREAMS=0"
+    stream_place_holder="env TORCHINDUCTOR_MULTIPLE_STREAMS=0"
 else
     stream_place_holder=""
 fi
