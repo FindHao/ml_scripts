@@ -66,7 +66,13 @@ echo "env1 is $env1" >>$output_file
 start_time=$(date +%s)
 
 for collection in torchbench timm_models huggingface; do
-    output_csv_file=${log_path}/${collection}_${mode}_${test_name}${var_date}.csv
+    # if single_stream
+    if [ $single_stream -eq 1 ]; then
+        stream_file_affix="_single_stream"
+    else
+        stream_file_affix=""
+    fi
+    output_csv_file=${log_path}/${collection}_${mode}_${test_name}${stream_file_affix}_${var_date}.csv
     echo "output_csv_file is $output_csv_file" >>$output_file
     ${stream_place_holder} python benchmarks/dynamo/${collection}.py ${test_acc_or_perf} ${precision_place_holder} -dcuda ${mode_place_holder} --inductor --disable-cudagraphs --output ${output_csv_file} >>$output_file 2>&1
 done
