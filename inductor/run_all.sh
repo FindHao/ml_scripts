@@ -9,9 +9,10 @@ var_date=$(date +%Y%m%d_%H%M%S)
 single_stream=${single_stream:-0}
 log_path=${log_path:-${work_path}/logs}
 output_file=${log_path}/run_${mode}_${test}_${var_date}.log
-conda_dir=${conda_dir:-/mnt/beegfs/users/yhao24/miniconda3}
+conda_dir=${conda_dir:-/home/users/yhao24/miniconda3}
+cpp_wrapper=${cpp_wrapper:-1}
 # env1 is the default environment
-env1=${env1:-pt_may25_compiled}
+env1=${env1:-pt_compiled}
 # =================== end Configurations ====================
 echo $output_file
 source ${conda_dir}/bin/activate
@@ -33,6 +34,11 @@ conda activate $env1
 
 cd $pt_path
 
+# check $test, it can only be perf or acc
+if [ $test != "perf" ] && [ $test != "acc" ]; then
+    echo "test can only be perf or acc"
+    exit 1
+fi
 if [ $test == "perf" ]; then
     test_name="performance"
     test_acc_or_perf="--performance"
@@ -52,6 +58,11 @@ if [ $single_stream -eq 1 ]; then
 else
     stream_place_holder=""
 fi
+if [ $cpp_wrapper -eq 1 ]; then
+    cpp_wrapper_place_holder="--cpp-wrapper"
+else
+    cpp_wrapper_place_holder=""
+fi
 
 echo "work_path is $work_path" >>$output_file
 echo "test_name is $test_name" >>$output_file
@@ -62,6 +73,7 @@ echo "log_path is $log_path" >>$output_file
 echo "output_file is $output_file" >>$output_file
 echo "conda_dir is $conda_dir" >>$output_file
 echo "env1 is $env1" >>$output_file
+echo "cpp_wrapper is $cpp_wrapper" >>$output_file
 
 start_time=$(date +%s)
 
@@ -74,7 +86,7 @@ for collection in torchbench timm_models huggingface; do
     fi
     output_csv_file=${log_path}/${collection}_${mode}_${test_name}${stream_file_affix}_${var_date}.csv
     echo "output_csv_file is $output_csv_file" >>$output_file
-    ${stream_place_holder} python benchmarks/dynamo/${collection}.py ${test_acc_or_perf} ${precision_place_holder} -dcuda ${mode_place_holder} --inductor --disable-cudagraphs --output ${output_csv_file} >>$output_file 2>&1
+    ${stream_place_holder} python benchmarks/dynamo/${collection}.py ${test_acc_or_perf} ${cpp_wrapper_place_holder} ${precision_place_holder} -dcuda ${mode_place_holder} --inductor --disable-cudagraphs --output ${output_csv_file} >>$output_file 2>&1
 done
 
 end_time=$(date +%s)
@@ -82,4 +94,4 @@ duration=$((end_time - start_time))
 # change time_diff to hours and minutes
 duration=$(date -d@$duration -u +%H:%M:%S)
 echo "duration is $duration" >>$output_file
-notify "${test_name} ${mode} finished, it takes $duration. The log is saved to ${output_file}. log_path is ${log_path}"
+notify "${test_name} ${mode} ${cpp_wrapper_place_holder} finished, it takes $duration. The log is saved to ${output_file}. log_path is ${log_path}"
