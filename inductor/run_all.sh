@@ -84,7 +84,7 @@ for collection in torchbench timm_models huggingface; do
     else
         stream_file_affix=""
     fi
-    output_csv_file=${log_path}/${collection}_${mode}_${test_name}${stream_file_affix}_${var_date}.csv
+    output_csv_file=${log_path}/${var_date}_${collection}_${mode}_${test_name}${stream_file_affix}.csv
     echo "output_csv_file is $output_csv_file" >>$output_file
     ${stream_place_holder} python benchmarks/dynamo/${collection}.py ${test_acc_or_perf} ${cpp_wrapper_place_holder} ${precision_place_holder} -dcuda ${mode_place_holder} --inductor --disable-cudagraphs --output ${output_csv_file} >>$output_file 2>&1
 done
