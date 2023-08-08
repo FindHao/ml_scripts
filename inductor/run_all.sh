@@ -21,8 +21,8 @@ if [ $? -ne 0 ]; then
     echo "can not activate conda"
     exit 1
 fi
-if [ ! -d ${work_path}/logs ]; then
-    mkdir ${work_path}/logs
+if [ ! -d ${log_path} ]; then
+    mkdir ${log_path}
 fi
 check_conda_env_exist() {
     if [[ $(conda env list | grep -c "${conda_env}") -eq 0 ]]; then
