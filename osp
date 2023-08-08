@@ -3,11 +3,14 @@
 # initialize sum variables
 sum_output=0
 sum_output_opt=0
-total_iterations=5
+total_iterations=${it:-5}
 opt=${opt:-1}
 break_long=${break_long:-0}
 
 echo "Test output_code_opt${opt}.py"
+
+# warmup
+
 
 printf "\rProgress: [%-50s] %d%%" $(printf '%.0s#' $(seq 1 $((0*50/total_iterations)))) $((0*100/total_iterations))
 # Start the progress bar
