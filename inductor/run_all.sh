@@ -13,6 +13,7 @@ conda_dir=${conda_dir:-/home/users/yhao24/miniconda3}
 cpp_wrapper=${cpp_wrapper:-1}
 # env1 is the default environment
 env1=${env1:-pt_compiled}
+STREAMSCHEDULER_REORDER=${STREAMSCHEDULER_REORDER:-0}
 # =================== end Configurations ====================
 echo $output_file
 source ${conda_dir}/bin/activate
@@ -64,6 +65,12 @@ else
     cpp_wrapper_place_holder=""
 fi
 
+if [ $STREAMSCHEDULER_REORDER -eq 1 ]; then
+    export STREAMSCHEDULER_REORDER=1
+else
+    export STREAMSCHEDULER_REORDER=0
+fi
+
 echo "work_path is $work_path" >>$output_file
 echo "test_name is $test_name" >>$output_file
 echo "mode is $mode" >>$output_file
@@ -74,7 +81,7 @@ echo "output_file is $output_file" >>$output_file
 echo "conda_dir is $conda_dir" >>$output_file
 echo "env1 is $env1" >>$output_file
 echo "cpp_wrapper is $cpp_wrapper" >>$output_file
-
+echo "STREAMSCHEDULER_REORDER is $STREAMSCHEDULER_REORDER" >>$output_file
 start_time=$(date +%s)
 
 for collection in torchbench timm_models huggingface; do

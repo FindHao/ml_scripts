@@ -66,12 +66,13 @@ def process_files(file_paths, output_file):
                     df_merge = pd.merge(df_merge, df_single_stream[['name', 'original speedup']], on='name', how='outer')
 
                     df_merge['changes'] = df_merge['speedup'] - df_merge['original speedup']
+                    df_merge['change speedup'] = df_merge['changes'] / df_merge['original speedup']
                     # Round the specified columns to 3 decimal places
-                    df_merge[['speedup', 'abs_latency', 'original speedup', 'changes']] = df_merge[['speedup', 'abs_latency', 'original speedup', 'changes']].round(3)
+                    df_merge[['speedup', 'abs_latency', 'original speedup', 'changes', 'change speedup']] = df_merge[['speedup', 'abs_latency', 'original speedup', 'changes', 'change speedup']].round(3)
                     # Reorder the columns
-                    df_merge = df_merge.reindex(['name', 'accuracy', 'abs_latency', 'original speedup', 'speedup', 'changes'], axis=1)
+                    df_merge = df_merge.reindex(['name', 'accuracy', 'abs_latency', 'original speedup', 'speedup', 'changes', 'change speedup'], axis=1)
                     # Sort the dataframe by 'accuracy' and 'changes' columns
-                    df_merge = df_merge.sort_values(by=['accuracy', 'changes'])
+                    df_merge = df_merge.sort_values(by=['accuracy', 'change speedup'])
                     df_merge.to_excel(writer, sheet_name=collection, index=False)
                     # Get the worksheet of the current collection
                     ws = writer.sheets[collection]
@@ -99,12 +100,12 @@ def format_excel_file(filename):
 
         # Add conditional formatting rule for the 'changes' column
         red_rule = Rule(type="expression", dxf=DifferentialStyle(fill=red_fill))
-        red_rule.formula = ["$F1<-0.02"]
-        sheet.conditional_formatting.add("F1:F1048576", red_rule)
+        red_rule.formula = ["$G3<-0.02"]
+        sheet.conditional_formatting.add("G3:G1048576", red_rule)
 
         green_rule = Rule(type="expression", dxf=DifferentialStyle(fill=green_fill))
-        green_rule.formula = ["$F1>0.02"]
-        sheet.conditional_formatting.add("F1:F1048576", green_rule)
+        green_rule.formula = ["$G3>0.02"]
+        sheet.conditional_formatting.add("G3:G1048576", green_rule)
 
         # For each column in the worksheet
         for column in sheet.iter_cols(min_row=2, max_col=sheet.max_column, max_row=sheet.max_row):
@@ -122,10 +123,15 @@ def format_excel_file(filename):
 
 
 if __name__ == '__main__':
+    # get current date and time
+    import datetime
+    now = datetime.datetime.now()
+    now_str = now.strftime("%Y%m%d_%H%M")
     parser = argparse.ArgumentParser()
     parser.add_argument('--input', type=str, default="/tmp/yhao/input.txt")
-    parser.add_argument('--output', type=str, default="/home/users/yhao24/b/tmp/profile/output.xlsx")
+    parser.add_argument('--output', type=str, default=f"/home/users/yhao24/b/tmp/profile/output_{now_str}.xlsx")
     args = parser.parse_args()
     file_paths = get_file_paths(args.input)
     process_files(file_paths, args.output)
     format_excel_file(args.output)
+    print(f"The output file is {args.output}")
