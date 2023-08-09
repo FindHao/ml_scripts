@@ -14,9 +14,8 @@ import requests
 def get_system_proxies():
     # Get system proxies. Typically, these might be set in your OS environment.
     return {
-        "http": os.environ.get("HTTP_PROXY"),
-        "https": os.environ.get("HTTPS_PROXY"),
-        "ftp": os.environ.get("FTP_PROXY")
+        "http": os.environ.get("http_proxy"),
+        "https": os.environ.get("https_proxy"),
     }
 
 def notify(message):
