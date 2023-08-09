@@ -9,7 +9,7 @@ def get_latest_folder(path):
 
 
 def execute_command(model_name, debug_folder_path):
-    cmd = f"TORCH_COMPILE_DEBUG=1 TORCHINDUCTOR_GRAPH_DIAGRAM=1 TORCHINDUCTOR_MULTIPLE_STREAMS=1 TORCHINDUCTOR_STREAM_ACCURACY_FIX=1 DEBUG_FOLDER={model_name}_checkpoints TORCH_COMPILE_DEBUG_DIR={debug_folder_path} python benchmarks/dynamo/torchbench.py --accuracy --bfloat16 -dcuda --inference --inductor --disable-cudagraphs --only {model_name}"
+    cmd = f"TORCHINDUCTOR_STREAM_PRINT_GRAPH=1 TORCH_COMPILE_DEBUG=1 TORCHINDUCTOR_GRAPH_DIAGRAM=1 TORCHINDUCTOR_MULTIPLE_STREAMS=1 TORCHINDUCTOR_STREAM_ACCURACY_FIX=1 DEBUG_FOLDER={model_name}_checkpoints TORCH_COMPILE_DEBUG_DIR={debug_folder_path} python benchmarks/dynamo/torchbench.py --accuracy --bfloat16 -dcuda --inference --inductor --disable-cudagraphs --only {model_name}"
     process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd="/home/users/yhao24/p9_inductor/pytorch")
     stdout, stderr = process.communicate()
     return stdout.decode(), stderr.decode()
@@ -37,6 +37,8 @@ def work(model_name, json_path, base_debug_folder):
                 f.write(stdout)
             with open(os.path.join(latest_folder, 'stderr.log'), 'w') as f:
                 f.write(stderr)
+            with open(os.path.join(latest_folder, 'checkpoint.json'), 'w') as f:
+                json.dump(original_content, f)
 
             if 'pass' not in stdout:
                 print(f"Error: 'pass' not found in stdout. Check {latest_folder} for details.")
@@ -45,13 +47,14 @@ def work(model_name, json_path, base_debug_folder):
             # Checkpoints.json
             with open(json_path, 'r') as f:
                 content = json.load(f)
-
-            if 'finished' in content.keys():
+            # breakpoint()
+            if 'finished' in content:
+                print(f"{model_name} passed all accuracy tests!")
                 return
 
             cur_graph = content["cur_graph"]
             this_time_node = content[cur_graph]["this_time_node"]
-            print(f"Current graph: {cur_graph}, this_time_node: {this_time_node}")
+            print(f"Current graph: {cur_graph}, this_time_node: {this_time_node} pass")
             with open(os.path.join(latest_folder, f"{cur_graph}___{this_time_node}"), 'w') as f:
                 f.write('This file indicates the current graph and its time node.')
 
