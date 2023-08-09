@@ -2,23 +2,41 @@ import os
 import json
 import subprocess
 import time
-niter=1
+niter=None
 pt_path=None
 user_key = os.getenv("PUSHOVER_USER_KEY")
 app_key = os.getenv("PUSHOVER_TORCH_KEY")
 assert user_key is not None, "PUSHOVER_USER_KEY is not set"
 assert app_key is not None, "PUSHOVER_TORCH_KEY is not set"
 
+import requests
+
+def get_system_proxies():
+    # Get system proxies. Typically, these might be set in your OS environment.
+    return {
+        "http": os.environ.get("HTTP_PROXY"),
+        "https": os.environ.get("HTTPS_PROXY"),
+        "ftp": os.environ.get("FTP_PROXY")
+    }
+
 def notify(message):
-    import http.client, urllib
-    conn = http.client.HTTPSConnection("api.pushover.net:443")
-    conn.request("POST", "/1/messages.json",
-                 urllib.parse.urlencode({
-                     "token": app_key,
-                     "user": user_key,
-                     "message": message,
-                 }), {"Content-type": "application/x-www-form-urlencoded"})
-    conn.getresponse()
+    url = "https://api.pushover.net/1/messages.json"
+    headers = {
+        "Content-type": "application/x-www-form-urlencoded"
+    }
+    data = {
+        "token": app_key,
+        "user": user_key,
+        "message": message,
+    }
+    proxies = get_system_proxies()
+    response = requests.post(url, headers=headers, data=data, proxies=proxies)
+    if response.status_code == 200:
+        print("Notification sent successfully!")
+    else:
+        print(f"Failed to send notification. Status code: {response.status_code}, Message: {response.text}")
+
+
 
 def get_latest_folder(path):
     return max([os.path.join(path, d) for d in os.listdir(path) if d.startswith('run')], key=os.path.getctime)
@@ -88,7 +106,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_name', type=str, default='resnet18')
     parser.add_argument('--pt_path', type=str, default='/home/users/yhao24/p9_inductor/pytorch')
-    parser.add_argument('--niter', type=int, default=1)
+    parser.add_argument('--niter', type=int, default=10)
     args = parser.parse_args()
     model_name = args.model_name
     niter = args.niter
