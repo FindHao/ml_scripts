@@ -3,12 +3,13 @@ import json
 import subprocess
 import time
 niter=1
+pt_path=None
+user_key = os.getenv("PUSHOVER_USER_KEY")
+app_key = os.getenv("PUSHOVER_TORCH_KEY")
+assert user_key is not None, "PUSHOVER_USER_KEY is not set"
+assert app_key is not None, "PUSHOVER_TORCH_KEY is not set"
 
 def notify(message):
-    user_key = os.getenv("PUSHOVER_USER_KEY")
-    app_key = os.getenv("PUSHOVER_TORCH_KEY")
-    assert user_key is not None, "PUSHOVER_USER_KEY is not set"
-    assert app_key is not None, "PUSHOVER_TORCH_KEY is not set"
     import http.client, urllib
     conn = http.client.HTTPSConnection("api.pushover.net:443")
     conn.request("POST", "/1/messages.json",
@@ -37,7 +38,7 @@ def execute_command(model_name, debug_folder_path):
             break
     assert target_collection is not None, f"Model {model_name} not found in collections"
     cmd = f"TORCHINDUCTOR_STREAM_PRINT_GRAPH=1 TORCH_COMPILE_DEBUG=1 TORCHINDUCTOR_GRAPH_DIAGRAM=1 TORCHINDUCTOR_MULTIPLE_STREAMS=1 TORCHINDUCTOR_STREAM_ACCURACY_FIX=1 DEBUG_FOLDER={model_name}_checkpoints TORCH_COMPILE_DEBUG_DIR={debug_folder_path} python benchmarks/dynamo/{target_collection}.py --accuracy --bfloat16 -dcuda --inference --inductor --disable-cudagraphs --only {model_name}"
-    process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd="/home/users/yhao24/p9_inductor/pytorch")
+    process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=pt_path)
     stdout, stderr = process.communicate()
     return stdout.decode(), stderr.decode()
 
@@ -86,8 +87,13 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_name', type=str, default='resnet18')
+    parser.add_argument('--pt_path', type=str, default='/home/users/yhao24/p9_inductor/pytorch')
+    parser.add_argument('--niter', type=int, default=1)
     args = parser.parse_args()
     model_name = args.model_name
+    niter = args.niter
+    pt_path = args.pt_path
+    assert os.path.exists(pt_path), f"Path {pt_path} does not exist"
     # Configurable paths
     base_debug_folder = f"/tmp/yhao/{model_name}_debug"
     json_path = os.path.join(base_debug_folder, f"torch_compile_debug/{model_name}_checkpoints/checkpoints.json")
