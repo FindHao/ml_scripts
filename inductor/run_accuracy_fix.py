@@ -42,7 +42,7 @@ def get_latest_folder(path):
 
 collections = {
     "timm_models": ["xcit_large_24_p8_224", "cait_m36_384", "cspdarknet53", "convit_base"],
-    "torchbench": ["hf_BigBird", "drq", "pyhpc_turbulent_kinetic_energy", "doctr_reco_predictor", "pytorch_stargan", "hf_T5", "Super_SloMo", "Background_Matting", "llama", "DALLE2_pytorch", "hf_T5_generate", "nanogpt_generate", "detectron2_fasterrcnn_r_101_c4", "detectron2_fasterrcnn_r_101_dc5", "detectron2_fasterrcnn_r_101_fpn", "detectron2_fasterrcnn_r_50_c4", "detectron2_fasterrcnn_r_50_dc5", "detectron2_fasterrcnn_r_50_fpn", "detectron2_fcos_r_50_fpn", "detectron2_maskrcnn_r_101_c4", "detectron2_maskrcnn_r_101_fpn", "detectron2_maskrcnn_r_50_c4", "detectron2_maskrcnn_r_50_fpn"]
+    "torchbench": ["hf_BigBird", "drq", "pyhpc_turbulent_kinetic_energy", "doctr_reco_predictor", "pytorch_stargan", "hf_T5", "Super_SloMo", "Background_Matting", "llama", "DALLE2_pytorch", "hf_T5_generate", "nanogpt_generate", "detectron2_fasterrcnn_r_101_c4", "detectron2_fasterrcnn_r_101_dc5", "detectron2_fasterrcnn_r_101_fpn", "detectron2_fasterrcnn_r_50_c4", "detectron2_fasterrcnn_r_50_dc5", "detectron2_fasterrcnn_r_50_fpn", "detectron2_fcos_r_50_fpn", "detectron2_maskrcnn_r_101_c4", "detectron2_maskrcnn_r_101_fpn", "detectron2_maskrcnn_r_50_c4", "detectron2_maskrcnn_r_50_fpn", "resnet18"]
 }
 
 
@@ -84,6 +84,12 @@ def work(model_name, json_path, base_debug_folder):
             with open(os.path.join(latest_folder, 'checkpoint.json'), 'w') as f:
                 json.dump(original_content, f)
 
+            cur_graph = original_content["cur_graph"]
+            this_time_node = original_content[cur_graph]["this_time_node"]
+            print(f"Current graph: {cur_graph}, this_time_node: {this_time_node} pass")
+            with open(os.path.join(latest_folder, f"{cur_graph}___{this_time_node}"), 'w') as f:
+                f.write('This file indicates the current graph and its time node.')
+                
             if 'pass' not in stdout:
                 return False, f"Error: 'pass' not found in stdout. Check {latest_folder} for details."
 
@@ -94,11 +100,6 @@ def work(model_name, json_path, base_debug_folder):
             if 'finished' in content:
                 return True, f"{model_name} passed all accuracy tests!"
 
-            cur_graph = content["cur_graph"]
-            this_time_node = content[cur_graph]["this_time_node"]
-            print(f"Current graph: {cur_graph}, this_time_node: {this_time_node} pass")
-            with open(os.path.join(latest_folder, f"{cur_graph}___{this_time_node}"), 'w') as f:
-                f.write('This file indicates the current graph and its time node.')
 
 if __name__ == "__main__":
     import argparse
