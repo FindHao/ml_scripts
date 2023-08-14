@@ -15,7 +15,7 @@ cpp_wrapper=${cpp_wrapper:-1}
 env1=${env1:-pt_compiled}
 STREAMSCHEDULER_REORDER=${STREAMSCHEDULER_REORDER:-0}
 # =================== end Configurations ====================
-echo $output_file
+
 source ${conda_dir}/bin/activate
 if [ $? -ne 0 ]; then
     echo "can not activate conda"
@@ -24,6 +24,8 @@ fi
 if [ ! -d ${log_path} ]; then
     mkdir ${log_path}
 fi
+echo $output_file
+
 check_conda_env_exist() {
     if [[ $(conda env list | grep -c "${conda_env}") -eq 0 ]]; then
         echo "Conda environment ${conda_env} does not exist."
