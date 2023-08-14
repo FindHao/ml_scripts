@@ -71,32 +71,34 @@ def work(model_name, json_path, base_debug_folder):
             if os.path.exists(json_path):
                 with open(json_path, 'w') as f:
                     json.dump(original_content, f)
-
             stdout, stderr = execute_command(model_name, base_debug_folder)
-
             latest_folder = get_latest_folder(f"{base_debug_folder}/torch_compile_debug")
-
             # Dump stdout and stderr
             with open(os.path.join(latest_folder, 'stdout.log'), 'w') as f:
                 f.write(stdout)
             with open(os.path.join(latest_folder, 'stderr.log'), 'w') as f:
                 f.write(stderr)
-            with open(os.path.join(latest_folder, 'checkpoint.json'), 'w') as f:
-                json.dump(original_content, f)
-
-            cur_graph = original_content["cur_graph"]
-            this_time_node = original_content[cur_graph]["this_time_node"]
+            # read the latest json file. 
+            with open(json_path, 'r') as f:
+                content = json.load(f)
+            if 'cur_graph' not in original_content:
+                with open(os.path.join(latest_folder, 'first_run'), 'w') as f:
+                    f.write('This file indicates the first run that is used to generate the stream assignments.')
+                if 'pass' not in stdout:
+                    return False, f"Error: 'pass' not found in stdout. Check {latest_folder} for details."
+                break
+            cur_graph = content["cur_graph"]
+            this_time_node = content[cur_graph]["this_time_node"]
             print(f"Current graph: {cur_graph}, this_time_node: {this_time_node} pass")
             with open(os.path.join(latest_folder, f"{cur_graph}___{this_time_node}"), 'w') as f:
                 f.write('This file indicates the current graph and its time node.')
                 
             if 'pass' not in stdout:
                 return False, f"Error: 'pass' not found in stdout. Check {latest_folder} for details."
-
-            # Checkpoints.json
-            with open(json_path, 'r') as f:
-                content = json.load(f)
-            # breakpoint()
+            # rewrite it with the original content. it is useful when current run fails. we can directly copy it to the global json file to reproduce the error.
+            with open(os.path.join(latest_folder, 'checkpoint.json'), 'w') as f:
+                json.dump(original_content, f)
+            
             if 'finished' in content:
                 return True, f"{model_name} passed all accuracy tests!"
 
