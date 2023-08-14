@@ -7,7 +7,13 @@ export USE_NCCL=1
 export ROCR_VISIBLE_DEVICES=3
 export CUDA_VISIBLE_DEVICES=1
 
-
+# write a function to check the return value of the previous command
+check_return_value() {
+    if [ $? -ne 0 ]; then
+        echo "Error: $1"
+        exit 1
+    fi
+}
 
 conda install -c pytorch magma-cuda121 -y
 
@@ -29,6 +35,8 @@ make triton
 export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
 python setup.py develop
 
+check_return_value "pytorch installation failed"
+
 # install torchdata
 cd $work_path
 git clone git@github.com:pytorch/data.git
@@ -37,6 +45,7 @@ git submodule update --init --recursive
 pip uninstall -y  torchdata
 python setup.py clean
 python setup.py install
+check_return_value "torchdata installation failed"
 echo "pytorch installation is done"
 
 # install torchtext
@@ -47,6 +56,7 @@ git submodule update --init --recursive
 pip uninstall -y  torchtext
 python setup.py clean
 python setup.py install
+check_return_value "torchtext installation failed"
 echo "torchtext installation is done"
 
 
@@ -60,6 +70,7 @@ git submodule update --init --recursive
 pip uninstall -y torchvision
 python setup.py clean
 python setup.py install
+check_return_value "torchvision installation failed"
 echo "torchvision installation is done"
 
 # install torchaudio
@@ -70,6 +81,7 @@ git submodule update --init --recursive
 pip uninstall -y torchaudio
 python setup.py clean
 python setup.py install
+check_return_value "torchaudio installation failed"
 echo "torchaudio installation is done"
 
 cd $work_path
@@ -77,4 +89,5 @@ git clone git@github.com:pytorch/benchmark.git
 pip install pyyaml
 cd benchmark
 python install.py
+check_return_value "torchbench installation failed"
 echo "torchbench installation is done"

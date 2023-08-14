@@ -81,7 +81,12 @@ def process_files(file_paths, output_file):
                     ws.insert_rows(1)
                     ws.cell(row=1, column=1, value="Original CSV Files: " + ', '.join(file_names_dict[collection]))
         else:
-            print("No data found for processing.")
+            if not df_accuracy_dict:
+                print("No accuracy data found for processing.")
+            if not df_performance_dict:
+                print("No performance data found for processing.")
+            if not df_single_stream_dict:
+                print("No single stream data found for processing.")
 
 from openpyxl.styles import PatternFill
 from openpyxl.styles.differential import DifferentialStyle

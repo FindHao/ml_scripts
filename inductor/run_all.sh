@@ -25,7 +25,6 @@ if [ ! -d ${log_path} ]; then
     mkdir ${log_path}
 fi
 echo $output_file
-
 check_conda_env_exist() {
     if [[ $(conda env list | grep -c "${conda_env}") -eq 0 ]]; then
         echo "Conda environment ${conda_env} does not exist."
