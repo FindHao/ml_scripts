@@ -78,9 +78,13 @@ def work(model_name, json_path, base_debug_folder):
                 f.write(stdout)
             with open(os.path.join(latest_folder, 'stderr.log'), 'w') as f:
                 f.write(stderr)
-            # read the latest json file. 
+            # read the latest json file.
             with open(json_path, 'r') as f:
                 content = json.load(f)
+            # rewrite it with the original content. it is useful when current run fails. we can directly copy it to the global json file to reproduce the error.
+            with open(os.path.join(latest_folder, 'checkpoint.json'), 'w') as f:
+                json.dump(original_content, f)
+
             if 'cur_graph' not in original_content:
                 with open(os.path.join(latest_folder, 'first_run'), 'w') as f:
                     f.write('This file indicates the first run that is used to generate the stream assignments.')
@@ -92,13 +96,11 @@ def work(model_name, json_path, base_debug_folder):
             print(f"Current graph: {cur_graph}, this_time_node: {this_time_node} pass")
             with open(os.path.join(latest_folder, f"{cur_graph}___{this_time_node}"), 'w') as f:
                 f.write('This file indicates the current graph and its time node.')
-                
+
             if 'pass' not in stdout:
                 return False, f"Error: 'pass' not found in stdout. Check {latest_folder} for details."
-            # rewrite it with the original content. it is useful when current run fails. we can directly copy it to the global json file to reproduce the error.
-            with open(os.path.join(latest_folder, 'checkpoint.json'), 'w') as f:
-                json.dump(original_content, f)
-            
+
+
             if 'finished' in content:
                 return True, f"{model_name} passed all accuracy tests!"
 
@@ -129,4 +131,3 @@ if __name__ == "__main__":
     else:
         print(return_str)
         notify(f"{return_str}. Test takes {duration}.")
-
