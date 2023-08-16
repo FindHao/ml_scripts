@@ -82,6 +82,9 @@ def work(model_name, json_path, base_debug_folder):
             # read the latest json file.
             with open(json_path, 'r') as f:
                 content = json.load(f)
+            # write the latest json file to the latest folder
+            with open(os.path.join(latest_folder, 'checkpoint_after.json'), 'w') as f:
+                json.dump(content, f)
             # rewrite it with the original content. it is useful when current run fails. we can directly copy it to the global json file to reproduce the error.
             with open(os.path.join(latest_folder, 'checkpoint.json'), 'w') as f:
                 json.dump(original_content, f)
@@ -97,8 +100,6 @@ def work(model_name, json_path, base_debug_folder):
             print(f"Current graph: {cur_graph}, this_time_node: {this_time_node} pass")
             with open(os.path.join(latest_folder, f"{cur_graph}___{this_time_node}"), 'w') as f:
                 f.write('This file indicates the current graph and its time node.')
-            # copy json_path file to the latest folder with the name checkpoint_after.json
-            shutil.copy(json_path, os.path.join(latest_folder, 'checkpoint_after.json'))
 
             if 'pass' not in stdout:
                 return False, f"Error: 'pass' not found in stdout. Check {latest_folder} for details."
