@@ -1,5 +1,6 @@
 import os
 import json
+import shutil
 import subprocess
 import time
 niter=None
@@ -96,6 +97,8 @@ def work(model_name, json_path, base_debug_folder):
             print(f"Current graph: {cur_graph}, this_time_node: {this_time_node} pass")
             with open(os.path.join(latest_folder, f"{cur_graph}___{this_time_node}"), 'w') as f:
                 f.write('This file indicates the current graph and its time node.')
+            # copy json_path file to the latest folder with the name checkpoint_after.json
+            shutil.copy(json_path, os.path.join(latest_folder, 'checkpoint_after.json'))
 
             if 'pass' not in stdout:
                 return False, f"Error: 'pass' not found in stdout. Check {latest_folder} for details."
