@@ -115,13 +115,17 @@ if __name__ == "__main__":
     parser.add_argument('--model_name', type=str, default='resnet18')
     parser.add_argument('--pt_path', type=str, default='/home/users/yhao24/p9_inductor/pytorch')
     parser.add_argument('--niter', type=int, default=10)
+    parser.add_argument('--base_debug_folder', type=str)
     args = parser.parse_args()
     model_name = args.model_name
     niter = args.niter
     pt_path = args.pt_path
     assert os.path.exists(pt_path), f"Path {pt_path} does not exist"
     # Configurable paths
-    base_debug_folder = f"/tmp/yhao/{model_name}_debug"
+    if args.base_debug_folder is None:
+        base_debug_folder = f"/tmp/yhao/{model_name}_debug"
+    else:
+        base_debug_folder = args.base_debug_folder
     json_path = os.path.join(base_debug_folder, f"torch_compile_debug/{model_name}_checkpoints/checkpoints.json")
     start_time = time.time()
     success, return_str = work(model_name, json_path, base_debug_folder)
