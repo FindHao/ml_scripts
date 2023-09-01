@@ -13,7 +13,7 @@ from torch import empty_strided, as_strided, device
 from torch._inductor.codecache import AsyncCompile
 from torch._inductor.select_algorithm import extern_kernels
 
-from torch._dynamo.testing import one_strided
+# from torch._dynamo.testing import one_strided
 
 aten = torch.ops.aten
 assert_size_stride = torch._C._dynamo.guards.assert_size_stride
