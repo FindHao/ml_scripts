@@ -473,13 +473,13 @@ def call(args):
         del arg14_1
         # =====put buf18 to stream5 =======
         torch.cuda.set_stream(stream5_raw)
-        event_buf18 = torch.cuda.Event()
+        # event_buf18 = torch.cuda.Event()
         buf18 = empty_strided((8192, 512), (512, 1), device='cuda', dtype=torch.bfloat16)
-        torch.cuda.set_stream(stream0_raw)
+        # torch.cuda.set_stream(stream0_raw)
         stream5_raw.wait_event(event_buf16_buf19_buf17_buf20)
-        torch.cuda.set_stream(stream5_raw)
+        # torch.cuda.set_stream(stream5_raw)
         extern_kernels.mm(as_strided(buf17, (8192, 512), (512, 1)), as_strided(arg75_1, (512, 512), (1, 512)), out=buf18)
-        event_buf18.record(stream5_raw)
+        # event_buf18.record(stream5_raw)
         torch.cuda.set_stream(stream0_raw)
         # ======== end ======
         del arg75_1
@@ -576,9 +576,14 @@ def benchmark_compiled_module(times=10, repeat=10):
 
     if all_equal:
         print("All outputs are equal")
-
+import argparse
 if __name__ == "__main__":
-    # from torch._inductor.utils import compiled_module_main
-    # compiled_module_main('hf_T5', benchmark_compiled_module_origin)
-
-    benchmark_compiled_module()
+    # set args
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--profile", action="store_true")
+    args = parser.parse_args()
+    if args.profile:
+        from torch._inductor.utils import compiled_module_main
+        compiled_module_main('hf_T5', benchmark_compiled_module_origin)
+    else:
+        benchmark_compiled_module()
