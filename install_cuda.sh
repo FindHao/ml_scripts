@@ -3,6 +3,7 @@
 
 # cudnn official redist link
 # https://developer.download.nvidia.com/compute/redist/cudnn/
+# new pytorch official cudnn version https://github.com/pytorch/pytorch/blob/main/.ci/docker/common/install_cudnn.sh
 
 # for variable in t_cuda t_cudnn t_cuda_path
 # do 
