@@ -1,4 +1,11 @@
 #!/bin/bash
+
+# mode=inference test=acc cpp_wrapper=0 log_path=/home/users/yhao24/b/p9/inductor_logs ./run_all.sh;
+# mode=inference test=perf cpp_wrapper=0 log_path=/home/users/yhao24/b/p9/inductor_logs ./run_all.sh;
+# mode=inference test=perf cpp_wrapper=0 single_stream=1 log_path=/home/users/yhao24/b/p9/inductor_logs ./run_all.sh;
+
+
+
 source ~/.notify.sh
 # =================== Configurations ====================
 work_path=${work_path:-"/home/users/yhao24/b/p9"}
@@ -58,7 +65,7 @@ fi
 if [ $single_stream -eq 1 ]; then
     stream_place_holder="env TORCHINDUCTOR_MULTIPLE_STREAMS=0"
 else
-    stream_place_holder=""
+    stream_place_holder="env TORCHINDUCTOR_MULTIPLE_STREAMS=1"
 fi
 if [ $cpp_wrapper -eq 1 ]; then
     cpp_wrapper_place_holder="--cpp-wrapper"
