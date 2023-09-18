@@ -8,8 +8,8 @@ from openpyxl.formatting.rule import CellIsRule
 
 def apply_coloring(ws):
     # Define fill colors
-    green_fill = PatternFill(start_color="00FF00", end_color="00FF00", fill_type="solid")
-    red_fill = PatternFill(start_color="FF0000", end_color="FF0000", fill_type="solid")
+    green_fill = PatternFill(start_color="10be07", end_color="10be07", fill_type="solid")
+    red_fill = PatternFill(start_color="f38a96", end_color="f38a96", fill_type="solid")
 
     # Create rules
     green_rule = CellIsRule(operator="greaterThan", formula=['0.02'], fill=green_fill)
