@@ -5,11 +5,12 @@ import argparse
 from openpyxl.styles import Alignment
 from openpyxl.styles import PatternFill
 from openpyxl.formatting.rule import CellIsRule
+from openpyxl.formatting.rule import FormulaRule
 
+green_fill = PatternFill(start_color="10be07", end_color="10be07", fill_type="solid")
+red_fill = PatternFill(start_color="f38a96", end_color="f38a96", fill_type="solid")
 def apply_coloring(ws):
     # Define fill colors
-    green_fill = PatternFill(start_color="10be07", end_color="10be07", fill_type="solid")
-    red_fill = PatternFill(start_color="f38a96", end_color="f38a96", fill_type="solid")
 
     # Create rules
     green_rule = CellIsRule(operator="greaterThan", formula=['0.02'], fill=green_fill)
@@ -52,6 +53,31 @@ def merge_sheets_based_on_model(ws1, ws2, ws_out):
                 ws_out.cell(row=idx, column=col_idx, value=cell_value)
 
 
+def apply_additional_column_and_coloring(ws):
+    # Calculate the last column's letter
+    last_col_letter = get_column_letter(ws.max_column + 1)
+    ws[f"{last_col_letter}3"].value = "original speedup diff"
+    # Populate the new column with the formula
+    for i, row in enumerate(ws.iter_rows(min_row=4, max_row=ws.max_row), 4):
+        colD_cell = row[3]  # 0-based index, so 3 corresponds to column D
+        colJ_cell = row[9]  # 0-based index, so 9 corresponds to column J
+        
+        if colD_cell.value is not None and colJ_cell.value is not None:
+            new_cell = ws[f"{last_col_letter}{i}"]
+            new_cell.value = f"={colD_cell.coordinate}/{colJ_cell.coordinate} - 1"
+            new_cell.number_format = "0.00"  # Two decimal places
+
+     # Create rules
+    positive_red_rule = FormulaRule(formula=[f"{last_col_letter}4>0.02"], fill=red_fill)
+    negative_red_rule = FormulaRule(formula=[f"{last_col_letter}4<-0.02"], fill=red_fill)
+
+    # Apply rules to the new column
+    ws.conditional_formatting.add(f"{last_col_letter}4:{last_col_letter}{ws.max_row}", positive_red_rule)
+    ws.conditional_formatting.add(f"{last_col_letter}4:{last_col_letter}{ws.max_row}", negative_red_rule)
+
+
+
+
 def merge_excel_files(file1, file2, output_name="merged.xlsx"):
     wb1 = openpyxl.load_workbook(file1)
     wb2 = openpyxl.load_workbook(file2)
@@ -67,7 +93,7 @@ def merge_excel_files(file1, file2, output_name="merged.xlsx"):
         # Merge based on model name
         merge_sheets_based_on_model(ws1, ws2, ws_out)
         apply_coloring(ws_out)
-        
+        apply_additional_column_and_coloring(ws_out)
     output_wb.save(output_name)
 
 if __name__ == "__main__":
