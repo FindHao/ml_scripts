@@ -21,6 +21,7 @@ cpp_wrapper=${cpp_wrapper:-1}
 # env1 is the default environment
 env1=${env1:-pt_compiled}
 STREAMSCHEDULER_REORDER=${STREAMSCHEDULER_REORDER:-0}
+TORCHINDUCTOR_BYPASS_TINY=${TORCHINDUCTOR_BYPASS_TINY:-0}
 # =================== end Configurations ====================
 
 source ${conda_dir}/bin/activate
@@ -77,6 +78,12 @@ if [ $STREAMSCHEDULER_REORDER -eq 1 ]; then
     export STREAMSCHEDULER_REORDER=1
 else
     export STREAMSCHEDULER_REORDER=0
+fi
+
+if [ $TORCHINDUCTOR_BYPASS_TINY -eq 1 ]; then
+    export TORCHINDUCTOR_BYPASS_TINY=1
+else
+    export TORCHINDUCTOR_BYPASS_TINY=0
 fi
 
 echo "work_path is $work_path" >>$output_file
