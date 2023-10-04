@@ -174,12 +174,12 @@ TORCHINDUCTOR_MULTIPLE_STREAMS=0  python benchmarks/dynamo/timm_models.py  --per
 
 # run all 
 export TORCHINDUCTOR_BYPASS_TINY=0 
-mode=training test=perf cpp_wrapper=0 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass ./run_all.sh;
-mode=training test=perf cpp_wrapper=0 single_stream=1 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass ./run_all.sh;
-mode=training test=acc cpp_wrapper=0 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass ./run_all.sh;
-mode=inference test=perf cpp_wrapper=0 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass ./run_all.sh;
-mode=inference test=perf cpp_wrapper=0 single_stream=1 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass ./run_all.sh;
-mode=inference test=acc cpp_wrapper=0 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass ./run_all.sh;
+mode=training test=perf cpp_wrapper=0 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass_$(mydate) ./run_all.sh;
+mode=training test=perf cpp_wrapper=0 single_stream=1 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass_$(mydate) ./run_all.sh;
+mode=training test=acc cpp_wrapper=0 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass_$(mydate) ./run_all.sh;
+mode=inference test=perf cpp_wrapper=0 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass_$(mydate) ./run_all.sh;
+mode=inference test=perf cpp_wrapper=0 single_stream=1 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass_$(mydate) ./run_all.sh;
+mode=inference test=acc cpp_wrapper=0 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass_$(mydate) ./run_all.sh;
 export TORCHINDUCTOR_BYPASS_TINY=1
 mode=training test=perf cpp_wrapper=0 log_path=/home/users/yhao24/b/p9/inductor_logs/bypass ./run_all.sh;
 mode=training test=perf cpp_wrapper=0 single_stream=1 log_path=/home/users/yhao24/b/p9/inductor_logs/bypass ./run_all.sh;
