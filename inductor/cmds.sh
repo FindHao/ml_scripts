@@ -1,3 +1,15 @@
+
+# write a bash function to set precision based on mode
+function set_precision() {
+    if [ "$mode" = "inference" ]; then
+        precision="${precision}"
+    elif [ "$mode" = "training" ]; then
+        precision="amp"
+    else
+        echo "mode not supported"
+    fi
+}
+
 # sat
 log_path="/tmp/yhao/"
 profile_path="/home/users/yhao24/b/tmp/profile"
@@ -16,16 +28,7 @@ collection="torchbench"
 mode="inference"
 
 mode="training"
-# write a bash function to set precision based on mode
-function set_precision() {
-    if [ "$mode" = "inference" ]; then
-        precision="${precision}"
-    elif [ "$mode" = "training" ]; then
-        precision="amp"
-    else
-        echo "mode not supported"
-    fi
-}
+
 set_precision
 
 TORCHINDUCTOR_BYPASS_TINY=0
@@ -37,6 +40,7 @@ TORCHINDUCTOR_BYPASS_TINY=0
 
 TORCH_COMPILE_DEBUG=1  TORCHINDUCTOR_MULTIPLE_STREAMS=0  python benchmarks/dynamo/torchbench.py  --performance --${precision} -dcuda --inference --inductor --cpp-wrapper --disable-cudagraphs   --only ${model} >  ${log_path}/${model}_$(mydate).log 2>&1
 
+TORCHINDUCTOR_MULTIPLE_STREAMS_PROFILING=1
 # profile 
 TORCHINDUCTOR_MULTIPLE_STREAMS=1  python benchmarks/dynamo/${collection}.py  --performance --${precision} -dcuda --${mode} --inductor --export-profiler-trace --profiler_trace_name ${profile_path}/$(mydate)_multiple  --disable-cudagraphs   --only ${model} >  ${log_path}/${model}_$(mydate).log 2>&1
 TORCHINDUCTOR_MULTIPLE_STREAMS=0  python benchmarks/dynamo/${collection}.py  --performance --${precision} -dcuda --${mode} --inductor --export-profiler-trace --profiler_trace_name ${profile_path}/$(mydate)_single  --disable-cudagraphs   --only ${model} >  ${log_path}/${model}_$(mydate).log 2>&1
@@ -48,6 +52,9 @@ TORCHINDUCTOR_MULTIPLE_STREAMS=1 python benchmarks/dynamo/${collection}.py  --ac
 TORCHINDUCTOR_MULTIPLE_STREAMS=1 python benchmarks/dynamo/${collection}.py  --performance --${precision} -dcuda --${mode} --inductor  --disable-cudagraphs   --only ${model}
 TORCHINDUCTOR_MULTIPLE_STREAMS=0 python benchmarks/dynamo/${collection}.py  --performance --${precision} -dcuda --${mode} --inductor  --disable-cudagraphs  --only ${model}
 
+# loading exisiting stream assignment
+TORCHINDUCTOR_LOAD_EXISTING_STREAM_ASSIGNMENT=/tmp/yhao/debug2023/resnet18_stream_assignment.update.json TORCHINDUCTOR_MULTIPLE_STREAMS=1 
+/tmp/yhao/debug2023/resnet50_stream_assignment.update.json
 # debug
 
 TORCH_COMPILE_DEBUG=1 TORCHINDUCTOR_GRAPH_DIAGRAM=1 TORCHINDUCTOR_STREAM_PRINT_GRAPH=1 TORCHINDUCTOR_MULTIPLE_STREAMS=1  python benchmarks/dynamo/${collection}.py  --performance --${precision} -dcuda --${mode} --inductor  --disable-cudagraphs   --only ${model} >  ${log_path}/${model}_$(mydate).log 2>&1
@@ -174,12 +181,12 @@ TORCHINDUCTOR_MULTIPLE_STREAMS=0  python benchmarks/dynamo/timm_models.py  --per
 
 # run all 
 export TORCHINDUCTOR_BYPASS_TINY=0 
-mode=training test=perf cpp_wrapper=0 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass_$(mydate) ./run_all.sh;
-mode=training test=perf cpp_wrapper=0 single_stream=1 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass_$(mydate) ./run_all.sh;
-mode=training test=acc cpp_wrapper=0 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass_$(mydate) ./run_all.sh;
-mode=inference test=perf cpp_wrapper=0 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass_$(mydate) ./run_all.sh;
-mode=inference test=perf cpp_wrapper=0 single_stream=1 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass_$(mydate) ./run_all.sh;
-mode=inference test=acc cpp_wrapper=0 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass_$(mydate) ./run_all.sh;
+mode=training test=perf cpp_wrapper=0 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass_$(mydate) ./run_all.sh
+mode=training test=perf cpp_wrapper=0 single_stream=1 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass_$(mydate) ./run_all.sh
+mode=training test=acc cpp_wrapper=0 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass_$(mydate) ./run_all.sh
+mode=inference test=perf cpp_wrapper=0 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass_$(mydate) ./run_all.sh
+mode=inference test=perf cpp_wrapper=0 single_stream=1 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass_$(mydate) ./run_all.sh
+mode=inference test=acc cpp_wrapper=0 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass_$(mydate) ./run_all.sh
 export TORCHINDUCTOR_BYPASS_TINY=1
 mode=training test=perf cpp_wrapper=0 log_path=/home/users/yhao24/b/p9/inductor_logs/bypass ./run_all.sh;
 mode=training test=perf cpp_wrapper=0 single_stream=1 log_path=/home/users/yhao24/b/p9/inductor_logs/bypass ./run_all.sh;
