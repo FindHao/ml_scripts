@@ -121,7 +121,7 @@ for model in $models; do
     echo "stream file is $stream_file" >> $output_file
     
     updated_stream_file=${updated_stream_path}/${model}_updated.json
-    python3 /scratch/yhao24/p9_inductor/TorchExpert/torchexpert.py -i ${profile_file} -s ${stream_file} --export_graph ${updated_stream_file} >> $output_file 2>&1
+    python /scratch/yhao24/p9_inductor/TorchExpert/torchexpert.py -i ${profile_file} -s ${stream_file} --export_graph ${updated_stream_file} >> $output_file 2>&1
     if [ $? -eq 0 ]; then
         echo "Generate updated graph successfully" >> $output_file
     else
