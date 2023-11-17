@@ -8,12 +8,20 @@ source ~/.notify.sh
 # fi
 # conda activate pt_may23_compiled
 
+# export TEMP=/mnt/beegfs/users/yhao24/sys_tmp
+# export TMP=/mnt/beegfs/users/yhao24/sys_tmp
+# export TMPDIR=/mnt/beegfs/users/yhao24/sys_tmp
 
 models="hf_Bert BERT_pytorch timm_vision_transformer hf_DistilBert pytorch_struct hf_Bert_large pytorch_CycleGAN_and_pix2pix dlrm densenet121 speech_transformer squeezenet1_1 LearningToPaint  shufflenet_v2_x1_0 fastNLP_Bert hf_Bart lennard_jones resnet152 attention_is_all_you_need_pytorch resnext50_32x4d phlippe_resnet functorch_dp_cifar10 mobilenet_v3_large alexnet mobilenet_v2 hf_GPT2  phlippe_densenet functorch_maml_omniglot timm_resnest timm_efficientnet soft_actor_critic mnasnet1_0 maml_omniglot drq dcgan timm_vovnet hf_Albert timm_regnet hf_Reformer yolov3 resnet18"
 # models="resnet50 "
 var_date=$(date +%Y%m%d_%H%M%S)
 
-profile_mode_base_path="/home/users/yhao24/b/tmp/profile_mode"
+profile_mode_base_path=${profile_mode_base_path:-"/home/users/yhao24/b/tmp/profile_mode"}
+pytorch_path=${pytorch_path:-"/scratch/yhao24/p9_inductor/pytorch"}
+torchexpert_path=${torchexpert_path:-"/scratch/yhao24/p9_inductor/TorchExpert"}
+
+
+
 profile_path="${profile_mode_base_path}/profiles"
 stream_path="${profile_mode_base_path}/streams"
 updated_stream_path="${profile_mode_base_path}/updated_streams"
@@ -56,7 +64,6 @@ echo "log file: ${output_file}"
 echo "Profile path: ${profile_path}"
 echo "Profile path: ${profile_path}" >> $output_file
 
-pytorch_path="/scratch/yhao24/p9_inductor/pytorch"
 work_path=$(dirname $(realpath $0))
 for model in $models; do
     export model=$model
@@ -121,7 +128,7 @@ for model in $models; do
     echo "stream file is $stream_file" >> $output_file
     
     updated_stream_file=${updated_stream_path}/${model}_updated.json
-    python /scratch/yhao24/p9_inductor/TorchExpert/torchexpert.py -i ${profile_file} -s ${stream_file} --export_graph ${updated_stream_file} >> $output_file 2>&1
+    python ${torchexpert_path}/torchexpert.py -i ${profile_file} -s ${stream_file} --export_graph ${updated_stream_file} >> $output_file 2>&1
     if [ $? -eq 0 ]; then
         echo "Generate updated graph successfully" >> $output_file
     else
