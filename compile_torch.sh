@@ -23,7 +23,7 @@ conda install -y cmake ninja mkl mkl-include libpng
 
 # !!! warning need to use same numpy version with torchbench!!!!! 
 # https://github.com/pytorch/benchmark/blob/main/requirements.txt
-pip install numpy==1.21.2
+pip install numpy==1.23.5
 cd $work_path
 git clone --recursive git@github.com:pytorch/pytorch.git
 cd pytorch
