@@ -2,7 +2,7 @@
 # write a bash function to set precision based on mode
 function set_precision() {
     if [ "$mode" = "inference" ]; then
-        precision="${precision}"
+        precision="bf16"
     elif [ "$mode" = "training" ]; then
         precision="amp"
     else
@@ -38,7 +38,7 @@ TORCHINDUCTOR_BYPASS_TINY=0
 # TORCH_COMPILE_DEBUG=1 TORCHINDUCTOR_GRAPH_DIAGRAM=1 TORCHINDUCTOR_STREAM_PRINT_GRAPH=1 TORCHINDUCTOR_MULTIPLE_STREAMS=0  python benchmarks/dynamo/${collection}.py  --performance --${precision} -dcuda --inference --inductor --export-profiler-trace --profiler_trace_name ${profile_path}/$(mydate)_${model}_single  --disable-cudagraphs   --only ${model} >  ${log_path}/${model}_$(mydate).log 2>&1
 
 
-TORCH_COMPILE_DEBUG=1  TORCHINDUCTOR_MULTIPLE_STREAMS=0  python benchmarks/dynamo/torchbench.py  --performance --${precision} -dcuda --inference --inductor --cpp-wrapper --disable-cudagraphs   --only ${model} >  ${log_path}/${model}_$(mydate).log 2>&1
+TORCH_COMPILE_DEBUG=1  TORCHINDUCTOR_MULTIPLE_STREAMS=0  python benchmarks/dynamo/torchbench.py  --performance --${precision} -dcuda --${mode}  --inductor --cpp-wrapper --disable-cudagraphs   --only ${model} >  ${log_path}/${model}_$(mydate).log 2>&1
 
 TORCHINDUCTOR_MULTIPLE_STREAMS_PROFILING=1
 # profile 
