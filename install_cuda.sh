@@ -13,21 +13,6 @@
 #     fi
 # done
 
-# check t_cuda is equal to 116 or 117 or 118
-if [ "$t_cuda" == "116" ] ; then
-    cuda_download_link="https://developer.download.nvidia.com/compute/cuda/11.6.2/local_installers/cuda_11.6.2_510.47.03_linux.run"
-    cudnn_download_link="https://developer.download.nvidia.com/compute/redist/cudnn/v8.3.2/local_installers/11.5/cudnn-linux-x86_64-8.3.2.44_cuda11.5-archive.tar.xz"
-    cuda_file_name="cuda_11.6.2_510.47.03_linux.run"
-    cudnn_file_name="cudnn-linux-x86_64-8.3.2.44_cuda11.5-archive"
-    cudnn_file_name_with_ext="cudnn-linux-x86_64-8.3.2.44_cuda11.5-archive.tar.xz"
-fi
-if [ "$t_cuda" == "117" ] ; then
-    cuda_download_link="https://developer.download.nvidia.com/compute/cuda/11.7.0/local_installers/cuda_11.7.0_515.43.04_linux.run"
-    cudnn_download_link="https://developer.download.nvidia.com/compute/redist/cudnn/v8.5.0/local_installers/11.7/cudnn-linux-x86_64-8.5.0.96_cuda11-archive.tar.xz"
-    cuda_file_name="cuda_11.7.0_515.43.04_linux.run"
-    cudnn_file_name="cudnn-linux-x86_64-8.5.0.96_cuda11-archive"
-    cudnn_file_name_with_ext="cudnn-linux-x86_64-8.5.0.96_cuda11-archive.tar.xz"
-fi
 if [ "$t_cuda" == "118" ] ; then
     cuda_download_link="https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda_11.8.0_520.61.05_linux.run"
     cudnn_download_link="https://developer.download.nvidia.com/compute/redist/cudnn/v8.5.0/local_installers/11.7/cudnn-linux-x86_64-8.5.0.96_cuda11-archive.tar.xz"
@@ -53,6 +38,39 @@ if [ "$t_cuda" == "121" ] ; then
     nccl_download_link="https://developer.download.nvidia.com/compute/redist/nccl/v2.20.5/${nccl_file_name}.txz"
     nccl_file_name_with_ext="${nccl_file_name}.txz"
 fi
+
+if [ "$t_cuda" == "124" ] ; then
+    cuda_download_link="https://developer.download.nvidia.com/compute/cuda/12.4.0/local_installers/cuda_12.4.0_550.54.14_linux.run"
+    cuda_file_name="cuda_12.4.0_550.54.14_linux.run"
+    cudnn_file_name="cudnn-linux-x86_64-8.9.2.26_cuda12-archive"
+    cudnn_download_link="https://developer.download.nvidia.com/compute/cudnn/redist/cudnn/linux-x86_64/${cudnn_file_name}.tar.xz"
+    cudnn_file_name_with_ext="${cudnn_file_name}.tar.xz"
+    nccl_branch="v2.20.5-1"
+    cusparselt_version="052"
+fi
+
+function compile_nccl() {
+    git clone -b ${nccl_branch} --depth 1 https://github.com/NVIDIA/nccl.git nccl-${nccl_branch}
+    cd nccl-${nccl_branch}
+    make -j src.build
+    cp -a build/include/* $t_cuda_path/include/
+    cp -a build/lib/* $t_cuda_path/lib64/
+    cd ..
+    rm -rf nccl-${nccl_branch}
+}
+
+
+function install_cusparselt_052 {
+    # cuSparseLt license: https://docs.nvidia.com/cuda/cusparselt/license.html
+    mkdir tmp_cusparselt && cd tmp_cusparselt
+    wget -q https://developer.download.nvidia.com/compute/cusparselt/redist/libcusparse_lt/linux-x86_64/libcusparse_lt-linux-x86_64-0.5.2.1-archive.tar.xz
+    tar xf libcusparse_lt-linux-x86_64-0.5.2.1-archive.tar.xz
+    cp -a libcusparse_lt-linux-x86_64-0.5.2.1-archive/include/* $t_cuda_path/include/
+    cp -a libcusparse_lt-linux-x86_64-0.5.2.1-archive/lib/* $t_cuda_path/lib64/
+    cd ..
+    rm -rf tmp_cusparselt
+}
+
 
 if [ -z "$cuda_download_link" ]; then
     echo "t_cuda is only available for 116, 117, 118, 1187, 121"
@@ -86,6 +104,12 @@ function download_and_install() {
         cp -r .downloads/$t_cuda/$nccl_file_name/include/* $t_cuda_path/include/
         cp -r .downloads/$t_cuda/$nccl_file_name/lib/* $t_cuda_path/lib64/
         chmod a+r $t_cuda_path/include/nccl*.h $t_cuda_path/lib64/libnccl*
+    fi
+    if [ ! -z "$nccl_branch" ]; then
+        compile_nccl
+    fi
+    if [ ! -z "$cusparselt_version" ]; then
+        eval install_cusparselt_${cusparselt_version}
     fi
 }
 
