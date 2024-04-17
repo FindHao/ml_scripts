@@ -59,7 +59,6 @@ echo "torchtext installation is done"
 
 
 # install torchvision
-# FORCE_CUDA doesn't work
 export FORCE_CUDA=TRUE
 cd $work_path
 git clone git@github.com:pytorch/vision.git
