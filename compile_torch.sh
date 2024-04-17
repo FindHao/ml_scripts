@@ -48,6 +48,8 @@ echo "pytorch installation is done"
 
 # install torchtext
 cd $work_path
+export CC=`realpath gcc`
+export CXX=`realpath g++`
 git clone git@github.com:pytorch/text.git
 cd text
 git submodule update --init --recursive
