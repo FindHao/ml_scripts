@@ -16,8 +16,8 @@ profile_path="/home/users/yhao24/b/tmp/profile"
 collection="torchbench"
 
 # gil
-log_path="/home/users/yhao24/p9_inductor/tmp/"
-profile_path="/home/users/yhao24/b/tmp/profile"
+log_path="/scratch/yhao/logs/runlog"
+profile_path="/scratch/yhao/logs/profile"
 collection="torchbench"
 
 # dev 
@@ -84,7 +84,9 @@ TORCH_COMPILE_DEBUG=1 TORCHINDUCTOR_GRAPH_DIAGRAM=1 TORCHINDUCTOR_STREAM_PRINT_G
 
 
 
-
+single_stream=0 mode=inference test=acc work_path=/home/users/yhao24/gil/p9 ./run_all.sh;
+single_stream=0 mode=inference test=perf work_path=/home/users/yhao24/gil/p9 ./run_all.sh;
+single_stream=1 mode=inference test=perf work_path=/home/users/yhao24/gil/p9 ./run_all.sh;
 
 
 

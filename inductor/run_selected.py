@@ -128,7 +128,15 @@ if __name__ == "__main__":
                         help="profile trace path")
     parser.add_argument("--disable_streams", action="store_true",)
     args = parser.parse_args()
-    test_accuracy = args.accuracy
+    if args.accuracy and args.performance:
+        raise ValueError("Please choose either accuracy or performance")
+    if not args.accuracy and not args.performance:
+        print("No --accuracy or --performance is chosen, default to performance")
+        test_accuracy = False
+    elif args.accuracy:
+        test_accuracy = True
+    else:
+        test_accuracy = False
     mode = args.mode
     directory = args.work_dir
     os.chdir(directory)
