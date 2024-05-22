@@ -25,6 +25,30 @@ class Model(torch.nn.Module):
         primals_2 = None
         return addmm
 
+
+def profile_model(fn, inputs, py=True, worker_name=None):
+    # profile
+    activity_groups = []
+    result_summary = []
+    device_to_activity = {
+        "cuda": profiler.ProfilerActivity.CUDA,
+        "cpu": profiler.ProfilerActivity.CPU,
+    }
+    # set it to zero since torchinductor version will clear args everytime.
+    nwarmup=0
+    with profiler.profile(
+        schedule=profiler.schedule(wait=0, warmup=nwarmup, active=1, repeat=1),
+        activities=activity_groups,
+        record_shapes=True,
+        on_trace_ready=(profiler.tensorboard_trace_handler("/tmp/yhao/profile/", worker_name=worker_name)),
+    ) as prof:
+        for i in range(nwarmup + 1):
+            if py:
+                fn(inputs)
+            else:
+                fn(*inputs)
+            prof.step()
+
 device="cuda"
 s0 = 727828
 s1 = 512
@@ -40,26 +64,7 @@ model = Model()
 ref_model=copy.deepcopy(model)
 expeceted = ref_model(*ref_inputs)
 
-# # profile
-# activity_groups = []
-# result_summary = []
-# device_to_activity = {
-#     "cuda": profiler.ProfilerActivity.CUDA,
-#     "cpu": profiler.ProfilerActivity.CPU,
-# }
-# nwarmup=1
-# with profiler.profile(
-#     schedule=profiler.schedule(wait=0, warmup=nwarmup, active=1, repeat=1),
-#     activities=activity_groups,
-#     record_shapes=True,
-#     # profile_memory=False,
-#     # with_stack=True,
-#     # with_flops=False,
-#     on_trace_ready=(profiler.tensorboard_trace_handler("/tmp/yhao/profile/")),
-# ) as prof:
-#     for i in range(nwarmup + 1):
-#         ref_model(*ref_inputs)
-#         prof.step()
+
 
 # torchinductor
 import importlib.util
@@ -77,8 +82,11 @@ py_path = "/tmp/torchinductor_yhao/ry/cry6wn35qurxhwrzmfhnkmi3onn6ek6wh2x7l6z3oy
 function_name = "call"
 call = dynamic_import(py_path, function_name)
 
-py_output = call(list(ref_inputs2))[0]
+ref_inputs2 = list(ref_inputs2)
+ref_inputs4 = copy.deepcopy(ref_inputs2)
+py_output = call(ref_inputs2)[0]
 print(same(py_output, expeceted))
+profile_model(call, ref_inputs4, py=True, worker_name="torchinductor")
 
 
 # aoti part
@@ -96,3 +104,4 @@ def optimized(*args, **kwargs):
 
 aoti_output = optimized(*example_inputs)
 print(same(aoti_output, expeceted))
+profile_model(optimized, example_inputs, py=False, worker_name="aoti")
