@@ -605,24 +605,26 @@ void AOTInductorModel::run_impl(
     void* kernel_args_var_0[] = {&var_0, &var_1, &var_2, &var_3};
     Grid triton_poi_fused_clone_0_grid_0 = Grid(1L, 45489L, 2L);
     launchKernel(kernels.triton_poi_fused_clone_0, triton_poi_fused_clone_0_grid_0.grid_x, triton_poi_fused_clone_0_grid_0.grid_y, triton_poi_fused_clone_0_grid_0.grid_z, 8, 20480, kernel_args_var_0, stream);
-    // @Yueming: run it again
-        launchKernel(kernels.triton_poi_fused_clone_0, triton_poi_fused_clone_0_grid_0.grid_x, triton_poi_fused_clone_0_grid_0.grid_y, triton_poi_fused_clone_0_grid_0.grid_z, 8, 20480, kernel_args_var_0, stream);
-    // arg2_1.reset();
-    // static constexpr int64_t int_array_6[] = {93161984L, 2L};
-    // static constexpr int64_t int_array_7[] = {2L, 1L};
-    // AtenTensorHandle buf1_handle;
-    // AOTI_TORCH_ERROR_CODE_CHECK(aoti_torch_empty_strided(2, int_array_6, int_array_7, cached_torch_dtype_float32, cached_torch_device_type_cuda, this->device_idx_, &buf1_handle));
-    // RAIIAtenTensorHandle buf1(buf1_handle);
-    // // Source Nodes: [addmm], Original ATen: [aten.addmm]
-    // static constexpr int64_t int_array_0[] = {93161984L, 4L};
-    // static constexpr int64_t int_array_1[] = {4L, 1L};
-    // auto tmp_tensor_handle_0 = reinterpret_tensor_wrapper(buf0, 2, int_array_0, int_array_1, 0L);
-    // static constexpr int64_t int_array_2[] = {4L, 2L};
-    // static constexpr int64_t int_array_3[] = {1L, 4L};
-    // auto tmp_tensor_handle_1 = reinterpret_tensor_wrapper(arg0_1, 2, int_array_2, int_array_3, 0L);
-    // AOTI_TORCH_ERROR_CODE_CHECK(aoti_torch_cuda_addmm_out(convert_arrayref_tensor_to_tensor(buf1), convert_arrayref_tensor_to_tensor(arg1_1), convert_arrayref_tensor_to_tensor(wrap_with_raii_handle_if_needed(tmp_tensor_handle_0)), convert_arrayref_tensor_to_tensor(wrap_with_raii_handle_if_needed(tmp_tensor_handle_1)), 1L, 1L));
-    // arg0_1.reset();
-    // arg1_1.reset();
+    arg2_1.reset();
+
+
+    static constexpr int64_t int_array_6[] = {93161984L, 2L};
+    static constexpr int64_t int_array_7[] = {2L, 1L};
+    AtenTensorHandle buf1_handle;
+    AOTI_TORCH_ERROR_CODE_CHECK(aoti_torch_empty_strided(2, int_array_6, int_array_7, cached_torch_dtype_float32, cached_torch_device_type_cuda, this->device_idx_, &buf1_handle));
+    RAIIAtenTensorHandle buf1(buf1_handle);
+    // Source Nodes: [addmm], Original ATen: [aten.addmm]
+    static constexpr int64_t int_array_0[] = {93161984L, 4L};
+    static constexpr int64_t int_array_1[] = {4L, 1L};
+    auto tmp_tensor_handle_0 = reinterpret_tensor_wrapper(buf0, 2, int_array_0, int_array_1, 0L);
+    static constexpr int64_t int_array_2[] = {4L, 2L};
+    static constexpr int64_t int_array_3[] = {1L, 4L};
+    auto tmp_tensor_handle_1 = reinterpret_tensor_wrapper(arg0_1, 2, int_array_2, int_array_3, 0L);
+    AOTI_TORCH_ERROR_CODE_CHECK(aoti_torch_cuda_addmm_out(convert_arrayref_tensor_to_tensor(buf1), convert_arrayref_tensor_to_tensor(arg1_1), convert_arrayref_tensor_to_tensor(wrap_with_raii_handle_if_needed(tmp_tensor_handle_0)), convert_arrayref_tensor_to_tensor(wrap_with_raii_handle_if_needed(tmp_tensor_handle_1)), 1L, 1L));
+    arg0_1.reset();
+    arg1_1.reset();
+
+// for returning buf0
     // buf0.reset();
     if constexpr (std::is_same_v<std::decay_t<decltype(buf0)>,RAIIAtenTensorHandle> || std::is_same_v<std::decay_t<decltype(buf0)>,AtenTensorHandle> || std::is_same_v<std::decay_t<decltype(buf0)>,ConstantHandle>) {
         output_handles[0] = buf0.release();
@@ -632,6 +634,16 @@ void AOTInductorModel::run_impl(
         AOTI_TORCH_ERROR_CODE_CHECK(aoti_torch_new_uninitialized_tensor(&output_handles[0]));
         AOTI_TORCH_ERROR_CODE_CHECK(aoti_torch_assign_tensors(cached_output_0.tensor(), output_handles[0]));
     }
+
+
+    // if constexpr (std::is_same_v<std::decay_t<decltype(buf1)>,RAIIAtenTensorHandle> || std::is_same_v<std::decay_t<decltype(buf1)>,AtenTensorHandle> || std::is_same_v<std::decay_t<decltype(buf1)>,ConstantHandle>) {
+    //     output_handles[0] = buf1.release();
+    // } else {
+    //     thread_local ThreadLocalCachedOutputTensor<std::decay_t<decltype(buf1)>> cached_output_0(buf1);
+    //     cached_output_0.copy_data_from(buf1);
+    //     AOTI_TORCH_ERROR_CODE_CHECK(aoti_torch_new_uninitialized_tensor(&output_handles[0]));
+    //     AOTI_TORCH_ERROR_CODE_CHECK(aoti_torch_assign_tensors(cached_output_0.tensor(), output_handles[0]));
+    // }
 } // AOTInductorModel::run_impl
 } // namespace aot_inductor
 } // namespace torch

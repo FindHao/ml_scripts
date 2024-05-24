@@ -30,13 +30,38 @@ ref_inputs2 = copy.deepcopy(example_inputs)
 # model = Model()
 # ref_model=copy.deepcopy(model)
 # expeceted = ref_model(*ref_inputs)
+import time
 
+def forward(primals_1, primals_2, primals_5):
+    view = torch.ops.aten.reshape.default(primals_5, [-1, 4, 128])
+    primals_5 = None
+    permute = torch.ops.aten.permute.default(view, [0, 2, 1])
+    clone = torch.ops.aten.clone.default(
+        permute, memory_format=torch.contiguous_format
+    )
+    return clone
+    permute = None
+
+    view_1 = torch.ops.aten.reshape.default(clone, [-1, 4])
+    clone = None
+    permute_1 = torch.ops.aten.permute.default(primals_1, [1, 0])
+    primals_1 = None
+    addmm = torch.ops.aten.addmm.default(primals_2, view_1, permute_1)
+    primals_2 = None
+    return addmm
+
+
+original_output=forward(*example_inputs)
+print('======eager mode======')
+print(original_output)
 
 
 
 # torchinductor part
 import importlib.util
 import sys
+
+
 
 
 def dynamic_import(module_path, function_name):
@@ -55,7 +80,7 @@ ref_inputs = list(ref_inputs)
 # ref_inputs4 = copy.deepcopy(inputs)
 full_py_output = call(ref_inputs)
 py_output = full_py_output[0]
-print("py output id",hex(id(py_output)))
+print("py output id  ",hex(id(py_output)))
 
 # print(same(py_output, expeceted))
 # profile_model(call, ref_inputs4, py=True, worker_name="torchinductor")
@@ -88,6 +113,14 @@ print("====py_output")
 print(py_output)
 print("====same or not")
 print(same(aoti_output, py_output))
+
+# print("=====compare input ====")
+# print("refinputs")
+# print(ref_inputs)
+# print("refinputs2")
+# print(ref_inputs2)
+# print(same(ref_inputs, ref_inputs2))
+
 
 # print("===== a workaround for the buffer issue=====")
 # py_output = run_py_impl(ref_inputs3)

@@ -73,9 +73,10 @@ from torch._C import _cuda_getCurrentRawStream as get_raw_stream
 async_compile.wait(globals())
 del async_compile
 
+import time
 def call(args):
     arg0_1, arg1_1, arg2_1 = args
-    args.clear()
+    # args.clear()
     assert_size_stride(arg0_1, (2, 4), (4, 1))
     assert_size_stride(arg1_1, (2, ), (1, ))
     assert_size_stride(arg2_1, (727828, 512), (512, 1))
@@ -89,13 +90,18 @@ def call(args):
         # Source Nodes: [clone], Original ATen: [aten.clone]
         stream0 = get_raw_stream(0)
         triton_poi_fused_clone_0.run(arg2_1, buf0, 93161984, 4, grid=grid(93161984, 4), stream=stream0)
-        # @Yueming: the belowing is generated from the unit test, but we don't need it for our testing.
-        # del arg2_1
-        # buf1 = empty_strided_cuda((93161984, 2), (2, 1), torch.float32)
-        # # Source Nodes: [addmm], Original ATen: [aten.addmm]
-        # extern_kernels.addmm(arg1_1, reinterpret_tensor(buf0, (93161984, 4), (4, 1), 0), reinterpret_tensor(arg0_1, (4, 2), (1, 4), 0), alpha=1, beta=1, out=buf1)
-        # del arg0_1
-        # del arg1_1
+        # torch.cuda.synchronize()
+
+        # time.sleep(5)
+
+
+    # #     @Yueming: the belowing is generated from the unit test, but we don't need it for our testing.
+    #     del arg2_1
+    #     buf1 = empty_strided_cuda((93161984, 2), (2, 1), torch.float32)
+    #     # Source Nodes: [addmm], Original ATen: [aten.addmm]
+    #     extern_kernels.addmm(arg1_1, reinterpret_tensor(buf0, (93161984, 4), (4, 1), 0), reinterpret_tensor(arg0_1, (4, 2), (1, 4), 0), alpha=1, beta=1, out=buf1)
+    #     del arg0_1
+    #     del arg1_1
     #     # del buf0
     # for kernel in globals().values():
     #     if isinstance(kernel, torch._inductor.runtime.triton_heuristics.CachingAutotuner):
@@ -107,6 +113,9 @@ def call(args):
     #                 stream="stream",  # use dummy stream
     #                 launcher=kernel.launchers[0],
     #             )
+    # return (buf1, )
+
+
     return (buf0, )
 
 
