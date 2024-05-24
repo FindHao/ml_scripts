@@ -38,57 +38,48 @@ ref_inputs2 = copy.deepcopy(example_inputs)
 import importlib.util
 import sys
 
-def run_py_impl(inputs):
 
-    def dynamic_import(module_path, function_name):
-        module_name = module_path.split("/")[-1].split(".")[0]
-        spec = importlib.util.spec_from_file_location(module_name, module_path)
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[module_name] = module
-        spec.loader.exec_module(module)
-        return getattr(module, function_name)
-
-
-    function_name = "call"
-    call = dynamic_import(py_impl_path, function_name)
-
-    inputs = list(inputs)
-    # ref_inputs4 = copy.deepcopy(inputs)
-    full_py_output = call(inputs)
-    py_output = full_py_output[0]
-    print("py output id",hex(id(py_output)))
-
-    # print(same(py_output, expeceted))
-    # profile_model(call, ref_inputs4, py=True, worker_name="torchinductor")
-    return py_output
+def dynamic_import(module_path, function_name):
+    module_name = module_path.split("/")[-1].split(".")[0]
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return getattr(module, function_name)
 
 
-def run_aoti(inputs):
-    # aoti part
-    runner = torch._C._aoti.AOTIModelContainerRunnerCuda(aoti_impl_path, 1, device)  # type: ignore[assignment, call-arg]
-    import time
-    time.sleep(10)
-    def optimized(*args, **kwargs):
-        call_spec = runner.get_call_spec()  # type: ignore[attr-defined]
-        in_spec = pytree.treespec_loads(call_spec[0])
-        out_spec = pytree.treespec_loads(call_spec[1])
-        flat_inputs = pytree.tree_flatten((args, reorder_kwargs(kwargs, in_spec)))[0]
-        flat_outputs = runner.run(flat_inputs)  # type: ignore[attr-defined]
-        print("aoti output id", hex(id(flat_outputs[0])))
-        return pytree.tree_unflatten(flat_outputs, out_spec)
-    aoti_output = optimized(*inputs)
-    return aoti_output
+function_name = "call"
+call = dynamic_import(py_impl_path, function_name)
+
+ref_inputs = list(ref_inputs)
+# ref_inputs4 = copy.deepcopy(inputs)
+full_py_output = call(ref_inputs)
+py_output = full_py_output[0]
+print("py output id",hex(id(py_output)))
+
+# print(same(py_output, expeceted))
+# profile_model(call, ref_inputs4, py=True, worker_name="torchinductor")
 
 
-
+# aoti part
+runner = torch._C._aoti.AOTIModelContainerRunnerCuda(aoti_impl_path, 1, device)  # type: ignore[assignment, call-arg]
+import time
+time.sleep(10)
+def optimized(*args, **kwargs):
+    call_spec = runner.get_call_spec()  # type: ignore[attr-defined]
+    in_spec = pytree.treespec_loads(call_spec[0])
+    out_spec = pytree.treespec_loads(call_spec[1])
+    flat_inputs = pytree.tree_flatten((args, reorder_kwargs(kwargs, in_spec)))[0]
+    flat_outputs = runner.run(flat_inputs)  # type: ignore[attr-defined]
+    print("aoti output id", hex(id(flat_outputs[0])))
+    return pytree.tree_unflatten(flat_outputs, out_spec)
+aoti_output = optimized(*ref_inputs2)
 
 
 # reproduce issue
 
-py_output = run_py_impl(ref_inputs)
-print("outside py output id",hex(id(py_output)))
-
-aoti_output = run_aoti(ref_inputs2)
+# py_output = run_py_impl(ref_inputs)
+# aoti_output = run_aoti(ref_inputs2)
 
 # print output and compare
 print("====aoti===")
