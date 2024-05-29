@@ -14,8 +14,15 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 
 
 device="cuda"
-s0 = 727828
+# s0 = 727828
+# y_grid=65536
+s0=524288
+# y_grid=65535
+# s0=524280
 s1 = 512
+
+s0 = 727828
+
 example_inputs = (
     torch.rand(2, 4, device=device),
     torch.rand(2, device=device),
@@ -40,12 +47,12 @@ def forward(primals_1, primals_2, primals_5):
     )
     return clone
 
-print("====origin=====")
+print("====torchinductor=====")
 compiled_1 = torch.compile(forward)
 actual = compiled_1(*ref_inputs)
 print(actual)
 
-print("====expecte=====")
+print("====eager=====")
 expeceted = forward(*ref_inputs2)
 print(expeceted)
 print("===same or not?===")
