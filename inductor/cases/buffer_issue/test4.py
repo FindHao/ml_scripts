@@ -15,14 +15,16 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 
 device="cuda"
 # s0 = 727828
+# y_grid = 65537
+s0=524296
 # y_grid=65536
 s0=524288
 # y_grid=65535
 # s0=524280
-s1 = 512
+s1 = 8
 
-s0 = 727828
-
+# s0 = 727828
+s0 = 16777472
 example_inputs = (
     torch.rand(2, 4, device=device),
     torch.rand(2, device=device),
@@ -39,7 +41,7 @@ ref_inputs2 = copy.deepcopy(example_inputs)
 import time
 
 def forward(primals_1, primals_2, primals_5):
-    view = torch.ops.aten.reshape.default(primals_5, [-1, 4, 128])
+    view = torch.ops.aten.reshape.default(primals_5, [-1, 2, 4])
     primals_5 = None
     permute = torch.ops.aten.permute.default(view, [0, 2, 1])
     clone = torch.ops.aten.clone.default(
