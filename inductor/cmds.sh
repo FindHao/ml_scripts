@@ -20,10 +20,11 @@ log_path="/scratch/yhao/logs/runlog"
 profile_path="/scratch/yhao/logs/profile"
 collection="torchbench"
 
-# dev 
+# dev
 log_path="/tmp/yhao/"
-profile_path="/home/yhao/p9/profile"
+profile_path="/home/yhao/p9_clean/profile"
 collection="torchbench"
+
 
 mode="inference"
 
@@ -41,19 +42,19 @@ TORCHINDUCTOR_BYPASS_TINY=0
 TORCH_COMPILE_DEBUG=1  TORCHINDUCTOR_MULTIPLE_STREAMS=0  python benchmarks/dynamo/torchbench.py  --performance --${precision} -dcuda --${mode}  --inductor --disable-cudagraphs   --only ${model} >  ${log_path}/${model}_$(mydate).log 2>&1
 
 TORCHINDUCTOR_MULTIPLE_STREAMS_PROFILING=1
-# profile 
+# profile
 TORCHINDUCTOR_MULTIPLE_STREAMS=1  python benchmarks/dynamo/${collection}.py  --performance --${precision} -dcuda --${mode} --inductor --export-profiler-trace --profiler_trace_name ${profile_path}/$(mydate)_multiple  --disable-cudagraphs   --only ${model} >  ${log_path}/${model}_$(mydate).log 2>&1
 TORCHINDUCTOR_MULTIPLE_STREAMS=0  python benchmarks/dynamo/${collection}.py  --performance --${precision} -dcuda --${mode} --inductor --export-profiler-trace --profiler_trace_name ${profile_path}/$(mydate)_single  --disable-cudagraphs   --only ${model} >  ${log_path}/${model}_$(mydate).log 2>&1
 
 TORCHINDUCTOR_MULTIPLE_STREAMS=0 python benchmarks/dynamo/torchbench.py  --performance --${precision} -dcuda --${mode} --inductor  --disable-cudagraphs   --only ${model} >  ${log_path}/${model}_$(mydate).log 2>&1
 
 # pure run
-TORCHINDUCTOR_MULTIPLE_STREAMS=1 python benchmarks/dynamo/${collection}.py  --accuracy --${precision} -dcuda --${mode} --inductor  --disable-cudagraphs   --only ${model}
-TORCHINDUCTOR_MULTIPLE_STREAMS=1 python benchmarks/dynamo/${collection}.py  --performance --${precision} -dcuda --${mode} --inductor  --disable-cudagraphs   --only ${model}
-TORCHINDUCTOR_MULTIPLE_STREAMS=0 python benchmarks/dynamo/${collection}.py  --performance --${precision} -dcuda --${mode} --inductor  --disable-cudagraphs  --only ${model}
+TORCHINDUCTOR_MULTIPLE_STREAMS=1 python benchmarks/dynamo/${collection}.py  --accuracy  -dcuda --${mode} --inductor  --disable-cudagraphs   --only ${model}
+TORCHINDUCTOR_MULTIPLE_STREAMS=1 python benchmarks/dynamo/${collection}.py  --performance  -dcuda --${mode} --inductor  --disable-cudagraphs   --only ${model}
+TORCHINDUCTOR_MULTIPLE_STREAMS=0 python benchmarks/dynamo/${collection}.py  --performance  -dcuda --${mode} --inductor  --disable-cudagraphs  --only ${model}
 
 # loading exisiting stream assignment
-TORCHINDUCTOR_LOAD_EXISTING_STREAM_ASSIGNMENT=/tmp/yhao/debug2023/resnet18_stream_assignment.update.json TORCHINDUCTOR_MULTIPLE_STREAMS=1 
+TORCHINDUCTOR_LOAD_EXISTING_STREAM_ASSIGNMENT=/tmp/yhao/debug2023/resnet18_stream_assignment.update.json TORCHINDUCTOR_MULTIPLE_STREAMS=1
 /tmp/yhao/debug2023/resnet50_stream_assignment.update.json
 # debug
 
@@ -70,7 +71,7 @@ TORCHINDUCTOR_MULTIPLE_STREAMS=1 python benchmarks/dynamo/torchbench.py  --perfo
 TORCHINDUCTOR_MULTIPLE_STREAMS=0 python benchmarks/dynamo/torchbench.py  --performance --${precision} -dcuda --inference --inductor  --disable-cudagraphs --cpp-wrapper  --only ${model}
 
 TORCHINDUCTOR_MULTIPLE_STREAMS=0 python benchmarks/dynamo/torchbench.py  --performance --${precision} -dcuda --inference --inductor --disable-cudagraphs --cpp-wrapper  --only ${model}
- 
+
 TORCHINDUCTOR_MULTIPLE_STREAMS=1  python benchmarks/dynamo/torchbench.py --cpp-wrapper   --performance --${precision} -dcuda --inference --inductor --export-profiler-trace --profiler_trace_name ${profile_path}/$(mydate)_multiple_cpp  --disable-cudagraphs   --only ${model} >  ${log_path}/${model}_$(mydate).log 2>&1
 TORCHINDUCTOR_MULTIPLE_STREAMS=0  python benchmarks/dynamo/torchbench.py --cpp-wrapper  --performance --${precision} -dcuda --inference --inductor --export-profiler-trace --profiler_trace_name ${profile_path}/$(mydate)_single_cpp  --disable-cudagraphs   --only ${model} >  ${log_path}/${model}_$(mydate).log 2>&1
 
@@ -127,18 +128,18 @@ TORCH_COMPILE_DEBUG=1 TORCHINDUCTOR_GRAPH_DIAGRAM=0 TORCHINDUCTOR_STREAM_PRINT_G
 TORCH_COMPILE_DEBUG=1 TORCHINDUCTOR_GRAPH_DIAGRAM=0 TORCHINDUCTOR_STREAM_PRINT_GRAPH=0 TORCHINDUCTOR_MULTIPLE_STREAMS=0  python benchmarks/dynamo/huggingface.py  --performance --amp -dcuda --training --inductor --export-profiler-trace --profiler_trace_name ${profile_path}/$(mydate)_single  --disable-cudagraphs   --only ${model} >  ${log_path}/${model}_$(mydate).log 2>&1
 
 
-TORCHINDUCTOR_MULTIPLE_STREAMS=0 python benchmarks/dynamo/huggingface.py  --performance --${precision} -dcuda --inference --inductor  --export-profiler-trace --profiler_trace_name ${profile_path}/$(mydate)_single  --disable-cudagraphs   --only ${model}  
+TORCHINDUCTOR_MULTIPLE_STREAMS=0 python benchmarks/dynamo/huggingface.py  --performance --${precision} -dcuda --inference --inductor  --export-profiler-trace --profiler_trace_name ${profile_path}/$(mydate)_single  --disable-cudagraphs   --only ${model}
 
-TORCHINDUCTOR_MULTIPLE_STREAMS=1 python benchmarks/dynamo/huggingface.py  --performance --${precision} -dcuda --inference --inductor  --export-profiler-trace --profiler_trace_name ${profile_path}/$(mydate)_multi  --disable-cudagraphs   --only ${model}  
-
-
-TORCHINDUCTOR_MULTIPLE_STREAMS=1  python benchmarks/dynamo/huggingface.py  --accuracy --${precision} -dcuda --inference --inductor --disable-cudagraphs  --only ${model} 
-TORCHINDUCTOR_MULTIPLE_STREAMS=1  python benchmarks/dynamo/huggingface.py  --performance --${precision} -dcuda --inference --inductor --disable-cudagraphs  --only ${model} 
-TORCHINDUCTOR_MULTIPLE_STREAMS=0  python benchmarks/dynamo/huggingface.py  --performance --${precision} -dcuda --inference --inductor --disable-cudagraphs  --only ${model} 
+TORCHINDUCTOR_MULTIPLE_STREAMS=1 python benchmarks/dynamo/huggingface.py  --performance --${precision} -dcuda --inference --inductor  --export-profiler-trace --profiler_trace_name ${profile_path}/$(mydate)_multi  --disable-cudagraphs   --only ${model}
 
 
-TORCH_COMPILE_DEBUG=1 TORCHINDUCTOR_GRAPH_DIAGRAM=1 TORCHINDUCTOR_STREAM_PRINT_GRAPH=1 TORCHINDUCTOR_MULTIPLE_STREAMS=1  python benchmarks/dynamo/huggingface.py  --accuracy --${precision} -dcuda --inference --inductor --disable-cudagraphs  --only ${model} 
-TORCH_COMPILE_DEBUG=1 TORCHINDUCTOR_GRAPH_DIAGRAM=1 TORCHINDUCTOR_STREAM_PRINT_GRAPH=1 TORCHINDUCTOR_MULTIPLE_STREAMS=0  python benchmarks/dynamo/huggingface.py  --performance --${precision} -dcuda --inference --inductor --disable-cudagraphs  --only ${model} 
+TORCHINDUCTOR_MULTIPLE_STREAMS=1  python benchmarks/dynamo/huggingface.py  --accuracy --${precision} -dcuda --inference --inductor --disable-cudagraphs  --only ${model}
+TORCHINDUCTOR_MULTIPLE_STREAMS=1  python benchmarks/dynamo/huggingface.py  --performance --${precision} -dcuda --inference --inductor --disable-cudagraphs  --only ${model}
+TORCHINDUCTOR_MULTIPLE_STREAMS=0  python benchmarks/dynamo/huggingface.py  --performance --${precision} -dcuda --inference --inductor --disable-cudagraphs  --only ${model}
+
+
+TORCH_COMPILE_DEBUG=1 TORCHINDUCTOR_GRAPH_DIAGRAM=1 TORCHINDUCTOR_STREAM_PRINT_GRAPH=1 TORCHINDUCTOR_MULTIPLE_STREAMS=1  python benchmarks/dynamo/huggingface.py  --accuracy --${precision} -dcuda --inference --inductor --disable-cudagraphs  --only ${model}
+TORCH_COMPILE_DEBUG=1 TORCHINDUCTOR_GRAPH_DIAGRAM=1 TORCHINDUCTOR_STREAM_PRINT_GRAPH=1 TORCHINDUCTOR_MULTIPLE_STREAMS=0  python benchmarks/dynamo/huggingface.py  --performance --${precision} -dcuda --inference --inductor --disable-cudagraphs  --only ${model}
 
 ## cpp wrapper
 
@@ -146,14 +147,14 @@ TORCH_COMPILE_DEBUG=1 TORCHINDUCTOR_GRAPH_DIAGRAM=1 TORCHINDUCTOR_STREAM_PRINT_G
 TORCH_COMPILE_DEBUG=1 TORCHINDUCTOR_GRAPH_DIAGRAM=1 TORCHINDUCTOR_STREAM_PRINT_GRAPH=1 TORCHINDUCTOR_MULTIPLE_STREAMS=0  python benchmarks/dynamo/huggingface.py  --performance --${precision} -dcuda --inference --inductor --export-profiler-trace --cpp-wrapper --profiler_trace_name ${profile_path}/$(mydate)_single  --disable-cudagraphs   --only ${model} >  ${log_path}/${model}_$(mydate).log 2>&1
 
 
-TORCHINDUCTOR_MULTIPLE_STREAMS=1  python benchmarks/dynamo/huggingface.py  --accuracy --${precision} -dcuda --inference --inductor --disable-cudagraphs  --cpp-wrapper --only ${model} 
-TORCHINDUCTOR_MULTIPLE_STREAMS=1  python benchmarks/dynamo/huggingface.py  --performance --${precision} -dcuda --inference --inductor --disable-cudagraphs  --cpp-wrapper --only ${model} 
-TORCHINDUCTOR_MULTIPLE_STREAMS=0  python benchmarks/dynamo/huggingface.py  --performance --${precision} -dcuda --inference --inductor --disable-cudagraphs --cpp-wrapper  --only ${model} 
+TORCHINDUCTOR_MULTIPLE_STREAMS=1  python benchmarks/dynamo/huggingface.py  --accuracy --${precision} -dcuda --inference --inductor --disable-cudagraphs  --cpp-wrapper --only ${model}
+TORCHINDUCTOR_MULTIPLE_STREAMS=1  python benchmarks/dynamo/huggingface.py  --performance --${precision} -dcuda --inference --inductor --disable-cudagraphs  --cpp-wrapper --only ${model}
+TORCHINDUCTOR_MULTIPLE_STREAMS=0  python benchmarks/dynamo/huggingface.py  --performance --${precision} -dcuda --inference --inductor --disable-cudagraphs --cpp-wrapper  --only ${model}
 
 # export trace
-TORCHINDUCTOR_MULTIPLE_STREAMS=0 python benchmarks/dynamo/huggingface.py  --performance --${precision} -dcuda --inference --inductor --cpp-wrapper --export-profiler-trace --profiler_trace_name ${profile_path}/$(mydate)_single_cpp  --disable-cudagraphs   --only ${model}  
+TORCHINDUCTOR_MULTIPLE_STREAMS=0 python benchmarks/dynamo/huggingface.py  --performance --${precision} -dcuda --inference --inductor --cpp-wrapper --export-profiler-trace --profiler_trace_name ${profile_path}/$(mydate)_single_cpp  --disable-cudagraphs   --only ${model}
 
-TORCHINDUCTOR_MULTIPLE_STREAMS=1 python benchmarks/dynamo/huggingface.py  --performance --${precision} -dcuda --inference --inductor --cpp-wrapper  --export-profiler-trace --profiler_trace_name ${profile_path}/$(mydate)_multi_cpp  --disable-cudagraphs   --only ${model}  
+TORCHINDUCTOR_MULTIPLE_STREAMS=1 python benchmarks/dynamo/huggingface.py  --performance --${precision} -dcuda --inference --inductor --cpp-wrapper  --export-profiler-trace --profiler_trace_name ${profile_path}/$(mydate)_multi_cpp  --disable-cudagraphs   --only ${model}
 
 
 
@@ -181,8 +182,8 @@ TORCHINDUCTOR_MULTIPLE_STREAMS=0  python benchmarks/dynamo/timm_models.py  --per
 
 
 
-# run all 
-export TORCHINDUCTOR_BYPASS_TINY=0 
+# run all
+export TORCHINDUCTOR_BYPASS_TINY=0
 mode=training test=perf cpp_wrapper=0 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass_$(mydate) ./run_all.sh
 mode=training test=perf cpp_wrapper=0 single_stream=1 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass_$(mydate) ./run_all.sh
 mode=training test=acc cpp_wrapper=0 log_path=/home/users/yhao24/b/p9/inductor_logs/nobypass_$(mydate) ./run_all.sh
@@ -197,7 +198,7 @@ mode=inference test=perf cpp_wrapper=0 log_path=/home/users/yhao24/b/p9/inductor
 mode=inference test=perf cpp_wrapper=0 single_stream=1 log_path=/home/users/yhao24/b/p9/inductor_logs/bypass ./run_all.sh;
 mode=inference test=acc cpp_wrapper=0 log_path=/home/users/yhao24/b/p9/inductor_logs/bypass ./run_all.sh;
 
-export TORCHINDUCTOR_BYPASS_TINY=0 
+export TORCHINDUCTOR_BYPASS_TINY=0
 
 # run all on dev
 

@@ -8,7 +8,7 @@
 
 source ~/.notify.sh
 # =================== Configurations ====================
-work_path=${work_path:-"/home/users/yhao24/gil/p9"}
+work_path=${work_path:-"/home/yhao/p9_clean"}
 pt_path=${pt_path:-${work_path}/pytorch}
 test=${test:-"perf"}
 mode=${mode:-"inference"}
@@ -16,10 +16,10 @@ var_date=$(date +%Y%m%d_%H%M%S)
 single_stream=${single_stream:-0}
 log_path=${log_path:-${work_path}/logs}
 output_file=${log_path}/run_${mode}_${test}_${var_date}.log
-conda_dir=${conda_dir:-/scratch/yhao/miniconda3}
+conda_dir=${conda_dir:-/home/yhao/miniconda3}
 cpp_wrapper=${cpp_wrapper:-0}
 # env1 is the default environment
-env1=${env1:-pt_compile_0415}
+env1=${env1:-pt_compiled_clean_for_ms}
 STREAMSCHEDULER_REORDER=${STREAMSCHEDULER_REORDER:-0}
 TORCHINDUCTOR_BYPASS_TINY=${TORCHINDUCTOR_BYPASS_TINY:-0}
 # =================== end Configurations ====================
