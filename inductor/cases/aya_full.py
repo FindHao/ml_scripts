@@ -54,11 +54,6 @@ model = AutoModelForCausalLM.from_pretrained(
           device_map="auto",
         )
 
-compiled_model=torch.compile(model)
-# compiled_model=model
-
-# model.save_pretrained("./aya_full.pt")
-
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 def get_message_format(prompts):
   messages = []
@@ -72,15 +67,13 @@ def get_message_format(prompts):
 
 def generate_aya_23(
       prompts,
-      compiled_model,
+      model,
       temperature=0.3,
       top_p=0.75,
       top_k=0,
       max_new_tokens=1024
     ):
-
   messages = get_message_format(prompts)
-
   input_ids = tokenizer.apply_chat_template(
         messages,
         tokenize=True,
@@ -88,11 +81,12 @@ def generate_aya_23(
         padding=True,
         return_tensors="pt",
       )
-  input_ids = input_ids.to(compiled_model.device)
-  print(compiled_model.device)
+  input_ids = input_ids.to(model.device)
+  print(model.device)
   prompt_padded_len = len(input_ids[0])
 
-  # gen_tokens = compiled_model.generate(
+# original code
+  # gen_tokens = model.generate(
   #       input_ids,
   #       temperature=temperature,
   #       top_p=top_p,
@@ -101,34 +95,20 @@ def generate_aya_23(
   #       do_sample=True,
   #     )
   
-  # inps = (
-  #   input_ids,
-  #   temperature=temperature,
-  #   top_p=top_p,
-  #   top_k=top_k,
-  #   max_new_tokens=max_new_tokens,
-  #   do_sample=True,
-  # )
-  # compiled_model.generate(
-  #   input_ids,
-  #   temperature=temperature,
-  #   top_p=top_p,
-  #   top_k=top_k,
-  #   max_new_tokens=max_new_tokens,
-  #   do_sample=True,
-  # )
   tmp_generation_config = GenerationConfig( 
     temperature=temperature,
     top_p=top_p,
     top_k=top_k,
     max_new_tokens=max_new_tokens,
     do_sample=True,)
-  generate_fn = torch.compile(compiled_model.generate)
+  generate_fn = torch.compile(model.generate)
 
   gen_tokens = generate_fn(
     input_ids,
     generation_config=tmp_generation_config,
   )
+
+  gen_tokens = model.generate(input_ids, generation_config=tmp_generation_config)
 
   # get only generated tokens
   gen_tokens = [
@@ -141,12 +121,9 @@ def generate_aya_23(
   # Test generations on langauges in Aya 23 set
 prompts = [
     "Write a list of three fruits and tell me about each of them", # English
-    # "Viết danh sách ba loại trái cây và kể cho tôi nghe về từng loại trái cây đó", # Vietnamese
-    # "3 つの果物のリストを書いて、それぞれについて教えてください", # Japanese
-    # "Üç meyveden oluşan bir liste yazın ve bana her birini anlatın" # Turkish
 ]
 
-generations = generate_aya_23(prompts, compiled_model)
+generations = generate_aya_23(prompts, model)
 
 for p, g in zip(prompts, generations):
   print(
