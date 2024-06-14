@@ -88,3 +88,7 @@ git submodule sync
 git submodule update --init --recursive
 python install.py
 echo "torchbench installation is done"
+if command -v notify &> /dev/null
+then
+    notify "PyTorch Compilation is done"
+fi
