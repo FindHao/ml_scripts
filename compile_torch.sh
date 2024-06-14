@@ -1,14 +1,17 @@
 #!/bin/bash
 set -e
-work_path=${work_path:-/scratch/yhao24/p9_inductor}
+work_path=${work_path:-/home/yhao/p9/pytorch}
+# clean_install=1 will remove the existing pytorch folder and re-clone it
+# if not, it will just update the existing pytorch and dependent packages
+clean_install=${clean_install:-0}
+# clean_torch=1 will run python setup.py clean to remove previous pytorch build files 
+clean_torch=${clean_torch:-0}
 # disable ROCM when working on servers with NVIDIA GPUs and AMD GPUs
 export USE_ROCM=0
 export USE_NCCL=1
-export ROCR_VISIBLE_DEVICES=3
-export CUDA_VISIBLE_DEVICES=1
-
-
-# write a function to check the return value of the previous command
+# export ROCR_VISIBLE_DEVICES=3
+# export CUDA_VISIBLE_DEVICES=1
+# function to check the return value of the previous command
 check_return_value() {
     if [ $? -ne 0 ]; then
         echo "Error: $1"
@@ -24,70 +27,64 @@ conda install -y magma-cuda121 cmake ninja mkl mkl-include libpng libjpeg-turbo 
 # https://github.com/pytorch/benchmark/blob/main/requirements.txt
 pip install numpy==1.23.5
 cd $work_path
-git clone --recursive git@github.com:pytorch/pytorch.git
-cd pytorch
+if [ $clean_install -eq 1 ]; then
+    rm -rf pytorch text vision audio benchmark
+    git clone --recursive git@github.com:pytorch/pytorch.git
+    git clone --recursive git@github.com:pytorch/text.git
+    git clone --recursive git@github.com:pytorch/vision.git
+    git clone --recursive git@github.com:pytorch/audio.git
+    git clone --recursive git@github.com:pytorch/benchmark.git
+    cd pytorch
+else
+    cd pytorch
+    git checkout main
+    git pull
+fi
+
 git submodule sync
 git submodule update --init --recursive
 pip install -r requirements.txt
 make triton
 
 export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
+if [ $clean_torch -eq 1 ]; then
+    python setup.py clean
+fi
 python setup.py develop
 
-check_return_value "pytorch installation failed"
+function upgrade_pack(){
+    cd $work_path/$1
+    git pull
+    git submodule sync
+    git submodule update --init --recursive
+    pip uninstall -y $1
+    python setup.py clean
+    python setup.py install
+    echo "$1 installation is done"
+}
 
 # install torchdata
 cd $work_path
-git clone git@github.com:pytorch/data.git
-cd data
-git submodule update --init --recursive
-pip uninstall -y  torchdata
-python setup.py clean
-python setup.py install
-check_return_value "torchdata installation failed"
-echo "pytorch installation is done"
+upgrade_pack data
 
 # install torchtext
 cd $work_path
 export CC=`which gcc`
 export CXX=`which g++`
-git clone git@github.com:pytorch/text.git
-cd text
-git submodule update --init --recursive
-pip uninstall -y  torchtext
-python setup.py clean
-python setup.py install
-check_return_value "torchtext installation failed"
-echo "torchtext installation is done"
-
+upgrade_pack text
 
 # install torchvision
 export FORCE_CUDA=TRUE
-cd $work_path
-git clone git@github.com:pytorch/vision.git
-cd vision
 git submodule update --init --recursive
-pip uninstall -y torchvision
-python setup.py clean
-python setup.py install
-check_return_value "torchvision installation failed"
-echo "torchvision installation is done"
 
 # install torchaudio
-cd $work_path
-git clone git@github.com:pytorch/audio.git
-cd audio
-git submodule update --init --recursive
-pip uninstall -y torchaudio
-python setup.py clean
-python setup.py install
-check_return_value "torchaudio installation failed"
-echo "torchaudio installation is done"
+upgrade_pack audio
 
-cd $work_path
-git clone git@github.com:pytorch/benchmark.git
+# install torchbench
 pip install pyyaml
-cd benchmark
+cd $work_path/benchmark
+git pull
+git submodule sync
+git submodule update --init --recursive
 python install.py
-check_return_value "torchbench installation failed"
 echo "torchbench installation is done"
