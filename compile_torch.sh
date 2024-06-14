@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-work_path=${work_path:-/home/yhao/p9/pytorch}
+work_path=${work_path:-/home/yhao/p9}
 # clean_install=1 will remove the existing pytorch folder and re-clone it
 # if not, it will just update the existing pytorch and dependent packages
 clean_install=${clean_install:-0}
