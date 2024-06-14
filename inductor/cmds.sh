@@ -208,3 +208,21 @@ work_path=/home/yhao/p9 conda_dir=/home/yhao/miniconda3 mode=training test=perf 
 work_path=/home/yhao/p9 conda_dir=/home/yhao/miniconda3 mode=inference test=acc cpp_wrapper=0 log_path=/home/yhao/p9/logs ./run_all.sh;
 work_path=/home/yhao/p9 conda_dir=/home/yhao/miniconda3 mode=inference test=perf cpp_wrapper=0 log_path=/home/yhao/p9/logs ./run_all.sh;
 work_path=/home/yhao/p9 conda_dir=/home/yhao/miniconda3 mode=inference test=perf cpp_wrapper=0 single_stream=1 log_path=/home/yhao/p9/logs ./run_all.sh;
+
+# pure run
+
+for model in RobertaForCausalLM MegatronBertForQuestionAnswering MegatronBertForCausalLM; do
+
+TORCHINDUCTOR_MULTIPLE_STREAMS=1 python benchmarks/dynamo/${collection}.py  --accuracy  -dcuda --${mode} --inductor  --disable-cudagraphs   --only ${model}
+TORCHINDUCTOR_MULTIPLE_STREAMS=1 python benchmarks/dynamo/${collection}.py  --performance  -dcuda --${mode} --inductor  --disable-cudagraphs   --only ${model}
+TORCHINDUCTOR_MULTIPLE_STREAMS=0 python benchmarks/dynamo/${collection}.py  --performance  -dcuda --${mode} --inductor  --disable-cudagraphs  --only ${model}
+
+done
+
+
+mode=training test=perf single_stream=1  ./run_all.sh
+mode=training test=perf  ./run_all.sh
+mode=training test=acc ./run_all.sh
+mode=inference test=perf single_stream=1 ./run_all.sh
+mode=inference test=perf  ./run_all.sh
+mode=inference test=acc  ./run_all.sh
