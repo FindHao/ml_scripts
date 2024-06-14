@@ -1,11 +1,12 @@
 #!/bin/bash
-
+set -e
 work_path=${work_path:-/scratch/yhao24/p9_inductor}
 # disable ROCM when working on servers with NVIDIA GPUs and AMD GPUs
 export USE_ROCM=0
 export USE_NCCL=1
 export ROCR_VISIBLE_DEVICES=3
 export CUDA_VISIBLE_DEVICES=1
+
 
 # write a function to check the return value of the previous command
 check_return_value() {
@@ -19,7 +20,7 @@ check_return_value() {
 
 conda install -y magma-cuda121 cmake ninja mkl mkl-include libpng libjpeg-turbo graphviz -c pytorch
 
-# !!! warning need to use same numpy version with torchbench!!!!! 
+# !!! warning need to use same numpy version with torchbench!!!!!
 # https://github.com/pytorch/benchmark/blob/main/requirements.txt
 pip install numpy==1.23.5
 cd $work_path
