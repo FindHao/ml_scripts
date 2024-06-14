@@ -4,8 +4,9 @@ work_path=${work_path:-/home/yhao/p9}
 # clean_install=1 will remove the existing pytorch folder and re-clone it
 # if not, it will just update the existing pytorch and dependent packages
 clean_install=${clean_install:-0}
-# clean_torch=1 will run python setup.py clean to remove previous pytorch build files 
+# clean_torch=1 will run python setup.py clean to remove previous pytorch build files
 clean_torch=${clean_torch:-0}
+torch_only=${torch_only:-0}
 # disable ROCM when working on servers with NVIDIA GPUs and AMD GPUs
 export USE_ROCM=0
 export USE_NCCL=1
@@ -52,7 +53,18 @@ if [ $clean_torch -eq 1 ]; then
 fi
 python setup.py develop
 
-function upgrade_pack(){
+function notify_finish() {
+    if command -v notify &>/dev/null; then
+        notify "PyTorch Compilation is done"
+    fi
+}
+
+if [ $torch_only -eq 1 ]; then
+    notify_finish
+    exit 0
+fi
+
+function upgrade_pack() {
     cd $work_path/$1
     git pull
     git submodule sync
@@ -69,8 +81,8 @@ upgrade_pack data
 
 # install torchtext
 cd $work_path
-export CC=`which gcc`
-export CXX=`which g++`
+export CC=$(which gcc)
+export CXX=$(which g++)
 upgrade_pack text
 
 # install torchvision
@@ -88,7 +100,3 @@ git submodule sync
 git submodule update --init --recursive
 python install.py
 echo "torchbench installation is done"
-if command -v notify &> /dev/null
-then
-    notify "PyTorch Compilation is done"
-fi
