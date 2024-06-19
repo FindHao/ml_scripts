@@ -18,7 +18,7 @@ log_path=${log_path:-${work_path}/logs}
 output_file=${log_path}/run_${mode}_${test}_${var_date}.log
 conda_dir=${conda_dir:-/home/yhao/miniconda3}
 cpp_wrapper=${cpp_wrapper:-0}
-# TORCH_COMPILE_DEBUG=1 etc.
+# debug_flags="TORCH_COMPILE_DEBUG=1 " etc.
 debug_flags=${debug_flags:-""}
 # env1 is the default environment
 env1=${env1:-pt_compiled_clean_for_ms}
