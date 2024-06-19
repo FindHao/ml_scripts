@@ -18,6 +18,8 @@ log_path=${log_path:-${work_path}/logs}
 output_file=${log_path}/run_${mode}_${test}_${var_date}.log
 conda_dir=${conda_dir:-/home/yhao/miniconda3}
 cpp_wrapper=${cpp_wrapper:-0}
+# TORCH_COMPILE_DEBUG=1 etc.
+debug_flags=${debug_flags:-""}
 # env1 is the default environment
 env1=${env1:-pt_compiled_clean_for_ms}
 STREAMSCHEDULER_REORDER=${STREAMSCHEDULER_REORDER:-0}
@@ -63,11 +65,18 @@ else
     precision_place_holder="--amp"
     mode_place_holder="--training"
 fi
-if [ $single_stream -eq 1 ]; then
-    stream_place_holder="env TORCHINDUCTOR_MULTIPLE_STREAMS=0"
-else
-    stream_place_holder="env TORCHINDUCTOR_MULTIPLE_STREAMS=1"
+PREFIX=""
+# if debug_flags is not empty, then add it to prefix
+if [ ! -z "$debug_flags" ]; then
+    PREFIX="${debug_flags}"
 fi
+if [ $single_stream -eq 1 ]; then
+    PREFIX="${PREFIX} TORCHINDUCTOR_MULTIPLE_STREAMS=0"
+else
+    PREFIX="${PREFIX} TORCHINDUCTOR_MULTIPLE_STREAMS=1"
+fi
+PREFIX="env ${PREFIX} "
+
 if [ $cpp_wrapper -eq 1 ]; then
     cpp_wrapper_place_holder="--cpp-wrapper"
 else
@@ -108,7 +117,7 @@ for collection in torchbench timm_models huggingface; do
     fi
     output_csv_file=${log_path}/${var_date}_${collection}_${mode}_${test_name}${stream_file_affix}.csv
     echo "output_csv_file is $output_csv_file" >>$output_file
-    ${stream_place_holder} python benchmarks/dynamo/${collection}.py ${test_acc_or_perf} ${cpp_wrapper_place_holder} ${precision_place_holder} -dcuda ${mode_place_holder} --inductor --disable-cudagraphs --output ${output_csv_file} >>$output_file 2>&1
+    ${PREFIX} python benchmarks/dynamo/${collection}.py ${test_acc_or_perf} ${cpp_wrapper_place_holder} ${precision_place_holder} -dcuda ${mode_place_holder} --inductor --disable-cudagraphs --output ${output_csv_file} >>$output_file 2>&1
 done
 
 end_time=$(date +%s)
