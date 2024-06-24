@@ -32,6 +32,7 @@ if [ $clean_install -eq 1 ]; then
     rm -rf pytorch text vision audio benchmark
     git clone --recursive git@github.com:pytorch/pytorch.git
     git clone --recursive git@github.com:pytorch/text.git
+    git clone --recursive git@github.com:pytorch/data.git
     git clone --recursive git@github.com:pytorch/vision.git
     git clone --recursive git@github.com:pytorch/audio.git
     git clone --recursive git@github.com:pytorch/benchmark.git
