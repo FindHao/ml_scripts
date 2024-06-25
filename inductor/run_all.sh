@@ -76,6 +76,7 @@ else
     PREFIX="${PREFIX} TORCHINDUCTOR_MULTIPLE_STREAMS=1"
 fi
 PREFIX="env ${PREFIX} "
+echo "PREFIX: ${PREFIX}"
 
 if [ $cpp_wrapper -eq 1 ]; then
     cpp_wrapper_place_holder="--cpp-wrapper"
@@ -117,6 +118,7 @@ for collection in torchbench timm_models huggingface; do
     fi
     output_csv_file=${log_path}/${var_date}_${collection}_${mode}_${test_name}${stream_file_affix}.csv
     echo "output_csv_file is $output_csv_file" >>$output_file
+    echo "${PREFIX} python benchmarks/dynamo/${collection}.py ${test_acc_or_perf} ${cpp_wrapper_place_holder} ${precision_place_holder} -dcuda ${mode_place_holder} --inductor --disable-cudagraphs --output ${output_csv_file} >>$output_file 2>&1" >> $output_file
     ${PREFIX} python benchmarks/dynamo/${collection}.py ${test_acc_or_perf} ${cpp_wrapper_place_holder} ${precision_place_holder} -dcuda ${mode_place_holder} --inductor --disable-cudagraphs --output ${output_csv_file} >>$output_file 2>&1
 done
 
