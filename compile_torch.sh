@@ -24,9 +24,6 @@ check_return_value() {
 
 conda install -y magma-cuda121 cmake ninja mkl mkl-include libpng libjpeg-turbo graphviz -c pytorch
 
-# !!! warning need to use same numpy version with torchbench!!!!!
-# https://github.com/pytorch/benchmark/blob/main/requirements.txt
-pip install numpy==1.23.5
 cd $work_path
 if [ $clean_install -eq 1 ]; then
     rm -rf pytorch text vision audio benchmark
