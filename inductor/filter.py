@@ -16,10 +16,13 @@ def work_multi_models(input_file, output_file):
     with open(input_file, 'r') as fin:
         content = fin.read()
     if "cuda train" in content:
-        mode='train'
+        split_str = "cuda train"
+    elif "cpu  train" in content:
+        split_str = "cpu  train"
     elif "cuda eval" in content:
-        mode='eval'
-    split_str = "cuda %s" % mode
+        split_str = "cuda eval"
+    elif "cpu  eval" in content:
+        split_str = "cpu  eval"
     content_s = [_ for _ in content.split(split_str) if _.strip()][1:]
     results = {}
     for amodel in content_s:
@@ -29,6 +32,7 @@ def work_multi_models(input_file, output_file):
         if not speedup:
             continue
         results[model_name] = float(speedup[0].strip())
+    # breakpoint()
     last_content = content_s[-1]
     find_summary = True
     reg_split = re.compile(r"\nspeedup.*gmean")
