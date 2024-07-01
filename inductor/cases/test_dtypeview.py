@@ -79,11 +79,12 @@ def _get_primitive_bitwidth(dtype):
 test_dtypes = [torch.float, torch.float64, torch.complex, torch.complex128,torch.float16, torch.bfloat16, torch.uint8, torch.int8, torch.int16, torch.int32, torch.int64, torch.bool]
 for test_dtype_x in test_dtypes:
     for test_dtype_y in test_dtypes:
+        # @ operation needs arguments to be the same dtype
         for view_dtype in test_dtypes:
-            if _get_primitive_bitwidth(test_dtype_x) != _get_primitive_bitwidth(test_dtype_y) and _get_primitive_bitwidth(test_dtype_x) != _get_primitive_bitwidth(view_dtype):
-                continue
-            # @ operation needs arguments to be the same dtype
             print(f"({test_dtype_x}, {test_dtype_y}, {view_dtype})")
+            if _get_primitive_bitwidth(test_dtype_x) != _get_primitive_bitwidth(test_dtype_y) or _get_primitive_bitwidth(test_dtype_x) != _get_primitive_bitwidth(view_dtype):
+                print("skip")
+                continue
             x = torch.randn((2, 2), device=device, dtype=test_dtype_x)
             y = torch.randn((2, 2), device=device, dtype=test_dtype_y)
             x2 = x.clone()
