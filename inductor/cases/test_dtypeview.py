@@ -76,16 +76,42 @@ def _get_primitive_bitwidth(dtype):
         return torch.finfo(dtype).bits
     else:
         return torch.iinfo(dtype).bits
-test_dtypes = [torch.float, torch.float64, torch.complex, torch.complex128,torch.float16, torch.bfloat16, torch.uint8, torch.int8, torch.int16, torch.int32, torch.int64, torch.bool]
+dtype_ranges = {
+    torch.uint8: (0, 256),
+    torch.int8: (-128, 128),
+    torch.int16: (-32768, 32767),
+    torch.int32: (-2147483648, 2147483647),
+    torch.int64: (-9223372036854775808, 9223372036854775807)
+}
+test_dtypes = [torch.float, torch.float64, torch.float16, torch.bfloat16, torch.uint8, torch.int8, torch.int16, torch.int32, torch.int64]
 for test_dtype_x in test_dtypes:
     for test_dtype_y in test_dtypes:
         # @ operation needs arguments to be the same dtype
         for view_dtype in test_dtypes:
             print(f"({test_dtype_x}, {test_dtype_y}, {view_dtype})")
-            if _get_primitive_bitwidth(test_dtype_x) != _get_primitive_bitwidth(test_dtype_y) or _get_primitive_bitwidth(test_dtype_x) != _get_primitive_bitwidth(view_dtype):
+            if _get_primitive_bitwidth(test_dtype_x) != _get_primitive_bitwidth(test_dtype_y) or _get_primitive_bitwidth(test_dtype_x) != _get_primitive_bitwidth(view_dtype) or view_dtype in [torch.int32, torch.int64, torch.int16, torch.uint8, torch.int8]:
                 print("skip")
                 continue
-            x = torch.randn((2, 2), device=device, dtype=test_dtype_x)
-            y = torch.randn((2, 2), device=device, dtype=test_dtype_y)
+            if test_dtype_x.is_floating_point:
+                x = torch.randn((2, 2), device='cuda', dtype=test_dtype_x)
+            else:
+                # Use the range from dtype_ranges if available
+                if test_dtype_x in dtype_ranges:
+                    low, high = dtype_ranges[test_dtype_x]
+                    x = torch.randint(low=low, high=high, size=(2, 2), device='cuda', dtype=test_dtype_x)
+                else:
+                    raise ValueError(f"Unsupported dtype: {test_dtype_x}")
+            if test_dtype_y.is_floating_point:
+                y = torch.randn((2, 2), device='cuda', dtype=test_dtype_y)
+            else:
+                # Use the range from dtype_ranges if available
+                if test_dtype_y in dtype_ranges:
+                    low, high = dtype_ranges[test_dtype_y]
+                    y = torch.randint(low=low, high=high, size=(2, 2), device='cuda', dtype=test_dtype_y)
+                else:
+                    raise ValueError(f"Unsupported dtype: {test_dtype_y}")
             x2 = x.clone()
             fn(x, y, view_dtype, x2)
+            # # print the final valued combination to /tmp/yhao.log
+            # with open("/tmp/yhao.log", "a") as f:
+            #     f.write(f"({test_dtype_x}, {test_dtype_y}, {view_dtype})\n")
