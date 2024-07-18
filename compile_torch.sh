@@ -85,7 +85,6 @@ upgrade_pack text
 
 # install torchvision
 export FORCE_CUDA=1
-git submodule update --init --recursive
 upgrade_pack vision
 
 # install torchaudio
