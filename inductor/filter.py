@@ -48,6 +48,8 @@ def work_multi_models(input_file, output_file):
                 continue
             metric_line = metric_line.strip().split()
             metric_name = metric_line[0]
+            if "warn" in metric_name.lower():
+                continue
             summary_metric[metric_name] = {}
             if metric_name == 'compilation_latency':
                 mean_name = metric_line[1].split('=')[0]
