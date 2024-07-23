@@ -7,6 +7,7 @@ clean_install=${clean_install:-0}
 # clean_torch=1 will run python setup.py clean to remove previous pytorch build files
 clean_torch=${clean_torch:-0}
 torch_only=${torch_only:-0}
+torch_branch=${torch_branch:"main"}
 # disable ROCM when working on servers with NVIDIA GPUs and AMD GPUs
 export USE_ROCM=0
 export USE_NCCL=1
@@ -36,7 +37,7 @@ if [ $clean_install -eq 1 ]; then
     cd pytorch
 else
     cd pytorch
-    git checkout main
+    git checkout ${torch_branch}
     git pull
 fi
 

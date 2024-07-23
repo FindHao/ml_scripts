@@ -1,5 +1,5 @@
 import torch
-
+from torch._dynamo.testing import rand_strided
 device = torch.device("cuda")
 
 # # @torch.compile
@@ -122,19 +122,51 @@ dtype_ranges = {
 #             #     f.write(f"({test_dtype_x}, {test_dtype_y}, {view_dtype})\n")
 
 
+# def fn(x, y, x_dtype):
+#     x = x.view(x_dtype)
+#     y = y.view(x_dtype) + 1
+#     return x @ y
+
+# x = torch.randn((2, 2), device='cuda', dtype=torch.float16)
+# y = torch.randn((2, 2), device='cuda', dtype=torch.float16)
+# x1 = x.clone()
+# y1 = y.clone()
+
+# ref_results = fn(x, y, torch.bfloat16)
+# compiled_fn = torch.compile(fn)
+# compiled_results = compiled_fn(x1, y1, torch.bfloat16)
+# print(ref_results)
+# print(compiled_results)
+# print(torch.allclose(ref_results, compiled_results))
+
+
+
+test_dtype_x=torch.float16
+test_dtype_y=torch.float16
+target_dtype = torch.bfloat16
+
+x = rand_strided(
+    (2, 2), (2, 1), device=device, dtype=test_dtype_x
+)
+y = rand_strided(
+    (2, 2), (2, 1), device=device, dtype=test_dtype_y
+)
+# def fn(x, y, x_dtype):
+#     x = x.view(x_dtype)
+#     y = y.view(x_dtype) + 1
+#     return x @ y
 def fn(x, y, x_dtype):
+    x = x + 1
     x = x.view(x_dtype)
     y = y.view(x_dtype) + 1
-    return x @ y
+    return x, y
 
-x = torch.randn((2, 2), device='cuda', dtype=torch.float16)
-y = torch.randn((2, 2), device='cuda', dtype=torch.float16)
 x1 = x.clone()
 y1 = y.clone()
 
-ref_results = fn(x, y, torch.bfloat16)
+ref_results = fn(x, y, target_dtype)
 compiled_fn = torch.compile(fn)
-compiled_results = compiled_fn(x1, y1, torch.bfloat16)
+compiled_results = compiled_fn(x1, y1, target_dtype)
 print(ref_results)
 print(compiled_results)
-print(torch.allclose(ref_results, compiled_results))
+print(torch.allclose(ref_results[0], compiled_results[0]))
