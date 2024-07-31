@@ -21,10 +21,22 @@ from torch._dynamo.testing import rand_strided
 # print(type(z1))
 # print(z1)
 
-def fn(x, x_dtype):
-    return x.view(x_dtype)
+# def fn(x, x_dtype):
+#     return x.view(x_dtype)
 
-x = rand_strided((2, 2), (2, 1), device='cuda:0', dtype=torch.float16)
-compiled_fn = torch.compile(fn)
-z1 = compiled_fn(x, torch.float32)
-print(z1.dtype)
+# x = rand_strided((2, 2), (2, 1), device='cuda:0', dtype=torch.float16)
+# compiled_fn = torch.compile(fn)
+# z1 = compiled_fn(x, torch.float32)
+# print(z1.dtype)
+
+device='cuda'
+
+@torch.compile
+def fn(x, y):
+    x = x.view(torch.float16)
+    y = y.view(torch.float16) + 1
+    return x @ y
+
+x = torch.randn((2, 2), device=device, dtype=torch.bfloat16)
+y = torch.randn((2, 2), device=device, dtype=torch.bfloat16)
+fn(x, y)
