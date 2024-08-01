@@ -31,7 +31,7 @@ import torch
 # foo(torch.rand([20]), torch.rand([4]))
 
 def fn(x):
-    return x.sum().item()
+    return x.sum()
 
 input = torch.rand([20], dtype=torch.float64)
 # input = torch.randint(0, 100, (5, 5), dtype=torch.int32)

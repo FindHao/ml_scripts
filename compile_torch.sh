@@ -7,7 +7,7 @@ clean_install=${clean_install:-0}
 # clean_torch=1 will run python setup.py clean to remove previous pytorch build files
 clean_torch=${clean_torch:-0}
 torch_only=${torch_only:-0}
-torch_branch=${torch_branch:"main"}
+torch_branch=${torch_branch:-"main"}
 # disable ROCM when working on servers with NVIDIA GPUs and AMD GPUs
 export USE_ROCM=0
 export USE_NCCL=1
@@ -20,6 +20,14 @@ check_return_value() {
         exit 1
     fi
 }
+
+# print configs
+echo "work_path: ${work_path}"
+echo "clean_install: ${clean_install}"
+echo "clean_torch: ${clean_torch}"
+echo "torch_only: ${torch_only}"
+echo "torch_branch: ${torch_branch}"
+
 
 # if you have an error named like version `GLIBCXX_3.4.30' not found, you can add `-c conda-forge` to the following command. And also for your `conda create -n pt_compiled -c conda-forge python=3.10` command
 
