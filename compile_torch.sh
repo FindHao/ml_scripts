@@ -35,7 +35,7 @@ conda install -y magma-cuda121 cmake ninja mkl mkl-include libpng libjpeg-turbo 
 
 cd $work_path
 if [ $clean_install -eq 1 ]; then
-    rm -rf pytorch text vision audio benchmark
+    rm -rf pytorch text vision audio benchmark data
     git clone --recursive git@github.com:pytorch/pytorch.git
     git clone --recursive git@github.com:pytorch/text.git
     git clone --recursive git@github.com:pytorch/data.git
