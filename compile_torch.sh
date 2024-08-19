@@ -8,6 +8,8 @@ clean_install=${clean_install:-0}
 clean_torch=${clean_torch:-0}
 torch_only=${torch_only:-0}
 torch_branch=${torch_branch:-"main"}
+# torchbench installation takes a long time, so it can be disabled
+no_torchbench=${no_torchbench:-0} 
 # disable ROCM when working on servers with NVIDIA GPUs and AMD GPUs
 export USE_ROCM=0
 export USE_NCCL=1
@@ -42,13 +44,11 @@ if [ $clean_install -eq 1 ]; then
     git clone --recursive git@github.com:pytorch/vision.git
     git clone --recursive git@github.com:pytorch/audio.git
     git clone --recursive git@github.com:pytorch/benchmark.git
-    cd pytorch
-else
-    cd pytorch
-    git checkout ${torch_branch}
-    git pull
 fi
 
+cd $work_path/pytorch
+git checkout $torch_branch
+git pull
 git submodule sync
 git submodule update --init --recursive
 pip install -r requirements.txt
@@ -99,6 +99,10 @@ upgrade_pack vision
 # install torchaudio
 upgrade_pack audio
 
+if [ $no_torchbench -eq 1 ]; then
+    notify_finish
+    exit 0
+fi
 # install torchbench
 pip install pyyaml
 cd $work_path/benchmark
@@ -107,3 +111,4 @@ git submodule sync
 git submodule update --init --recursive
 python install.py
 echo "torchbench installation is done"
+notify_finish
