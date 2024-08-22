@@ -39,7 +39,7 @@ echo "torch_commit: ${torch_commit}"
 
 # if you have an error named like version `GLIBCXX_3.4.30' not found, you can add `-c conda-forge` to the following command. And also for your `conda create -n pt_compiled -c conda-forge python=3.10` command
 
-conda install -y magma-cuda121 cmake ninja mkl mkl-include libpng libjpeg-turbo graphviz -c pytorch
+conda install -y magma-cuda121 cache cmake ninja mkl mkl-include libpng libjpeg-turbo graphviz -c pytorch
 
 cd $work_path
 if [ $clean_install -eq 1 ]; then
