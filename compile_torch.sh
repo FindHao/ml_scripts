@@ -10,7 +10,7 @@ clean_torch=${clean_torch:-0}
 torch_only=${torch_only:-0}
 
 # for specific commit or branch 
-torch_commit=${torch_commit:-0}
+torch_commit=${torch_commit:-""}
 torch_branch=${torch_branch:-"main"}
 
 # torchbench installation takes a long time, so it can be disabled
@@ -54,7 +54,7 @@ fi
 
 cd $work_path/pytorch
 git pull
-if [ $torch_commit -ne 0 ]; then
+if [ -n "$torch_commit" ]; then
     git checkout $torch_commit
     echo "warnging: you are using a specific commit. don't forget to create a new branch if you want to make changes"
 else
