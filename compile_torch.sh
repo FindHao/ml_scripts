@@ -1,4 +1,5 @@
 #!/bin/bash
+# simple usage: work_path=/home/yhao/pt ./compile_torch.sh
 set -e
 work_path=${work_path:-/home/yhao/p9}
 # clean_install=1 will remove the existing pytorch folder and re-clone it
@@ -7,7 +8,11 @@ clean_install=${clean_install:-0}
 # clean_torch=1 will run python setup.py clean to remove previous pytorch build files
 clean_torch=${clean_torch:-0}
 torch_only=${torch_only:-0}
+
+# for specific commit or branch 
+torch_commit=${torch_commit:-0}
 torch_branch=${torch_branch:-"main"}
+
 # torchbench installation takes a long time, so it can be disabled
 no_torchbench=${no_torchbench:-0} 
 # disable ROCM when working on servers with NVIDIA GPUs and AMD GPUs
@@ -29,6 +34,7 @@ echo "clean_install: ${clean_install}"
 echo "clean_torch: ${clean_torch}"
 echo "torch_only: ${torch_only}"
 echo "torch_branch: ${torch_branch}"
+echo "torch_commit: ${torch_commit}"
 
 
 # if you have an error named like version `GLIBCXX_3.4.30' not found, you can add `-c conda-forge` to the following command. And also for your `conda create -n pt_compiled -c conda-forge python=3.10` command
@@ -47,8 +53,13 @@ if [ $clean_install -eq 1 ]; then
 fi
 
 cd $work_path/pytorch
-git checkout $torch_branch
 git pull
+if [ $torch_commit -ne 0 ]; then
+    git checkout $torch_commit
+    echo "warnging: you are using a specific commit. don't forget to create a new branch if you want to make changes"
+else
+    git checkout $torch_branch
+fi
 git submodule sync
 git submodule update --init --recursive
 pip install -r requirements.txt
