@@ -5,9 +5,9 @@ This is a collection of scripts including cuda installation, nightly pytorch ins
 ## cuda installation
 
 ```
-t_cuda=121 t_cuda_path=/install/path  ./install_cuda.sh
+CUDA_VERSION=12.1 CUDA_INSTALL_PREFIX=/install/path  ./install_cuda.sh
 ```
-It will automatically download and install cuda 12.1, cudnn 8.8.1, and nccl 2.18.1 to the path `/install/path/cuda-12.1`.
+It will automatically download and install cuda 12.1, cudnn, and nccl to the path `/install/path/cuda-12.1`.
 
 
 ## PyTorch + TorchBench Compilation

@@ -1,5 +1,6 @@
 #!/bin/bash
 # Usage: CUDA_INSTALL_PREFIX=/path/to/install ./install_cuda.sh 11.8
+# Notice: Part of this script should be synced with pytorch/pytorch/.ci/docker/common/install_cuda.sh
 set -ex
 
 NCCL_VERSION=v2.21.5-1
