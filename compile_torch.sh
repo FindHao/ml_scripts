@@ -53,7 +53,7 @@ if [ $clean_install -eq 1 ]; then
 fi
 
 cd $work_path/pytorch
-git pull
+git pull origin main
 if [ -n "$torch_commit" ]; then
     git checkout $torch_commit
     echo "warnging: you are using a specific commit. don't forget to create a new branch if you want to make changes"
