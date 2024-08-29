@@ -85,6 +85,8 @@ fi
 function upgrade_pack() {
     cd $work_path/$1
     git pull
+    # the data.txt is weird, so we don't use it. leave it here for future reference
+    # git checkout "$work_path/pytorch/.github/ci_commit_pins/$1.txt"
     git submodule sync
     git submodule update --init --recursive
     pip uninstall -y $1
