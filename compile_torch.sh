@@ -10,12 +10,12 @@ clean_install=${clean_install:-0}
 clean_torch=${clean_torch:-0}
 torch_only=${torch_only:-0}
 
-# for specific commit or branch 
+# for specific commit or branch
 torch_commit=${torch_commit:-""}
 torch_branch=${torch_branch:-"main"}
 
 # torchbench installation takes a long time, so it can be disabled
-no_torchbench=${no_torchbench:-0} 
+no_torchbench=${no_torchbench:-0}
 # disable ROCM when working on servers with NVIDIA GPUs and AMD GPUs
 export USE_ROCM=0
 export USE_NCCL=1
@@ -53,7 +53,7 @@ if [ $clean_install -eq 1 ]; then
 fi
 
 cd $work_path/pytorch
-git pull origin main
+git fetch
 if [ -n "$torch_commit" ]; then
     git checkout $torch_commit
     echo "warnging: you are using a specific commit. don't forget to create a new branch if you want to make changes"
