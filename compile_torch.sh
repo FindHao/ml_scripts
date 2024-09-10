@@ -13,6 +13,7 @@ torch_only=${torch_only:-0}
 # for specific commit or branch
 torch_commit=${torch_commit:-""}
 torch_branch=${torch_branch:-"main"}
+torch_pull=${torch_pull:-0}
 
 # torchbench installation takes a long time, so it can be disabled
 no_torchbench=${no_torchbench:-0}
@@ -59,6 +60,9 @@ if [ -n "$torch_commit" ]; then
     echo "warnging: you are using a specific commit. don't forget to create a new branch if you want to make changes"
 else
     git checkout $torch_branch
+fi
+if [ $torch_pull -eq 1 ]; then
+    git pull
 fi
 git submodule sync
 git submodule update --init --recursive
