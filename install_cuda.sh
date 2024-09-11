@@ -65,7 +65,7 @@ function install_118 {
     # NCCL license: https://docs.nvidia.com/deeplearning/nccl/#licenses
     # Follow build: https://github.com/NVIDIA/nccl/tree/master?tab=readme-ov-file#build
     git clone -b $NCCL_VERSION --depth 1 https://github.com/NVIDIA/nccl.git
-    cd nccl && make -j src.build
+    cd nccl && make -j src.build CUDA_HOME=${CUDA_INSTALL_PREFIX}/cuda
     cp -a build/include/* ${CUDA_INSTALL_PREFIX}/cuda/include/
     cp -a build/lib/* ${CUDA_INSTALL_PREFIX}/cuda/lib64/
     cd ..
@@ -100,7 +100,7 @@ function install_121 {
     # NCCL license: https://docs.nvidia.com/deeplearning/nccl/#licenses
     # Follow build: https://github.com/NVIDIA/nccl/tree/master?tab=readme-ov-file#build
     git clone -b $NCCL_VERSION --depth 1 https://github.com/NVIDIA/nccl.git
-    cd nccl && make -j src.build
+    cd nccl && make -j src.build CUDA_HOME=${CUDA_INSTALL_PREFIX}/cuda
     cp -a build/include/* ${CUDA_INSTALL_PREFIX}/cuda/include/
     cp -a build/lib/* ${CUDA_INSTALL_PREFIX}/cuda/lib64/
     cd ..
@@ -134,7 +134,7 @@ function install_124 {
     # NCCL license: https://docs.nvidia.com/deeplearning/nccl/#licenses
     # Follow build: https://github.com/NVIDIA/nccl/tree/master?tab=readme-ov-file#build
     git clone -b $NCCL_VERSION --depth 1 https://github.com/NVIDIA/nccl.git
-    cd nccl && make -j src.build
+    cd nccl && make -j src.build CUDA_HOME=${CUDA_INSTALL_PREFIX}/cuda
     cp -a build/include/* ${CUDA_INSTALL_PREFIX}/cuda/include/
     cp -a build/lib/* ${CUDA_INSTALL_PREFIX}/cuda/lib64/
     cd ..
