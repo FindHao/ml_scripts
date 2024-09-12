@@ -40,7 +40,10 @@ echo "torch_commit: ${torch_commit}"
 
 
 # if you have an error named like version `GLIBCXX_3.4.30' not found, you can add `-c conda-forge` to the following command. And also for your `conda create -n pt_compiled -c conda-forge python=3.10` command
-conda install -y magma-cuda121 ccache cmake ninja mkl mkl-include libpng libjpeg-turbo graphviz -c pytorch
+conda install -y magma-cuda121  -c pytorch
+conda install -y ccache cmake ninja mkl mkl-include libpng libjpeg-turbo graphviz -c conda-forge
+export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
+
 
 cd $work_path
 if [ $clean_install -eq 1 ]; then
@@ -69,7 +72,6 @@ git submodule update --init --recursive
 pip install -r requirements.txt
 make triton
 
-export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
 if [ $clean_torch -eq 1 ]; then
     python setup.py clean
 fi
