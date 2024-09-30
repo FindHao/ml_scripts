@@ -10,6 +10,9 @@ clean_install=${clean_install:-0}
 clean_torch=${clean_torch:-0}
 torch_only=${torch_only:-0}
 
+export MAX_JOBS=256
+debug=${debug:-0}
+
 # for specific commit or branch
 torch_commit=${torch_commit:-""}
 torch_branch=${torch_branch:-"main"}
@@ -75,7 +78,15 @@ make triton
 if [ $clean_torch -eq 1 ]; then
     python setup.py clean
 fi
-python setup.py develop
+
+if [ $debug -eq 1 ]; then
+    debug_prefix="env DEBUG=1"
+else
+    debug_prefix=""
+fi
+
+
+${debug_prefix} python setup.py develop
 
 function notify_finish() {
     if command -v notify &>/dev/null; then
