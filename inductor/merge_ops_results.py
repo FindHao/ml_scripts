@@ -34,7 +34,6 @@ def create_chart(
     end_row,
     cols,
     title,
-    x_col,
     chart_position,
     categories_col,
     is_speedup,
@@ -72,7 +71,7 @@ def create_chart(
         series.data_labels.number_format = "0.00"
 
     # Add axis titles
-    chart.x_axis.title = x_col
+    chart.x_axis.title = worksheet.cell(row=1, column=categories_col).value
     if is_speedup:
         chart.y_axis.title = "Speedup"
     else:
@@ -139,10 +138,8 @@ def main():
             print("Selected memory columns:", [df.columns[i - 1] for i in mem_cols])
 
             # Find x_val column
-            x_val_col = [
-                i + 1 for i, col in enumerate(df.columns) if col.lower() == "x_val"
-            ][0]
-            print("add chart")
+            x_val_col = 1
+
             if speedup_cols:
                 create_chart(
                     worksheet=worksheet,
@@ -150,7 +147,6 @@ def main():
                     end_row=len(df) + 1,
                     cols=speedup_cols,
                     title=f"{sheet_name} Speedup",
-                    x_col="X Value",
                     chart_position="A10",
                     categories_col=x_val_col,
                     is_speedup=True,
@@ -163,7 +159,6 @@ def main():
                     end_row=len(df) + 1,
                     cols=mem_cols,
                     title=f"{sheet_name} Memory Footprint",
-                    x_col="X Value",
                     chart_position="P10",
                     categories_col=x_val_col,
                     is_speedup=False,
