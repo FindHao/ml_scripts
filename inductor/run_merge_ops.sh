@@ -1,7 +1,12 @@
 #!/bin/bash
 
-# Base directories
-INPUT_BASE="/tmp/tritonbench"
+# Check if input directory is provided
+if [ $# -eq 0 ]; then
+    INPUT_BASE="/tmp/tritonbench"  # Default value
+else
+    INPUT_BASE="$1"  # Use first command line argument
+fi
+
 OUTPUT_BASE="/tmp/tritonbench/results"
 
 # Create output directory if it doesn't exist
