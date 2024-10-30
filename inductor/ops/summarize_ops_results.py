@@ -5,63 +5,98 @@ from pathlib import Path
 import numpy as np
 
 def format_excel(writer, df, sheet_name, is_speedup=True):
-    """格式化Excel文件"""
+    """Format Excel file with conditional formatting and column widths"""
     workbook = writer.book
     worksheet = writer.sheets[sheet_name]
     
-    # 动态计算并设置每列的宽度
+    # Set column widths based on content
     for i, col in enumerate(df.columns):
-        # 计算列中最长内容的长度（包括列名和数据）
         column_data = df[col].astype(str)
         max_length = max(
-            max(len(str(x)) for x in column_data),  # 数据的最大长度
-            len(col)  # 列名的长度
+            max(len(str(x)) for x in column_data),
+            len(col)
         )
-        # 将宽度设置为最大长度的1.2倍以留出一些空间
-        worksheet.set_column(i, i, max_length)
+        worksheet.set_column(i, i, max_length * 1.2)
     
-    # 创建格式
+    # Create cell formats
     red_format = workbook.add_format({
-        'bg_color': '#FFC7CE',  # 浅红色
-        'num_format': '0.00'    # 两位小数
+        'bg_color': '#FFC7CE',  # Light red
+        'num_format': '0.00'    # Two decimal places
     })
     green_format = workbook.add_format({
-        'bg_color': '#C6EFCE',  # 浅绿色
-        'num_format': '0.00'    # 两位小数
+        'bg_color': '#C6EFCE',  # Light green
+        'num_format': '0.00'
     })
     normal_format = workbook.add_format({
-        'num_format': '0.00'    # 两位小数
+        'num_format': '0.00'
     })
     
-    # 为所有数值列设置两位小数格式
+    # Apply number format to all numeric columns
     for col_num, col_name in enumerate(df.columns):
-        if col_name != 'op_name':  # 跳过op_name列
-            for row in range(1, len(df) + 1):  # 从1开始以跳过标题行
+        if col_name != 'op_name':
+            for row in range(1, len(df) + 1):
                 worksheet.write(row, col_num, df.iloc[row-1, col_num], normal_format)
     
-    # 为比较列添加条件格式
+    # Apply conditional formatting to comparison columns
     if is_speedup:
-        compare_cols = ['p20_liger_vs_inductor', 'p50_liger_vs_inductor', 'p80_liger_vs_inductor']
+        compare_cols = ['p20_inductor_vs_liger', 'p50_inductor_vs_liger', 'p80_inductor_vs_liger']
     else:
-        compare_cols = ['p20_liger_vs_inductor_mem', 'p50_liger_vs_inductor_mem', 'p80_liger_vs_inductor_mem']
+        compare_cols = ['p20_inductor_vs_liger_mem', 'p50_inductor_vs_liger_mem', 'p80_inductor_vs_liger_mem']
     
     for col_name in compare_cols:
-        col_idx = df.columns.get_loc(col_name)
-        worksheet.conditional_format(1, col_idx, len(df), col_idx, {
-            'type': 'cell',
-            'criteria': '>=',
-            'value': 1.01,
-            'format': green_format
-        })
-        worksheet.conditional_format(1, col_idx, len(df), col_idx, {
-            'type': 'cell',
-            'criteria': '<=',
-            'value': 0.98,
-            'format': red_format
-        })
+        if col_name in df.columns:
+            col_idx = df.columns.get_loc(col_name)
+            # Red if inductor is slower/uses more memory
+            worksheet.conditional_format(1, col_idx, len(df), col_idx, {
+                'type': 'cell',
+                'criteria': '>=',
+                'value': 1.01,
+                'format': green_format
+            })
+            # Green if inductor is faster/uses less memory
+            worksheet.conditional_format(1, col_idx, len(df), col_idx, {
+                'type': 'cell',
+                'criteria': '<=',
+                'value': 0.98,
+                'format': red_format
+            })
+        else:
+            print(f"Warning: Column {col_name} not found in the dataframe")
+
+def get_op_name(filename):
+    """Extract op name from filename, remove random suffix"""
+    # Remove .csv extension
+    base_name = os.path.splitext(os.path.basename(filename))[0]
+    
+    # Remove 'op_' prefix
+    if base_name.startswith('op_'):
+        base_name = base_name[3:]
+    
+    # Find the last part containing random characters
+    parts = base_name.split('_')
+    for i in range(len(parts)-1, -1, -1):
+        part = parts[i]
+        # Check if this part looks like a random string (6-8 alphanumeric chars)
+        if 6 <= len(part) <= 8 and any(c.isalnum() for c in part):
+            return '_'.join(parts[:i])
+    
+    return base_name
+
+def test_op_name_extraction():
+    """Test function to ensure correct op name extraction"""
+    test_cases = [
+        'op_cross_entropy_u1b_7val.csv',
+        'op_embedding_9a0eb4iq.csv',
+        'op_fused_linear_cross_entropy_t7pjv_ge.csv',
+        'op_fused_linear_jsd_f87qw2pf.csv',
+        'op_geglu_djglp9k6.csv'
+    ]
+    
+    for test_case in test_cases:
+        print(f"{test_case} -> {get_op_name(test_case)}")
 
 def process_folder_results(folder_path):
-    """处理单个文件夹的所有CSV文件，返回speedup和memory的汇总数据"""
+    """Process all CSV files in a folder and return speedup and memory summary data"""
     print(f"Processing folder: {os.path.basename(folder_path)}")
     csv_files = glob.glob(os.path.join(folder_path, "*.csv"))
     
@@ -73,26 +108,32 @@ def process_folder_results(folder_path):
         df = pd.read_csv(csv_file, sep=';')
         
         try:
-            # 提取op名称
-            op_name = os.path.splitext(os.path.basename(csv_file))[0]
-            if op_name.startswith('op_'):
-                op_name = op_name[3:]
+            op_name = get_op_name(csv_file)
             
-            # 查找相关列
+            # Find relevant columns
             liger_speedup_col = [col for col in df.columns if 'liger' in col and '-speedup' in col][0]
             inductor_speedup_col = [col for col in df.columns if 'inductor' in col and '-speedup' in col][0]
             liger_mem_col = [col for col in df.columns if 'liger' in col and '-mem_footprint' in col][0]
             inductor_mem_col = [col for col in df.columns if 'inductor' in col and '-mem_footprint' in col][0]
             
-            # 转换数据类型
+            # Convert metrics to numeric type
             liger_speedup = pd.to_numeric(df[liger_speedup_col], errors='coerce')
             inductor_speedup = pd.to_numeric(df[inductor_speedup_col], errors='coerce')
             liger_mem = pd.to_numeric(df[liger_mem_col], errors='coerce')
             inductor_mem = pd.to_numeric(df[inductor_mem_col], errors='coerce')
             
+            # Skip files with insufficient valid data
+            if len(liger_speedup.dropna()) == 0 or len(inductor_speedup.dropna()) == 0 or \
+               len(liger_mem.dropna()) == 0 or len(inductor_mem.dropna()) == 0:
+                print(f"Skipping {csv_file} - insufficient valid data")
+                continue
+            
+            # Calculate ratios: inductor/liger
+            inductor_vs_liger_speedup = inductor_speedup / liger_speedup
+            inductor_vs_liger_mem = inductor_mem / liger_mem
+            
+            # Calculate percentiles for speedup metrics
             if len(liger_speedup.dropna()) > 0 and len(inductor_speedup.dropna()) > 0:
-                # 处理speedup数据
-                liger_vs_inductor_speedup = liger_speedup / inductor_speedup
                 speedup_metrics = {
                     'op_name': op_name,
                     'p20_liger_speedup': np.percentile(liger_speedup.dropna(), 20),
@@ -101,15 +142,14 @@ def process_folder_results(folder_path):
                     'p20_inductor_speedup': np.percentile(inductor_speedup.dropna(), 20),
                     'p50_inductor_speedup': np.percentile(inductor_speedup.dropna(), 50),
                     'p80_inductor_speedup': np.percentile(inductor_speedup.dropna(), 80),
-                    'p20_liger_vs_inductor': np.percentile(liger_vs_inductor_speedup.dropna(), 20),
-                    'p50_liger_vs_inductor': np.percentile(liger_vs_inductor_speedup.dropna(), 50),
-                    'p80_liger_vs_inductor': np.percentile(liger_vs_inductor_speedup.dropna(), 80)
+                    'p20_inductor_vs_liger': np.percentile(inductor_vs_liger_speedup.dropna(), 20),
+                    'p50_inductor_vs_liger': np.percentile(inductor_vs_liger_speedup.dropna(), 50),
+                    'p80_inductor_vs_liger': np.percentile(inductor_vs_liger_speedup.dropna(), 80)
                 }
                 speedup_results.append(speedup_metrics)
             
+            # Calculate percentiles for memory metrics
             if len(liger_mem.dropna()) > 0 and len(inductor_mem.dropna()) > 0:
-                # 处理memory数据
-                liger_vs_inductor_mem = liger_mem / inductor_mem
                 memory_metrics = {
                     'op_name': op_name,
                     'p20_liger_mem': np.percentile(liger_mem.dropna(), 20),
@@ -118,9 +158,9 @@ def process_folder_results(folder_path):
                     'p20_inductor_mem': np.percentile(inductor_mem.dropna(), 20),
                     'p50_inductor_mem': np.percentile(inductor_mem.dropna(), 50),
                     'p80_inductor_mem': np.percentile(inductor_mem.dropna(), 80),
-                    'p20_liger_vs_inductor_mem': np.percentile(liger_vs_inductor_mem.dropna(), 20),
-                    'p50_liger_vs_inductor_mem': np.percentile(liger_vs_inductor_mem.dropna(), 50),
-                    'p80_liger_vs_inductor_mem': np.percentile(liger_vs_inductor_mem.dropna(), 80)
+                    'p20_inductor_vs_liger_mem': np.percentile(inductor_vs_liger_mem.dropna(), 20),
+                    'p50_inductor_vs_liger_mem': np.percentile(inductor_vs_liger_mem.dropna(), 50),
+                    'p80_inductor_vs_liger_mem': np.percentile(inductor_vs_liger_mem.dropna(), 80)
                 }
                 memory_results.append(memory_metrics)
                 
@@ -131,9 +171,10 @@ def process_folder_results(folder_path):
     return pd.DataFrame(speedup_results), pd.DataFrame(memory_results)
 
 def main():
+    """Main function to process all folders and generate Excel reports"""
     base_path = "/tmp/tritonbench"
     
-    # 处理每个子文件夹
+    # Process each subfolder
     for folder in os.listdir(base_path):
         if folder.startswith(('v1', 'results')):
             continue
@@ -142,10 +183,10 @@ def main():
         if not os.path.isdir(folder_path):
             continue
         
-        # 获取该文件夹的所有结果
+        # Get results for the current folder
         speedup_df, memory_df = process_folder_results(folder_path)
         
-        # 创建单个Excel文件，包含两个sheet
+        # Create Excel file with multiple sheets
         output_file = f"{folder}_summary.xlsx"
         with pd.ExcelWriter(output_file, engine='xlsxwriter') as writer:
             if not speedup_df.empty:
