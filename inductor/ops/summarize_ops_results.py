@@ -63,42 +63,39 @@ def format_excel(writer, df, sheet_name, is_speedup=True):
         else:
             print(f"Warning: Column {col_name} not found in the dataframe")
 
-def get_op_name(filename):
-    """Extract op name from filename, remove random suffix"""
-    # Remove .csv extension
+def get_op_name(filename, liger_operators):
+    """Extract op name from filename based on predefined operator list"""
+    # Remove .csv extension and 'op_' prefix
     base_name = os.path.splitext(os.path.basename(filename))[0]
-    
-    # Remove 'op_' prefix
     if base_name.startswith('op_'):
         base_name = base_name[3:]
     
-    # Find the last part containing random characters
-    parts = base_name.split('_')
-    for i in range(len(parts)-1, -1, -1):
-        part = parts[i]
-        # Check if this part looks like a random string (6-8 alphanumeric chars)
-        if 6 <= len(part) <= 8 and any(c.isalnum() for c in part):
-            return '_'.join(parts[:i])
+    # Find matching operator from the predefined list
+    for op in liger_operators:
+        if base_name.startswith(op):
+            return op
     
+    print(f"Warning: No matching operator found for {filename}")
     return base_name
-
-def test_op_name_extraction():
-    """Test function to ensure correct op name extraction"""
-    test_cases = [
-        'op_cross_entropy_u1b_7val.csv',
-        'op_embedding_9a0eb4iq.csv',
-        'op_fused_linear_cross_entropy_t7pjv_ge.csv',
-        'op_fused_linear_jsd_f87qw2pf.csv',
-        'op_geglu_djglp9k6.csv'
-    ]
-    
-    for test_case in test_cases:
-        print(f"{test_case} -> {get_op_name(test_case)}")
 
 def process_folder_results(folder_path):
     """Process all CSV files in a folder and return speedup and memory summary data"""
     print(f"Processing folder: {os.path.basename(folder_path)}")
     csv_files = glob.glob(os.path.join(folder_path, "*.csv"))
+    
+    # Define known operators
+    liger_operators = [
+        "embedding",
+        "rms_norm",
+        "rope",
+        "jsd",
+        "fused_linear_jsd",
+        "cross_entropy",
+        "fused_linear_cross_entropy",
+        "geglu",
+        "kl_div",
+        "swiglu",
+    ]
     
     speedup_results = []
     memory_results = []
@@ -108,7 +105,8 @@ def process_folder_results(folder_path):
         df = pd.read_csv(csv_file, sep=';')
         
         try:
-            op_name = get_op_name(csv_file)
+            # Extract op name using predefined list
+            op_name = get_op_name(csv_file, liger_operators)
             
             # Find relevant columns
             liger_speedup_col = [col for col in df.columns if 'liger' in col and '-speedup' in col][0]
