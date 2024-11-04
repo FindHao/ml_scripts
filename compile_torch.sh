@@ -6,6 +6,8 @@ work_path=${work_path:-/home/yhao/p9}
 # clean_install=1 will remove the existing pytorch folder and re-clone it
 # if not, it will just update the existing pytorch and dependent packages
 clean_install=${clean_install:-0}
+# this option doesn't remove the existing pytorch and other packages, but will upgrade the existing pytorch to the latest version
+clean_upgrade=${clean_upgrade:-0}
 # clean_torch=1 will run python setup.py clean to remove previous pytorch build files
 clean_torch=${clean_torch:-0}
 torch_only=${torch_only:-0}
@@ -41,12 +43,10 @@ echo "torch_only: ${torch_only}"
 echo "torch_branch: ${torch_branch}"
 echo "torch_commit: ${torch_commit}"
 
-
 # if you have an error named like version `GLIBCXX_3.4.30' not found, you can add `-c conda-forge` to the following command. And also for your `conda create -n pt_compiled -c conda-forge python=3.10` command
-conda install -y magma-cuda121  -c pytorch
+conda install -y magma-cuda121 -c pytorch
 conda install -y ccache cmake ninja mkl mkl-include libpng libjpeg-turbo graphviz -c conda-forge
 export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
-
 
 cd $work_path
 if [ $clean_install -eq 1 ]; then
@@ -58,6 +58,27 @@ if [ $clean_install -eq 1 ]; then
     git clone --recursive git@github.com:pytorch/audio.git
     git clone --recursive git@github.com:pytorch/benchmark.git
 fi
+
+function git_upgrade_pack() {
+    cd $work_path/$1
+    git pull
+    git submodule sync
+    git submodule update --init --recursive
+}
+
+if [ $clean_upgrade -eq 1 ]; then
+    # upgrade pytorch to the latest version
+    cd $work_path/pytorch
+    git fetch
+    git checkout $torch_branch
+    git pull
+    git submodule sync
+    git submodule update --init --recursive
+    for pack in data text vision audio benchmark; do
+        git_upgrade_pack $pack
+    done
+fi
+echo "packages upgrade is done"
 
 cd $work_path/pytorch
 git fetch
@@ -85,7 +106,6 @@ else
     debug_prefix=""
 fi
 
-
 ${debug_prefix} python setup.py develop
 
 function notify_finish() {
@@ -100,12 +120,7 @@ if [ $torch_only -eq 1 ]; then
 fi
 
 function upgrade_pack() {
-    cd $work_path/$1
-    git pull
-    # the data.txt is weird, so we don't use it. leave it here for future reference
-    # git checkout "$work_path/pytorch/.github/ci_commit_pins/$1.txt"
-    git submodule sync
-    git submodule update --init --recursive
+    git_upgrade_pack $1
     pip uninstall -y $1
     python setup.py clean
     python setup.py install
