@@ -79,6 +79,35 @@ if [ "$clean_install" -eq 1 ]; then
     done
 fi
 
+# install pytorch
+cd $work_path/pytorch
+git fetch
+if [ -n "$torch_commit" ]; then
+    git checkout $torch_commit
+    echo "warnging: you are using a specific commit. don't forget to create a new branch if you want to make changes"
+else
+    git checkout $torch_branch
+fi
+if [ $torch_pull -eq 1 ]; then
+    git pull
+fi
+git submodule sync
+git submodule update --init --recursive
+pip install -r requirements.txt
+make triton
+
+if [ $clean_torch -eq 1 ]; then
+    python setup.py clean
+fi
+
+if [ $debug -eq 1 ]; then
+    debug_prefix="env DEBUG=1"
+else
+    debug_prefix=""
+fi
+
+${debug_prefix} python setup.py develop
+
 # install torchdata
 cd $work_path
 upgrade_pack data
