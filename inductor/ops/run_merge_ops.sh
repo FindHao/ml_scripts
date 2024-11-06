@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Get the directory of the current script
+SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+
 # Check if input directory is provided
 if [ $# -eq 0 ]; then
     INPUT_BASE="/tmp/tritonbench" # Default value
@@ -16,6 +19,12 @@ if [ ! -d "$OUTPUT_BASE" ]; then
     mkdir -p "$OUTPUT_BASE"
 fi
 
+# Check if merge_ops_results.py exists
+if [ ! -f "$SCRIPT_DIR/merge_ops_results.py" ]; then
+    echo "Error: merge_ops_results.py not found in $SCRIPT_DIR"
+    exit 1
+fi
+
 # Loop through all directories in INPUT_BASE
 for dir in "$INPUT_BASE"/*/; do
     # Get directory name
@@ -28,7 +37,7 @@ for dir in "$INPUT_BASE"/*/; do
         # Create output Excel file path
         output_file="$OUTPUT_BASE/${dir_name}.xlsx"
 
-        # Run the Python script
-        python ~/ml_scripts/inductor/merge_ops_results.py --input "$dir" --output "$output_file"
+        # Run the Python script using SCRIPT_DIR
+        python "$SCRIPT_DIR/merge_ops_results.py" --input "$dir" --output "$output_file"
     fi
 done
