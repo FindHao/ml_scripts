@@ -110,6 +110,7 @@ def process_folder_results(folder_path):
         "geglu",
         "kl_div",
         "swiglu",
+        "layer_norm",
     ]
 
     speedup_results = []
@@ -122,13 +123,16 @@ def process_folder_results(folder_path):
         try:
             # Extract op name using predefined list
             op_name = get_op_name(csv_file, liger_operators)
-
+            if op_name == "layer_norm":
+                tmp_inductor_placeholder = "torch_compile"
+            else:
+                tmp_inductor_placeholder = inductor_placeholder
             # Find relevant columns
             liger_speedup_col = [
                 col for col in df.columns if "liger" in col and "-speedup" in col
             ][0]
             inductor_speedup_col = [
-                col for col in df.columns if inductor_placeholder in col and "-speedup" in col
+                col for col in df.columns if tmp_inductor_placeholder in col and "-speedup" in col
             ][0]
             liger_mem_col = [
                 col for col in df.columns if "liger" in col and "-mem_footprint" in col
@@ -136,7 +140,7 @@ def process_folder_results(folder_path):
             inductor_mem_col = [
                 col
                 for col in df.columns
-                if inductor_placeholder in col and "-mem_footprint" in col
+                if tmp_inductor_placeholder in col and "-mem_footprint" in col
             ][0]
 
             # Convert metrics to numeric type
