@@ -13,20 +13,22 @@ if [ ! -f "run.py" ]; then
     exit 1
 fi
 
+DATE_STR=$(date +%Y%m%d_%H%M%S)
+output_dir="/tmp/tritonbench/${DATE_STR}"
+mkdir -p $output_dir
 
-for direction in "${directions[@]}"
-do
-    for precision in "${precisions[@]}"
-    do
+for direction in "${directions[@]}"; do
+    for precision in "${precisions[@]}"; do
         echo "Running with direction: $direction, precision: $precision"
+        echo "Running: python run.py --op-collection liger --mode $direction --precision $precision --metrics latency,gpu_peak_mem,speedup,mem_footprint,accuracy --dump-csv"
         python run.py \
-            --op-collection liger \
+            --op layer_norm \
             --mode $direction \
             --precision $precision \
             --metrics latency,gpu_peak_mem,speedup,mem_footprint,accuracy \
             --dump-csv
-        mkdir -p /tmp/tritonbench/${direction}_${precision}
-        mv /tmp/tritonbench/*.csv /tmp/tritonbench/${direction}_${precision}/
+        mkdir -p $output_dir/${direction}_${precision}
+        mv /tmp/tritonbench/*.csv $output_dir/${direction}_${precision}/
     done
 done
 
@@ -34,7 +36,7 @@ done
 end_time=$(date +%s)
 duration=$((end_time - start_time))
 hours=$((duration / 3600))
-minutes=$(( (duration % 3600) / 60 ))
+minutes=$(((duration % 3600) / 60))
 seconds=$((duration % 60))
 
 # Format duration string
