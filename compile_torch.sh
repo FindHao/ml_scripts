@@ -1,38 +1,57 @@
 #!/bin/bash
 # simple usage: work_path=/home/yhao/pt ./compile_torch.sh
 # make sure you have activated the correct conda environment before running this script
-set -e
-work_path=${work_path:-/home/yhao/p9}
-# clean_install=1 will remove the existing pytorch folder and re-clone it
-# if not, it will just update the existing pytorch and dependent packages
-clean_install=${clean_install:-0}
-# this option doesn't remove the existing pytorch and other packages, but will upgrade the existing pytorch to the latest version
-clean_upgrade=${clean_upgrade:-0}
-# clean_torch=1 will run python setup.py clean to remove previous pytorch build files
-clean_torch=${clean_torch:-0}
-torch_only=${torch_only:-0}
 
-export MAX_JOBS=256
-debug=${debug:-0}
+# Add strict mode for better error handling
+set -euo pipefail
+IFS=$'\n\t'
 
-# for specific commit or branch
-torch_commit=${torch_commit:-""}
-torch_branch=${torch_branch:-"main"}
-torch_pull=${torch_pull:-0}
+# Consolidate and organize environment variables at the top
+declare -r MAX_JOBS=256
+declare -r DEFAULT_WORK_PATH="/home/yhao/p9"
 
-# torchbench installation takes a long time, so it can be disabled
-no_torchbench=${no_torchbench:-0}
-# disable ROCM when working on servers with NVIDIA GPUs and AMD GPUs
+# Convert environment variables to more robust declarations
+declare -r work_path=${work_path:-"$DEFAULT_WORK_PATH"}
+declare -r clean_install=${clean_install:-0}
+declare -r clean_upgrade=${clean_upgrade:-0}
+declare -r clean_torch=${clean_torch:-0}
+declare -r torch_only=${torch_only:-0}
+declare -r debug=${debug:-0}
+declare -r torch_commit=${torch_commit:-""}
+declare -r torch_branch=${torch_branch:-"main"}
+declare -r torch_pull=${torch_pull:-0}
+declare -r no_torchbench=${no_torchbench:-0}
+
+# GPU-related exports
 export USE_ROCM=0
 export USE_NCCL=1
-# export ROCR_VISIBLE_DEVICES=3
-# export CUDA_VISIBLE_DEVICES=1
-# function to check the return value of the previous command
-check_return_value() {
-    if [ $? -ne 0 ]; then
-        echo "Error: $1"
-        exit 1
-    fi
+
+# Improve error handling function
+function error_exit() {
+    local message="$1"
+    echo "ERROR: $message" >&2
+    exit 1
+}
+
+# Improve the git_upgrade_pack function with error handling
+function git_upgrade_pack() {
+    local package_name="$1"
+    echo "Upgrading package: $package_name"
+    cd "$work_path/$package_name" || error_exit "Failed to change directory to $package_name"
+    git pull || error_exit "Failed to pull latest changes for $package_name"
+    git submodule sync || error_exit "Failed to sync submodules for $package_name"
+    git submodule update --init --recursive || error_exit "Failed to update submodules for $package_name"
+}
+
+# Improve the upgrade_pack function
+function upgrade_pack() {
+    local package_name="$1"
+    echo "Installing package: $package_name"
+    git_upgrade_pack "$package_name"
+    pip uninstall -y "$package_name" || true # Don't fail if package isn't installed
+    python setup.py clean || error_exit "Failed to clean $package_name"
+    python setup.py install || error_exit "Failed to install $package_name"
+    echo "$package_name installation completed successfully"
 }
 
 # print configs
@@ -48,38 +67,27 @@ conda install -y magma-cuda121 -c pytorch
 conda install -y ccache cmake ninja mkl mkl-include libpng libjpeg-turbo graphviz -c conda-forge
 export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
 
-cd $work_path
-if [ $clean_install -eq 1 ]; then
+# Improve directory handling
+cd "$work_path" || error_exit "Failed to change to work directory"
+
+# Improve clean install section with error handling
+if [ "$clean_install" -eq 1 ]; then
+    echo "Performing clean installation..."
     rm -rf pytorch text vision audio benchmark data
-    git clone --recursive git@github.com:pytorch/pytorch.git
-    git clone --recursive git@github.com:pytorch/text.git
-    git clone --recursive git@github.com:pytorch/data.git
-    git clone --recursive git@github.com:pytorch/vision.git
-    git clone --recursive git@github.com:pytorch/audio.git
-    git clone --recursive git@github.com:pytorch/benchmark.git
-fi
-
-function git_upgrade_pack() {
-    cd $work_path/$1
-    git pull
-    git submodule sync
-    git submodule update --init --recursive
-}
-
-if [ $clean_upgrade -eq 1 ]; then
-    # upgrade pytorch to the latest version
-    cd $work_path/pytorch
-    git fetch
-    git checkout $torch_branch
-    git pull
-    git submodule sync
-    git submodule update --init --recursive
-    for pack in data text vision audio benchmark; do
-        git_upgrade_pack $pack
+    for repo in pytorch text data vision audio benchmark; do
+        git clone --recursive "git@github.com:pytorch/${repo}.git" || error_exit "Failed to clone $repo"
     done
 fi
-echo "packages upgrade is done"
 
+function notify_finish() {
+    echo "PyTorch compilation completed successfully"
+    if command -v notify &>/dev/null; then
+        notify "PyTorch Compilation is done" || true # Don't fail if notify fails
+    fi
+}
+
+pip uninstall -y torch
+# install pytorch
 cd $work_path/pytorch
 git fetch
 if [ -n "$torch_commit" ]; then
@@ -108,24 +116,10 @@ fi
 
 ${debug_prefix} python setup.py develop
 
-function notify_finish() {
-    if command -v notify &>/dev/null; then
-        notify "PyTorch Compilation is done"
-    fi
-}
-
 if [ $torch_only -eq 1 ]; then
     notify_finish
     exit 0
 fi
-
-function upgrade_pack() {
-    git_upgrade_pack $1
-    pip uninstall -y $1
-    python setup.py clean
-    python setup.py install
-    echo "$1 installation is done"
-}
 
 # install torchdata
 cd $work_path
@@ -157,3 +151,6 @@ git submodule update --init --recursive
 python install.py
 echo "torchbench installation is done"
 notify_finish
+
+# Add trap for cleanup on script exit
+trap 'echo "Script execution interrupted"; exit 1' INT TERM
