@@ -79,6 +79,14 @@ if [ "$clean_install" -eq 1 ]; then
     done
 fi
 
+function notify_finish() {
+    echo "PyTorch compilation completed successfully"
+    if command -v notify &>/dev/null; then
+        notify "PyTorch Compilation is done" || true # Don't fail if notify fails
+    fi
+}
+
+pip uninstall -y torch
 # install pytorch
 cd $work_path/pytorch
 git fetch
@@ -107,6 +115,11 @@ else
 fi
 
 ${debug_prefix} python setup.py develop
+
+if [ $torch_only -eq 1 ]; then
+    notify_finish
+    exit 0
+fi
 
 # install torchdata
 cd $work_path
@@ -138,14 +151,6 @@ git submodule update --init --recursive
 python install.py
 echo "torchbench installation is done"
 notify_finish
-
-# Improve notification function
-function notify_finish() {
-    echo "PyTorch compilation completed successfully"
-    if command -v notify &>/dev/null; then
-        notify "PyTorch Compilation is done" || true # Don't fail if notify fails
-    fi
-}
 
 # Add trap for cleanup on script exit
 trap 'echo "Script execution interrupted"; exit 1' INT TERM
