@@ -1,12 +1,12 @@
-from typing import Callable, List, Optional, Tuple
+from typing import List, Callable, Optional, Tuple
 
 import torch
-from torch._higher_order_ops.auto_functionalize import auto_functionalized
 from torch._inductor.pattern_matcher import (
-    fwd_only,
     PatternMatcherPass,
     register_replacement,
+    fwd_only,
 )
+from torch._higher_order_ops.auto_functionalize import auto_functionalized
 
 torch.set_default_device("cuda")
 
@@ -72,9 +72,16 @@ def rms_pattern_static(
         scale=scale,
         azp=None,
     )
+    # 添加第三个返回值
+    at3 = auto_functionalized(
+        torch.ops.vllm.rms_norm.default,
+        result=result_rms.clone(),
+        input=input,
+        weight=weight,
+        epsilon=1e-6,
+    )
 
-    return at2[1], at2[2]
-    # return at2[2], at2[1]
+    return at2[1], at2[2], at3[1]  # 返回三个值
 
 
 def rms_replacement_static(
@@ -93,9 +100,16 @@ def rms_replacement_static(
         scale=scale,
         azp=None,
     )
+    # 添加第三个返回值
+    at2 = auto_functionalized(
+        torch.ops.vllm.rms_norm.default,
+        result=result_rms.clone(),
+        input=input,
+        weight=weight,
+        epsilon=1e-6,
+    )
 
-    return at[1], at[2]
-    # return at[2], at[1]
+    return at[1], at[2], at2[1]  # 返回三个值
 
 
 def empty_bf16(*args, **kwargs):
@@ -141,18 +155,21 @@ def custom_backend(
 
 @torch.compile(backend=custom_backend)
 def my_func_static(x, w, epsilon):
+    # 创建所需的输出张量
     quant_result = torch.empty_like(x, dtype=torch.int8)
-    result_rms = torch.empty_like(x, dtype=torch.bfloat16)  
+    result_rms = torch.empty_like(x, dtype=torch.bfloat16)  # 新增：RMS norm的中间结果
     scale = torch.ones((1, 1))
 
+    # 确保输入tensor的dtype正确
     x = x.to(torch.bfloat16)
     w = w.to(torch.bfloat16)
 
-    quant_result, scale = rms_pattern_static(
+    # 直接调用rms_pattern_static
+    quant_result, scale, result_rms = rms_pattern_static(
         result=quant_result, result_rms=result_rms, input=x, weight=w, scale=scale
     )
 
-    return quant_result, scale
+    return quant_result, scale, result_rms
 
 
 print("Run my_func_static")
