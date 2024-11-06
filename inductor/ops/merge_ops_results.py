@@ -117,6 +117,9 @@ def main():
             worksheet = writer.sheets[sheet_name]
 
             # Debug: print column names
+            print("\n" + "=" * 50)
+            print("Processing sheet:", sheet_name)
+            print("=" * 50)
             print("All columns:", df.columns.tolist())
 
             # More precise column selection
@@ -132,10 +135,11 @@ def main():
             ]
 
             # Debug: print selected columns
-            print(
-                "Selected speedup columns:", [df.columns[i - 1] for i in speedup_cols]
-            )
-            print("Selected memory columns:", [df.columns[i - 1] for i in mem_cols])
+            print("\nSelected columns:")
+            print("-" * 30)
+            print("Speedup columns:", [df.columns[i - 1] for i in speedup_cols])
+            print("Memory columns:", [df.columns[i - 1] for i in mem_cols])
+            print("=" * 50 + "\n")
 
             # Find x_val column
             x_val_col = 1
