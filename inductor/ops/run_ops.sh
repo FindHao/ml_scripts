@@ -22,7 +22,7 @@ for direction in "${directions[@]}"; do
         echo "Running with direction: $direction, precision: $precision"
         echo "Running: python run.py --op-collection liger --mode $direction --precision $precision --metrics latency,gpu_peak_mem,speedup,mem_footprint,accuracy --dump-csv"
         python run.py \
-            --op layer_norm \
+            --op-collection liger \
             --mode $direction \
             --precision $precision \
             --metrics latency,gpu_peak_mem,speedup,mem_footprint,accuracy \
@@ -42,5 +42,5 @@ seconds=$((duration % 60))
 # Format duration string
 duration_str=$(printf "%02d:%02d:%02d" $hours $minutes $seconds)
 echo "Total execution time: $duration_str"
-
+source ~/.notify.sh
 notify "TritonBench on dev done (Duration: $duration_str)"
