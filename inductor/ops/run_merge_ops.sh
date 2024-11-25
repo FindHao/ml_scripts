@@ -11,7 +11,7 @@ else
 fi
 
 # Get current date and time in YYYYMMDDHHMM format
-DATE_STR=$(date +"%Y%m%d%H%M")
+DATE_STR=$(date +"%Y%m%d_%H%M")
 
 OUTPUT_BASE="/tmp/tritonbench/results/${DATE_STR}"
 

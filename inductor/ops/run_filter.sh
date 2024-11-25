@@ -17,8 +17,8 @@ INPUT_DIR="$1"
 if [ "$#" -eq 2 ]; then
     OUTPUT_DIR="$2"
 else
-    # Generate timestamp in YYYYMMDD_HHMM format
-    TIMESTAMP=$(date +%Y%m%d_%H%M)
+    # Generate timestamp in YYYYMMDD_HHMMSS format
+    TIMESTAMP=$(date +%Y%m%d_%H%M%S)
     OUTPUT_DIR="/tmp/tritonbench/results/${TIMESTAMP}"
 fi
 
@@ -29,7 +29,7 @@ mkdir -p $OUTPUT_DIR
 ./run_merge_ops.sh $INPUT_DIR $OUTPUT_DIR
 
 # Run summary results script
-python summarize_ops_results.py --input_dir $INPUT_DIR --output_dir $OUTPUT_DIR
+python summarize_ops_results.py -i $INPUT_DIR -o $OUTPUT_DIR
 
 # Send notification when complete
 notify "Inductor ops analysis complete" "Results saved to $OUTPUT_DIR"
