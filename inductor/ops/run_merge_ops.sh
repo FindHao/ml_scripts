@@ -13,7 +13,12 @@ fi
 # Get current date and time in YYYYMMDDHHMM format
 DATE_STR=$(date +"%Y%m%d_%H%M")
 
-OUTPUT_BASE="/tmp/tritonbench/results/${DATE_STR}"
+# Check if output directory is provided as second argument
+if [ $# -ge 2 ]; then
+    OUTPUT_BASE="$2"
+else
+    OUTPUT_BASE="/tmp/tritonbench/results/${DATE_STR}"
+fi
 
 if [ ! -d "$OUTPUT_BASE" ]; then
     mkdir -p "$OUTPUT_BASE"
