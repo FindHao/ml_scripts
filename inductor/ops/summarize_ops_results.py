@@ -1,12 +1,14 @@
 #! /usr/bin/env python3
-import pandas as pd
-import os
-import glob
-from pathlib import Path
-import numpy as np
 import argparse
+import glob
+import os
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
 
 inductor_placeholder = "inductor"
+
 
 def format_excel(writer, df, sheet_name, is_speedup=True):
     """Format Excel file with conditional formatting and column widths"""
@@ -119,8 +121,8 @@ def process_folder_results(folder_path):
 
     for csv_file in csv_files:
         print(f"Processing CSV file: {csv_file}")
-        df = pd.read_csv(csv_file, sep=';')
-        
+        df = pd.read_csv(csv_file, sep=";")
+
         try:
             # Extract op name using predefined list
             op_name = get_op_name(csv_file, liger_operators)
@@ -133,15 +135,20 @@ def process_folder_results(folder_path):
                 col for col in df.columns if "liger" in col and "-speedup" in col
             ][0]
             inductor_speedup_col = [
-                col for col in df.columns if tmp_inductor_placeholder in col and "-speedup" in col
+                col
+                for col in df.columns
+                if tmp_inductor_placeholder in col and "-speedup" in col
             ][0]
             liger_mem_col = [
-                col for col in df.columns if "liger" in col and "-mem_footprint" in col
+                col
+                for col in df.columns
+                if "liger" in col and "-mem_footprint_compression_ratio" in col
             ][0]
             inductor_mem_col = [
                 col
                 for col in df.columns
-                if tmp_inductor_placeholder in col and "-mem_footprint" in col
+                if tmp_inductor_placeholder in col
+                and "-mem_footprint_compression_ratio" in col
             ][0]
 
             # Convert metrics to numeric type
@@ -151,13 +158,17 @@ def process_folder_results(folder_path):
             inductor_mem = pd.to_numeric(df[inductor_mem_col], errors="coerce")
 
             # Skip files with insufficient valid data
-            if (
-                len(liger_speedup.dropna()) == 0
-                or len(inductor_speedup.dropna()) == 0
-                or len(liger_mem.dropna()) == 0
-                or len(inductor_mem.dropna()) == 0
-            ):
+            insufficient_data = {
+                "liger_speedup": len(liger_speedup.dropna()),
+                "inductor_speedup": len(inductor_speedup.dropna()),
+                "liger_mem": len(liger_mem.dropna()),
+                "inductor_mem": len(inductor_mem.dropna()),
+            }
+            if any(length == 0 for length in insufficient_data.values()):
                 print(f"Skipping {csv_file} - insufficient valid data")
+                for name, length in insufficient_data.items():
+                    if length == 0:
+                        print(f"    {name}: {length}")
                 continue
 
             # Calculate ratios: inductor/liger
