@@ -7,6 +7,7 @@ from openpyxl.chart import BarChart, Reference, Series
 from openpyxl.chart.label import DataLabelList
 from openpyxl.chart.series import SeriesLabel
 import argparse
+import os
 
 
 def parse_args():
@@ -22,7 +23,7 @@ def parse_args():
     parser.add_argument(
         "--output",
         type=str,
-        required=True,
+        required=False,
         help="Output path for the merged Excel file",
     )
     return parser.parse_args()
@@ -85,7 +86,14 @@ def main():
 
     # Get folder path and output path from arguments
     folder_path = args.input
-    output_path = args.output
+    if not args.output:
+        output_path = folder_path + "/merged.xlsx"
+    elif '/' not in args.output:
+        output_path = folder_path + "/" + args.output + ".xlsx"
+    elif args.output.endswith('/'):
+        output_path = args.output + "merged.xlsx"
+    else:
+        raise ValueError("Invalid output path: must be a directory or a filename without '/'")
 
     # Ensure folder path ends with '/'
     if not folder_path.endswith("/"):
@@ -100,6 +108,7 @@ def main():
     # Create an Excel writer object
     with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
         for file in csv_files:
+            print("Processing file:", file)
             # Read each CSV file into a DataFrame with the correct delimiter
             df = pd.read_csv(file, delimiter=";")
 
@@ -107,8 +116,10 @@ def main():
             df = df.round(2)
 
             # Extract the middle part of the filename as the sheet name
-            filename_parts = file.split("/")[-1].split("_")
-            sheet_name = "_".join(filename_parts[1:-1])
+            # filename_parts = file.split("/")[-1].split("_")
+            # in the new pattern, the input filename is like op_phase_precision.csv
+            file_name = os.path.basename(file)
+            sheet_name = file_name.rsplit('.', 1)[0]
 
             # Write each DataFrame to a separate sheet with the extracted name
             df.to_excel(writer, sheet_name=sheet_name, index=False)

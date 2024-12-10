@@ -179,6 +179,15 @@ def process_folder_results(folder_path):
             if len(liger_speedup.dropna()) > 0 and len(inductor_speedup.dropna()) > 0:
                 speedup_metrics = {
                     "op_name": op_name,
+                    "p20_inductor_vs_liger": np.percentile(
+                        inductor_vs_liger_speedup.dropna(), 20
+                    ),
+                    "p50_inductor_vs_liger": np.percentile(
+                        inductor_vs_liger_speedup.dropna(), 50
+                    ),
+                    "p80_inductor_vs_liger": np.percentile(
+                        inductor_vs_liger_speedup.dropna(), 80
+                    ),
                     "p20_liger_speedup": np.percentile(liger_speedup.dropna(), 20),
                     "p50_liger_speedup": np.percentile(liger_speedup.dropna(), 50),
                     "p80_liger_speedup": np.percentile(liger_speedup.dropna(), 80),
@@ -190,15 +199,6 @@ def process_folder_results(folder_path):
                     ),
                     "p80_inductor_speedup": np.percentile(
                         inductor_speedup.dropna(), 80
-                    ),
-                    "p20_inductor_vs_liger": np.percentile(
-                        inductor_vs_liger_speedup.dropna(), 20
-                    ),
-                    "p50_inductor_vs_liger": np.percentile(
-                        inductor_vs_liger_speedup.dropna(), 50
-                    ),
-                    "p80_inductor_vs_liger": np.percentile(
-                        inductor_vs_liger_speedup.dropna(), 80
                     ),
                 }
                 speedup_results.append(speedup_metrics)
