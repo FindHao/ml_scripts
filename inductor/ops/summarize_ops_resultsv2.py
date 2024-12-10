@@ -6,35 +6,38 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import openpyxl
+from openpyxl.styles import PatternFill
 
 inductor_placeholder = "inductor"
 
 
 def format_excel(writer, df, sheet_name, is_speedup=True):
     """Format Excel file with conditional formatting and column widths"""
-    workbook = writer.book
     worksheet = writer.sheets[sheet_name]
 
     # Set column widths based on content
     for i, col in enumerate(df.columns):
+        column_letter = openpyxl.utils.get_column_letter(i + 1)
         column_data = df[col].astype(str)
         max_length = max(max(len(str(x)) for x in column_data), len(col))
-        worksheet.set_column(i, i, max_length * 1.2)
+        worksheet.column_dimensions[column_letter].width = max_length * 1.2
 
     # Create cell formats
-    red_format = workbook.add_format(
-        {"bg_color": "#FFC7CE", "num_format": "0.00"}  # Light red  # Two decimal places
+    red_fill = openpyxl.styles.PatternFill(
+        start_color="FFC7CE", end_color="FFC7CE", fill_type="solid"
     )
-    green_format = workbook.add_format(
-        {"bg_color": "#C6EFCE", "num_format": "0.00"}  # Light green
+    green_fill = openpyxl.styles.PatternFill(
+        start_color="C6EFCE", end_color="C6EFCE", fill_type="solid"
     )
-    normal_format = workbook.add_format({"num_format": "0.00"})
+    number_format = openpyxl.styles.numbers.FORMAT_NUMBER_00
 
     # Apply number format to all numeric columns
-    for col_num, col_name in enumerate(df.columns):
+    for col_num, col_name in enumerate(df.columns, 1):
         if col_name != "op_name":
-            for row in range(1, len(df) + 1):
-                worksheet.write(row, col_num, df.iloc[row - 1, col_num], normal_format)
+            for row in range(2, len(df) + 2):  # Start from 2 to skip header
+                cell = worksheet.cell(row=row, column=col_num)
+                cell.number_format = number_format
 
     # Apply conditional formatting to comparison columns
     if is_speedup:
@@ -52,30 +55,17 @@ def format_excel(writer, df, sheet_name, is_speedup=True):
 
     for col_name in compare_cols:
         if col_name in df.columns:
-            col_idx = df.columns.get_loc(col_name)
-            # Red if inductor is slower/uses more memory
-            worksheet.conditional_format(
-                1,
-                col_idx,
-                len(df),
-                col_idx,
-                {
-                    "type": "cell",
-                    "criteria": ">=",
-                    "value": 1.01,
-                    "format": green_format,
-                },
-            )
-            # Green if inductor is faster/uses less memory
-            worksheet.conditional_format(
-                1,
-                col_idx,
-                len(df),
-                col_idx,
-                {"type": "cell", "criteria": "<=", "value": 0.98, "format": red_format},
-            )
-        else:
-            print(f"Warning: Column {col_name} not found in the dataframe")
+            col_idx = df.columns.get_loc(col_name) + 1
+            for row in range(2, len(df) + 2):
+                cell = worksheet.cell(row=row, column=col_idx)
+                try:
+                    value = float(cell.value)
+                    if value >= 1.01:
+                        cell.fill = green_fill
+                    elif value <= 0.98:
+                        cell.fill = red_fill
+                except (ValueError, TypeError):
+                    continue
 
 
 def get_op_name(filename, liger_operators):
@@ -207,12 +197,6 @@ def process_folder_results(folder_path):
             if len(liger_mem.dropna()) > 0 and len(inductor_mem.dropna()) > 0:
                 memory_metrics = {
                     "op_name": op_name,
-                    "p20_liger_mem": np.percentile(liger_mem.dropna(), 20),
-                    "p50_liger_mem": np.percentile(liger_mem.dropna(), 50),
-                    "p80_liger_mem": np.percentile(liger_mem.dropna(), 80),
-                    "p20_inductor_mem": np.percentile(inductor_mem.dropna(), 20),
-                    "p50_inductor_mem": np.percentile(inductor_mem.dropna(), 50),
-                    "p80_inductor_mem": np.percentile(inductor_mem.dropna(), 80),
                     "p20_inductor_vs_liger_mem": np.percentile(
                         inductor_vs_liger_mem.dropna(), 20
                     ),
@@ -222,6 +206,12 @@ def process_folder_results(folder_path):
                     "p80_inductor_vs_liger_mem": np.percentile(
                         inductor_vs_liger_mem.dropna(), 80
                     ),
+                    "p20_liger_mem": np.percentile(liger_mem.dropna(), 20),
+                    "p50_liger_mem": np.percentile(liger_mem.dropna(), 50),
+                    "p80_liger_mem": np.percentile(liger_mem.dropna(), 80),
+                    "p20_inductor_mem": np.percentile(inductor_mem.dropna(), 20),
+                    "p50_inductor_mem": np.percentile(inductor_mem.dropna(), 50),
+                    "p80_inductor_mem": np.percentile(inductor_mem.dropna(), 80),
                 }
                 memory_results.append(memory_metrics)
 
@@ -259,26 +249,66 @@ def main():
     folder_path = args.input_dir
     if not args.output:
         output_file = folder_path + "/merged.xlsx"
-    elif '/' not in args.output:
+    elif "/" not in args.output:
         output_file = folder_path + "/" + args.output + ".xlsx"
-    elif args.output.endswith('/'):
+    elif args.output.endswith("/"):
         output_file = args.output + "merged.xlsx"
     else:
-        raise ValueError("Invalid output path: must be a directory or a filename without '/'")
+        raise ValueError(
+            "Invalid output path: must be a directory or a filename without '/'"
+        )
 
-    
     speedup_df, memory_df = process_folder_results(folder_path)
-    with pd.ExcelWriter(output_file, engine="xlsxwriter") as writer:
-        if not speedup_df.empty:
-            speedup_df.to_excel(writer, sheet_name="speedup_summary", index=False)
-            format_excel(writer, speedup_df, "speedup_summary", is_speedup=True)
 
-        if not memory_df.empty:
-            memory_df.to_excel(writer, sheet_name="memory_summary", index=False)
-            format_excel(writer, memory_df, "memory_summary", is_speedup=False)
+    if os.path.exists(output_file):
+        # Load existing workbook
+        book = openpyxl.load_workbook(output_file)
 
-        print(f"Results saved to {output_file}")
+        # Remove sheets if they already exist
+        if "speedup_summary" in book.sheetnames:
+            book.remove(book["speedup_summary"])
+        if "memory_summary" in book.sheetnames:
+            book.remove(book["memory_summary"])
 
+        with pd.ExcelWriter(
+            output_file, engine="openpyxl", mode="a", if_sheet_exists="replace"
+        ) as writer:
+            # Write new sheets
+            if not speedup_df.empty:
+                speedup_df.to_excel(writer, sheet_name="speedup_summary", index=False)
+                format_excel(writer, speedup_df, "speedup_summary", is_speedup=True)
+
+            if not memory_df.empty:
+                memory_df.to_excel(writer, sheet_name="memory_summary", index=False)
+                format_excel(writer, memory_df, "memory_summary", is_speedup=False)
+
+            # Get the workbook from the writer
+            workbook = writer.book
+
+            # Calculate current positions
+            current_position_speedup = workbook.sheetnames.index("speedup_summary")
+
+            # Move speedup_summary to the beginning
+            workbook.move_sheet("speedup_summary", offset=-current_position_speedup)
+
+            # Move memory_summary right after speedup_summary
+            current_position_memory = workbook.sheetnames.index("memory_summary")
+            target_position = 1  # Right after speedup_summary
+            offset = target_position - current_position_memory
+            workbook.move_sheet("memory_summary", offset=offset)
+
+    else:
+        # Create new file if it doesn't exist
+        with pd.ExcelWriter(output_file, engine="xlsxwriter") as writer:
+            if not speedup_df.empty:
+                speedup_df.to_excel(writer, sheet_name="speedup_summary", index=False)
+                format_excel(writer, speedup_df, "speedup_summary", is_speedup=True)
+
+            if not memory_df.empty:
+                memory_df.to_excel(writer, sheet_name="memory_summary", index=False)
+                format_excel(writer, memory_df, "memory_summary", is_speedup=False)
+
+    print(f"Results saved to {output_file}")
 
 
 if __name__ == "__main__":

@@ -15,12 +15,14 @@ def parse_args():
         description="Merge CSV files into a single Excel file."
     )
     parser.add_argument(
+        "-i",
         "--input",
         type=str,
         required=True,
         help="Input folder path containing CSV files",
     )
     parser.add_argument(
+        "-o",
         "--output",
         type=str,
         required=False,
@@ -88,12 +90,14 @@ def main():
     folder_path = args.input
     if not args.output:
         output_path = folder_path + "/merged.xlsx"
-    elif '/' not in args.output:
+    elif "/" not in args.output:
         output_path = folder_path + "/" + args.output + ".xlsx"
-    elif args.output.endswith('/'):
+    elif args.output.endswith("/"):
         output_path = args.output + "merged.xlsx"
     else:
-        raise ValueError("Invalid output path: must be a directory or a filename without '/'")
+        raise ValueError(
+            "Invalid output path: must be a directory or a filename without '/'"
+        )
 
     # Ensure folder path ends with '/'
     if not folder_path.endswith("/"):
@@ -119,7 +123,7 @@ def main():
             # filename_parts = file.split("/")[-1].split("_")
             # in the new pattern, the input filename is like op_phase_precision.csv
             file_name = os.path.basename(file)
-            sheet_name = file_name.rsplit('.', 1)[0]
+            sheet_name = "_".join(file_name.rsplit(".", 1)[0].split("_")[:-2])
 
             # Write each DataFrame to a separate sheet with the extracted name
             df.to_excel(writer, sheet_name=sheet_name, index=False)
