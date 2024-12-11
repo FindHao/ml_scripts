@@ -8,6 +8,8 @@ CUDNN_VERSION=9.5.1.17
 
 # Make cuda install path configurable. By default, it is /usr/local.
 CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX:-/usr/local}
+# Remove trailing slash if present
+CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX%/}
 SKIP_PRUNE=${SKIP_PRUNE:-1}
 CUDA_VERSION=${CUDA_VERSION:-12.1}
 
