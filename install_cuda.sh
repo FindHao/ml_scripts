@@ -1,7 +1,7 @@
 #!/bin/bash
 # Usage: CUDA_INSTALL_PREFIX=/home/yhao/opt ./install_cuda.sh 11.8
 # Notice: Part of this script should be synced with https://github.com/pytorch/pytorch/blob/main/.ci/docker/common/install_cuda.sh
-set -ex
+set -v
 
 NCCL_VERSION=v2.21.5-1
 CUDNN_VERSION=9.5.1.17
@@ -11,7 +11,7 @@ CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX:-/usr/local}
 # Remove trailing slash if present
 CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX%/}
 SKIP_PRUNE=${SKIP_PRUNE:-1}
-CUDA_VERSION=${CUDA_VERSION:-12.1}
+CUDA_VERSION=${CUDA_VERSION:-12.6}
 
 # Clean up any leftover temporary directories from previous failed installations
 cleanup_temp_dirs() {
@@ -19,6 +19,7 @@ cleanup_temp_dirs() {
     [ -d "tmp_cudnn" ] && rm -rf tmp_cudnn
     [ -d "nccl" ] && rm -rf nccl
 }
+cleanup_temp_dirs
 
 function install_cusparselt_040 {
     # cuSparseLt license: https://docs.nvidia.com/cuda/cusparselt/license.html
