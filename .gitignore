@@ -144,3 +144,5 @@ report*
 .downloads/
 
 torch_compile_debug/
+
+cuda*.run

@@ -127,9 +127,9 @@ function install_126 {
     echo "Installing CUDA 12.6.3 and cuDNN ${CUDNN_VERSION} and NCCL ${NCCL_VERSION} and cuSparseLt-0.6.3"
     rm -rf ${CUDA_INSTALL_PREFIX}/cuda-12.6 ${CUDA_INSTALL_PREFIX}/cuda
     # install CUDA 12.6.3 in the same container
-    wget -q https://developer.download.nvidia.com/compute/cuda/12.6.3/local_installers/cuda_12.6.3_560.35.05_linux.run
+    wget -q https://developer.download.nvidia.com/compute/cuda/12.6.3/local_installers/cuda_12.6.3_560.35.05_linux.run -O cuda_12.6.3_560.35.05_linux.run
     chmod +x cuda_12.6.3_560.35.05_linux.run
-    ./cuda_12.6.3_560.35.05_linux.run --toolkit --silent
+    ./cuda_12.6.3_560.35.05_linux.run --toolkit --silent --toolkitpath=${CUDA_INSTALL_PREFIX}/cuda-${CUDA_VERSION}
     rm -f cuda_12.6.3_560.35.05_linux.run
     rm -f ${CUDA_INSTALL_PREFIX}/cuda && ln -s ${CUDA_INSTALL_PREFIX}/cuda-12.6 ${CUDA_INSTALL_PREFIX}/cuda
 
