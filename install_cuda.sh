@@ -13,6 +13,13 @@ CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX%/}
 SKIP_PRUNE=${SKIP_PRUNE:-1}
 CUDA_VERSION=${CUDA_VERSION:-12.1}
 
+# Clean up any leftover temporary directories from previous failed installations
+cleanup_temp_dirs() {
+    [ -d "tmp_cusparselt" ] && rm -rf tmp_cusparselt
+    [ -d "tmp_cudnn" ] && rm -rf tmp_cudnn
+    [ -d "nccl" ] && rm -rf nccl
+}
+
 function install_cusparselt_040 {
     # cuSparseLt license: https://docs.nvidia.com/cuda/cusparselt/license.html
     mkdir tmp_cusparselt && pushd tmp_cusparselt
