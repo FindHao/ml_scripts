@@ -71,11 +71,10 @@ def triton_poi_fused_embedding_0(
     xoffset = tl.program_id(0) * XBLOCK
     xindex = xoffset + tl.arange(0, XBLOCK)[:]
     xmask = tl.full([XBLOCK], True, tl.int1)
-    x1_scalar = tl.program_id(0) * XBLOCK // 4096
+    x1 = xoffset // 4096
     x0 = xindex % 4096
     x2 = xindex
-    tmp0_scalar = tl.load(in_ptr0 + (x1_scalar), None, eviction_policy="evict_last")
-    tmp0 = tmp0_scalar
+    tmp0 = tl.load(in_ptr0 + (x1), None, eviction_policy="evict_last")
     tmp1 = tl.full([XBLOCK], 8192, tl.int32)
     tmp2 = tmp0 + tmp1
     tmp3 = tmp0 < 0
