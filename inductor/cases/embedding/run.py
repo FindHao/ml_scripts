@@ -248,7 +248,7 @@ def benchmark_compiled_module2(times=10, repeat=10):
                         YBLOCK=YBLOCK,
                         num_warps=nwarps,
                     )
-                    ares = print_performance(fn, times=times, repeat=repeat)
+                    ares = float(print_performance(fn, times=times, repeat=repeat))
 
                     # Compare results
                     max_diff = torch.max(torch.abs(test_result - ref_result)).item()
@@ -264,6 +264,7 @@ def benchmark_compiled_module2(times=10, repeat=10):
                         f"=====XBLOCK={XBLOCK}, YBLOCK={YBLOCK}, nwarps={nwarps}, "
                         f"ares={ares}, max_diff={max_diff:.2e}, correct={is_correct}"
                     )
+
 
 
 def benchmark_compiled_module(times=10, repeat=10):
