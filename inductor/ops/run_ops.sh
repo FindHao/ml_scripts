@@ -20,14 +20,13 @@ mkdir -p $output_dir
 for direction in "${directions[@]}"; do
     for precision in "${precisions[@]}"; do
         echo "Running with direction: $direction, precision: $precision"
-        echo "Running: python run.py --op-collection liger --mode $direction --precision $precision --metrics latency,gpu_peak_mem,speedup,mem_footprint_compression_ratio,accuracy --cudagraph --dump-csv"
+        echo "Running: python run.py --op-collection liger --mode $direction --precision $precision --metrics latency,gpu_peak_mem,speedup,mem_footprint_compression_ratio,accuracy  --dump-csv"
         python run.py \
             --op-collection liger \
             --mode $direction \
             --precision $precision \
             --metrics latency,gpu_peak_mem,speedup,mem_footprint_compression_ratio,accuracy \
-            --cudagraph \
-            --dump-csv
+            --dump-csv --isolate
         mkdir -p $output_dir/${direction}_${precision}
         mv /tmp/tritonbench/*.csv $output_dir/${direction}_${precision}/
     done
