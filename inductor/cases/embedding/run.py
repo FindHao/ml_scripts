@@ -229,8 +229,8 @@ def benchmark_compiled_module2(times=10, repeat=10):
         print(f"=====ref: XBLOCK=128, YBLOCK=128, nwarps=4, ares={ref_perf}")
         writer.writerow([128, 128, 4, ref_perf, 0.0, True])
 
-        for XBLOCK in range(32, MAX_VAL, 32):
-            for YBLOCK in range(32, MAX_VAL, 32):
+        for XBLOCK in range(1, MAX_VAL, 32):
+            for YBLOCK in range(1, MAX_VAL, 32):
                 for nwarps in [4, 8]:
                     # Get result tensor and measure performance
                     test_result = call(
