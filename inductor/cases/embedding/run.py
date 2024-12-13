@@ -5,6 +5,7 @@ import random
 import tempfile
 from ctypes import c_int, c_long, c_void_p
 from math import inf, nan
+from weakref import ref
 
 import torch
 import triton
@@ -293,8 +294,73 @@ def benchmark_compiled_module(times=10, repeat=10):
     return ref_result
 
 
+def benchmark_compiled_module2(times=10, repeat=10):
+    from torch._dynamo.testing import rand_strided
+    from torch._inductor.utils import print_performance
+
+    primals_1 = rand_strided(
+        (8192, 4096), (4096, 1), device="cuda:0", dtype=torch.float32
+    )
+    primals_2 = torch.randint(8192, (8, 2048), device="cuda:0", dtype=torch.int64)
+    results = {}
+    MAX_VAL = 1025
+    # MAX_VAL = 33
+    import csv
+
+    with open("results.csv", mode="w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(["XBLOCK", "YBLOCK", "nwarps", "ares"])
+
+        for XBLOCK in range(32, MAX_VAL, 32):
+            for YBLOCK in range(32, MAX_VAL, 32):
+                for nwarps in [4, 8]:
+                    fn = lambda: call(
+                        [primals_1, primals_2],
+                        XBLOCK=XBLOCK,
+                        YBLOCK=YBLOCK,
+                        num_warps=nwarps,
+                    )
+                    ares = print_performance(fn, times=times, repeat=repeat)
+                    results[(XBLOCK, YBLOCK, nwarps)] = ares
+                    writer.writerow([XBLOCK, YBLOCK, nwarps, ares])
+                    print(
+                        f"=====XBLOCK={XBLOCK}, YBLOCK={YBLOCK}, nwarps={nwarps}, ares={ares}"
+                    )
+        fn = lambda: LigerEmbeddingFunction.forward(primals_1, primals_2)
+        ref_result = print_performance(fn, times=times, repeat=repeat)
+        print(f"=====ref: XBLOCK=128, YBLOCK=128, nwarps=4, ares={ref_result}")
+        writer.writerow([128, 128, 4, ref_result])
+
+
+def benchmark_compiled_module(times=10, repeat=10):
+    from torch._dynamo.testing import rand_strided
+    from torch._inductor.utils import print_performance
+
+    primals_1 = rand_strided(
+        (8192, 4096), (4096, 1), device="cuda:0", dtype=torch.float32
+    )
+    primals_2 = torch.randint(8192, (8, 2048), device="cuda:0", dtype=torch.int64)
+    results = {}
+
+    fn = lambda: call(
+        [primals_1, primals_2],
+        XBLOCK=128,
+        YBLOCK=128,
+        num_warps=4,
+    )
+    ares = print_performance(fn, times=times, repeat=repeat)
+    results[(128, 128, 4)] = ares
+    print(f"=====XBLOCK=128, YBLOCK=128, nwarps=4, ares={ares}")
+
+    fn = lambda: LigerEmbeddingFunction.forward(primals_1, primals_2)
+    ref_result = print_performance(fn, times=times, repeat=repeat)
+    print(f"=====ref: XBLOCK=128, YBLOCK=128, nwarps=4, ares={ref_result}")
+
+    return ref_result
+
+
 if __name__ == "__main__":
     from torch._inductor.wrapper_benchmark import compiled_module_main
 
     compiled_module_main("None", benchmark_compiled_module)
-    # benchmark_compiled_module2()
+    # benchmark_compiled_module()
