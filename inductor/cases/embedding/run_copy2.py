@@ -1,4 +1,3 @@
-# the original code with XYBLOCK and yindex
 # AOT ID: ['0_forward']
 import math
 import os
@@ -83,7 +82,7 @@ def triton_poi_fused_embedding_0(
     xmask = tl.full([XBLOCK, YBLOCK], True, tl.int1)
     y0 = yindex
     x1 = xindex
-    tmp0 = tl.load(in_ptr0 + (y0), None, eviction_policy="evict_last")
+    tmp0 = tl.load(in_ptr0 + (yoffset), None, eviction_policy="evict_last")
     tmp1 = tl.full([XBLOCK, YBLOCK], 8192, tl.int32)
     tmp2 = tmp0 + tmp1
     tmp3 = tmp0 < 0
@@ -201,7 +200,7 @@ class LigerEmbeddingFunction(torch.autograd.Function):
 
         return output.view(*ori_shape, -1)
 
-# iterator XBLOCK, YBLOCK, nwarps
+
 def benchmark_compiled_module2(times=10, repeat=10):
     from torch._dynamo.testing import rand_strided
     from torch._inductor.utils import print_performance
@@ -215,7 +214,10 @@ def benchmark_compiled_module2(times=10, repeat=10):
     # MAX_VAL = 33
     import csv
 
-    with open("results.csv", mode="w", newline="") as file:
+    from datetime import datetime
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    with open(f"results_{timestamp}.csv", mode="w", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(
             ["XBLOCK", "YBLOCK", "nwarps", "ares", "max_diff", "is_correct"]
@@ -267,7 +269,6 @@ def benchmark_compiled_module2(times=10, repeat=10):
                     )
 
 
-
 def benchmark_compiled_module(times=10, repeat=10):
     from torch._dynamo.testing import rand_strided
     from torch._inductor.utils import print_performance
@@ -294,6 +295,7 @@ def benchmark_compiled_module(times=10, repeat=10):
     ref_result = print_performance(fn, times=times, repeat=repeat)
     print(f"=====ref: XBLOCK=128, YBLOCK=128, nwarps=4, ares={ref_result}")
     return ref_result
+
 
 def benchmark_compiled_module_backup(times=10, repeat=10):
     from torch._dynamo.testing import rand_strided
@@ -323,8 +325,58 @@ def benchmark_compiled_module_backup(times=10, repeat=10):
     return ref_result
 
 
+class cuda_profiler_range:
+    def __init__(self, use_cuda_profiler_range):
+        self.use_cuda_profiler_range = use_cuda_profiler_range
+
+    def __enter__(self):
+        if self.use_cuda_profiler_range:
+            torch.cuda.cudart().cudaProfilerStart()
+
+    def __exit__(self, *exc_info):
+        if self.use_cuda_profiler_range:
+            torch.cuda.cudart().cudaProfilerStop()
+
+
+def benchmark_compiled_module3(XBLOCK=128, YBLOCK=128, nwarps=4, times=10, repeat=10):
+    import torch.cuda.nvtx as nvtx  # Add NVTX import
+    from torch._dynamo.testing import rand_strided
+    from torch._inductor.utils import print_performance
+
+    # Initialize test data
+    primals_1 = rand_strided(
+        (8192, 4096), (4096, 1), device="cuda:0", dtype=torch.float32
+    )
+    primals_2 = torch.randint(8192, (8, 2048), device="cuda:0", dtype=torch.int64)
+
+    # Test the optimized version with given parameters
+    def test_fn():
+        return call(
+            [primals_1, primals_2],
+            XBLOCK=XBLOCK,
+            YBLOCK=YBLOCK,
+            num_warps=nwarps,
+        )
+
+    with cuda_profiler_range(True):
+        nvtx.range_push(
+            f"test_fn_XBLOCK{XBLOCK}_YBLOCK{YBLOCK}_nwarps{nwarps}"
+        )  # Start NVTX range
+        test_result = test_fn()[0]  # Get actual tensor result
+        nvtx.range_pop()  # End NVTX range
+
+    # Get reference result
+    def ref_fn():
+        return LigerEmbeddingFunction.forward(primals_1, primals_2)
+
+    ref_result = ref_fn()  # Get actual tensor result
+
+    # Compare results and return only the boolean result
+    return torch.allclose(test_result, ref_result, rtol=1e-5, atol=1e-5)
+
+
 if __name__ == "__main__":
     from torch._inductor.wrapper_benchmark import compiled_module_main
 
-    compiled_module_main("None", benchmark_compiled_module)
-    # benchmark_compiled_module2()
+    # compiled_module_main("None", benchmark_compiled_module)
+    benchmark_compiled_module2()

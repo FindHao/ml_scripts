@@ -1,4 +1,4 @@
-# the original code with XYBLOCK and yindex
+# try to compare how triton compile the yindex and yoffset
 # AOT ID: ['0_forward']
 import math
 import os
@@ -83,7 +83,8 @@ def triton_poi_fused_embedding_0(
     xmask = tl.full([XBLOCK, YBLOCK], True, tl.int1)
     y0 = yindex
     x1 = xindex
-    tmp0 = tl.load(in_ptr0 + (y0), None, eviction_policy="evict_last")
+    # tmp0 = tl.load(in_ptr0 + (y0), None, eviction_policy="evict_last")
+    tmp0 = tl.load(in_ptr0 + (yoffset), None, eviction_policy="evict_last")
     tmp1 = tl.full([XBLOCK, YBLOCK], 8192, tl.int32)
     tmp2 = tmp0 + tmp1
     tmp3 = tmp0 < 0
@@ -201,101 +202,8 @@ class LigerEmbeddingFunction(torch.autograd.Function):
 
         return output.view(*ori_shape, -1)
 
-# iterator XBLOCK, YBLOCK, nwarps
-def benchmark_compiled_module2(times=10, repeat=10):
-    from torch._dynamo.testing import rand_strided
-    from torch._inductor.utils import print_performance
-
-    primals_1 = rand_strided(
-        (8192, 4096), (4096, 1), device="cuda:0", dtype=torch.float32
-    )
-    primals_2 = torch.randint(8192, (8, 2048), device="cuda:0", dtype=torch.int64)
-    results = {}
-    MAX_VAL = 4097
-    # MAX_VAL = 33
-    import csv
-
-    with open("results.csv", mode="w", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerow(
-            ["XBLOCK", "YBLOCK", "nwarps", "ares", "max_diff", "is_correct"]
-        )
-
-        # Get reference result first
-        def ref_fn():
-            return LigerEmbeddingFunction.forward(primals_1, primals_2)
-
-        ref_result = ref_fn()  # Get actual tensor result
-        ref_perf = print_performance(ref_fn, times=times, repeat=repeat)
-        print(f"=====ref: XBLOCK=128, YBLOCK=128, nwarps=4, ares={ref_perf}")
-        writer.writerow([128, 128, 4, ref_perf, 0.0, True])
-
-        for XBLOCK in range(1, MAX_VAL, 32):
-            for YBLOCK in range(1, MAX_VAL, 32):
-                for nwarps in [4, 8]:
-                    # Get result tensor and measure performance
-                    test_result = call(
-                        [primals_1, primals_2],
-                        XBLOCK=XBLOCK,
-                        YBLOCK=YBLOCK,
-                        num_warps=nwarps,
-                    )[
-                        0
-                    ]  # [0] to get only output tensor
-
-                    fn = lambda: call(
-                        [primals_1, primals_2],
-                        XBLOCK=XBLOCK,
-                        YBLOCK=YBLOCK,
-                        num_warps=nwarps,
-                    )
-                    ares = float(print_performance(fn, times=times, repeat=repeat))
-
-                    # Compare results
-                    max_diff = torch.max(torch.abs(test_result - ref_result)).item()
-                    is_correct = torch.allclose(
-                        test_result, ref_result, rtol=1e-5, atol=1e-5
-                    )
-
-                    results[(XBLOCK, YBLOCK, nwarps)] = (ares, max_diff, is_correct)
-                    writer.writerow(
-                        [XBLOCK, YBLOCK, nwarps, ares, max_diff, is_correct]
-                    )
-                    print(
-                        f"=====XBLOCK={XBLOCK}, YBLOCK={YBLOCK}, nwarps={nwarps}, "
-                        f"ares={ares}, max_diff={max_diff:.2e}, correct={is_correct}"
-                    )
-
-
 
 def benchmark_compiled_module(times=10, repeat=10):
-    from torch._dynamo.testing import rand_strided
-    from torch._inductor.utils import print_performance
-
-    primals_1 = rand_strided(
-        (8192, 4096), (4096, 1), device="cuda:0", dtype=torch.float32
-    )
-    primals_2 = torch.randint(8192, (8, 2048), device="cuda:0", dtype=torch.int64)
-
-    XBLOCK = 128
-    YBLOCK = 128
-    nwarps = 4
-
-    fn = lambda: call(
-        [primals_1, primals_2],
-        XBLOCK=XBLOCK,
-        YBLOCK=YBLOCK,
-        num_warps=nwarps,
-    )
-    ares = print_performance(fn, times=times, repeat=repeat)
-    print(f"=====XBLOCK={XBLOCK}, YBLOCK={YBLOCK}, nwarps={nwarps}, ares={ares}")
-
-    fn = lambda: LigerEmbeddingFunction.forward(primals_1, primals_2)
-    ref_result = print_performance(fn, times=times, repeat=repeat)
-    print(f"=====ref: XBLOCK=128, YBLOCK=128, nwarps=4, ares={ref_result}")
-    return ref_result
-
-def benchmark_compiled_module_backup(times=10, repeat=10):
     from torch._dynamo.testing import rand_strided
     from torch._inductor.utils import print_performance
 
@@ -327,4 +235,3 @@ if __name__ == "__main__":
     from torch._inductor.wrapper_benchmark import compiled_module_main
 
     compiled_module_main("None", benchmark_compiled_module)
-    # benchmark_compiled_module2()
