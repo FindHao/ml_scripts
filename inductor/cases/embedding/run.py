@@ -116,9 +116,9 @@ def call(
             buf0,
             16384,
             4096,
-            XBLOCK=128,
-            YBLOCK=128,
-            num_warps=8,
+            XBLOCK=XBLOCK,
+            YBLOCK=YBLOCK,
+            num_warps=num_warps,
             num_stages=1,
         )
         del primals_1
@@ -201,6 +201,7 @@ class LigerEmbeddingFunction(torch.autograd.Function):
 
         return output.view(*ori_shape, -1)
 
+
 # iterator XBLOCK, YBLOCK, nwarps
 def benchmark_compiled_module2(times=10, repeat=10):
     from torch._dynamo.testing import rand_strided
@@ -230,8 +231,8 @@ def benchmark_compiled_module2(times=10, repeat=10):
         print(f"=====ref: XBLOCK=128, YBLOCK=128, nwarps=4, ares={ref_perf}")
         writer.writerow([128, 128, 4, ref_perf, 0.0, True])
 
-        for XBLOCK in range(1, MAX_VAL, 32):
-            for YBLOCK in range(1, MAX_VAL, 32):
+        for XBLOCK in [2**i for i in range(1, int(math.log2(MAX_VAL)) + 1)]:
+            for YBLOCK in [2**i for i in range(1, int(math.log2(MAX_VAL)) + 1)]:
                 for nwarps in [4, 8]:
                     # Get result tensor and measure performance
                     test_result = call(
@@ -267,7 +268,6 @@ def benchmark_compiled_module2(times=10, repeat=10):
                     )
 
 
-
 def benchmark_compiled_module(times=10, repeat=10):
     from torch._dynamo.testing import rand_strided
     from torch._inductor.utils import print_performance
@@ -294,6 +294,7 @@ def benchmark_compiled_module(times=10, repeat=10):
     ref_result = print_performance(fn, times=times, repeat=repeat)
     print(f"=====ref: XBLOCK=128, YBLOCK=128, nwarps=4, ares={ref_result}")
     return ref_result
+
 
 def benchmark_compiled_module_backup(times=10, repeat=10):
     from torch._dynamo.testing import rand_strided
@@ -326,5 +327,5 @@ def benchmark_compiled_module_backup(times=10, repeat=10):
 if __name__ == "__main__":
     from torch._inductor.wrapper_benchmark import compiled_module_main
 
-    compiled_module_main("None", benchmark_compiled_module)
-    # benchmark_compiled_module2()
+    # compiled_module_main("None", benchmark_compiled_module)
+    benchmark_compiled_module2()
