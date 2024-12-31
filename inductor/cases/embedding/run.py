@@ -4,6 +4,7 @@ import math
 import os
 import random
 import tempfile
+import time
 from ctypes import c_int, c_long, c_void_p
 from math import inf, nan
 from weakref import ref
@@ -216,7 +217,9 @@ def benchmark_compiled_module2(times=10, repeat=10):
     # MAX_VAL = 33
     import csv
 
-    with open("results.csv", mode="w", newline="") as file:
+    with open(
+        f"results_{time.strftime('%Y%m%d_%H%M%S')}.csv", mode="w", newline=""
+    ) as file:
         writer = csv.writer(file)
         writer.writerow(
             ["XBLOCK", "YBLOCK", "nwarps", "ares", "max_diff", "is_correct"]
@@ -227,7 +230,7 @@ def benchmark_compiled_module2(times=10, repeat=10):
             return LigerEmbeddingFunction.forward(primals_1, primals_2)
 
         ref_result = ref_fn()  # Get actual tensor result
-        ref_perf = print_performance(ref_fn, times=times, repeat=repeat)
+        ref_perf = float(print_performance(ref_fn, times=times, repeat=repeat))
         print(f"=====ref: XBLOCK=128, YBLOCK=128, nwarps=4, ares={ref_perf}")
         writer.writerow([128, 128, 4, ref_perf, 0.0, True])
 
@@ -250,8 +253,13 @@ def benchmark_compiled_module2(times=10, repeat=10):
                         YBLOCK=YBLOCK,
                         num_warps=nwarps,
                     )
-                    ares = float(print_performance(fn, times=times, repeat=repeat))
-
+                    try:
+                        ares = float(print_performance(fn, times=times, repeat=repeat))
+                    except Exception as e:
+                        print(
+                            f"=====XBLOCK={XBLOCK}, YBLOCK={YBLOCK}, nwarps={nwarps}, ares=error"
+                        )
+                        continue
                     # Compare results
                     max_diff = torch.max(torch.abs(test_result - ref_result)).item()
                     is_correct = torch.allclose(
