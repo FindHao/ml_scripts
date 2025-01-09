@@ -1,6 +1,7 @@
+# tried to change loop order without XYBLOCK
 # AOT ID: ['0_forward']
 """
-This file is a optimized inductor code for embedding.
+This file is a original inductor code for embedding.
 """
 from ctypes import c_void_p, c_long, c_int
 import torch
@@ -71,10 +72,10 @@ def triton_poi_fused_embedding_0(
     xoffset = tl.program_id(0) * XBLOCK
     xindex = xoffset + tl.arange(0, XBLOCK)[:]
     xmask = tl.full([XBLOCK], True, tl.int1)
-    x1 = xoffset // 4096
-    x0 = xindex % 4096
+    x1 = xindex // 16384
+    x0 = xindex % 16384
     x2 = xindex
-    tmp0 = tl.load(in_ptr0 + (x1), None, eviction_policy="evict_last")
+    tmp0 = tl.load(in_ptr0 + (x0), None, eviction_policy="evict_last")
     tmp1 = tl.full([XBLOCK], 8192, tl.int32)
     tmp2 = tmp0 + tmp1
     tmp3 = tmp0 < 0
@@ -82,11 +83,11 @@ def triton_poi_fused_embedding_0(
     tl.device_assert(
         (0 <= tmp4) & (tmp4 < 8192), "index out of bounds: 0 <= tmp4 < 8192"
     )
-    tmp6 = tl.load(in_ptr1 + (x0 + 4096 * tmp4), None)
+    tmp6 = tl.load(in_ptr1 + (x1 + 16384 * tmp4), None)
     tl.store(out_ptr0 + (x2), tmp6, None)
 
 
-def call(args, XBLOCK=1024, num_warps=4, num_stages=1):
+def call(args):
     primals_1, primals_2 = args
     args.clear()
     assert_size_stride(primals_1, (8192, 4096), (4096, 1))
@@ -97,13 +98,19 @@ def call(args, XBLOCK=1024, num_warps=4, num_stages=1):
         # Topologically Sorted Source Nodes: [embedding], Original ATen: [aten.embedding]
         stream0 = get_raw_stream(0)
         triton_poi_fused_embedding_0[grid(67108864)](
-            primals_2, primals_1, buf0, 67108864, XBLOCK
+            primals_2, primals_1, buf0, 67108864, XBLOCK=1024, num_warps=4, num_stages=1
         )
         del primals_1
     return (
         buf0,
         primals_2,
     )
+
+
+import torch
+import triton
+import triton.language as tl
+
 
 @triton.jit
 def embedding_forward_kernel(
@@ -173,6 +180,19 @@ class LigerEmbeddingFunction(torch.autograd.Function):
 
         return output.view(*ori_shape, -1)
 
+# def benchmark_compiled_module(times=10, repeat=10):
+#     from torch._dynamo.testing import rand_strided
+#     from torch._inductor.utils import print_performance
+
+#     primals_1 = rand_strided(
+#         (8192, 4096), (4096, 1), device="cuda:0", dtype=torch.float32
+#     )
+#     # primals_2 = rand_strided((8, 2048), (2048, 1), device='cuda:0', dtype=torch.int64)
+#     primals_2 = torch.randint(8192, (8, 2048), device="cuda:0", dtype=torch.int64)
+#     fn = lambda: call([primals_1, primals_2])
+#     return print_performance(fn, times=times, repeat=repeat)
+
+
 def benchmark_compiled_module(times=10, repeat=10):
     from torch._dynamo.testing import rand_strided
     from torch._inductor.utils import print_performance
@@ -182,99 +202,48 @@ def benchmark_compiled_module(times=10, repeat=10):
     )
     primals_2 = torch.randint(8192, (8, 2048), device="cuda:0", dtype=torch.int64)
 
-    XBLOCK = 4096
+    XBLOCK = 128
+    YBLOCK = 128
     nwarps = 4
 
     fn = lambda: call(
         [primals_1, primals_2],
-        XBLOCK=XBLOCK,
-        num_warps=nwarps,
+        # XBLOCK=XBLOCK,
+        # YBLOCK=YBLOCK,
+        # num_warps=nwarps,
     )
     ares = print_performance(fn, times=times, repeat=repeat)
-    print(f"=====XBLOCK={XBLOCK}, nwarps={nwarps}, ares={ares}")
+    print(f"=====XBLOCK={XBLOCK}, YBLOCK={YBLOCK}, nwarps={nwarps}, ares={ares}")
 
     fn = lambda: LigerEmbeddingFunction.forward(primals_1, primals_2)
     ref_result = print_performance(fn, times=times, repeat=repeat)
     print(f"=====ref: XBLOCK=128, YBLOCK=128, nwarps=4, ares={ref_result}")
-    # Check correctness by comparing the results of the two functions
-    result_call = call([primals_1.clone(), primals_2.clone()])
-    result_liger = LigerEmbeddingFunction.forward(primals_1.clone(), primals_2.clone())
-
-    # Ensure both results are tensors
-    assert isinstance(result_call[0], torch.Tensor), "Result from 'call' is not a tensor"
-    assert isinstance(result_liger, torch.Tensor), "Result from 'LigerEmbeddingFunction.forward' is not a tensor"
-
-    # Compare the results
-    if torch.allclose(result_call[0], result_liger, atol=1e-6):
-        print("The results of the two functions are correct and match.")
-    else:
-        print("The results of the two functions do not match. There might be an error.")
-
+    # Check correctness
+    with torch.no_grad():
+        out1 = call([primals_1, primals_2])[0]
+        out2 = LigerEmbeddingFunction.forward(primals_1, primals_2)
+        
+        # Compare outputs
+        max_diff = torch.max(torch.abs(out1 - out2))
+        print(f"\nMax absolute difference: {max_diff}")
+        
+        # Check if outputs are close enough
+        rtol = 1e-5
+        atol = 1e-5
+        is_close = torch.allclose(out1, out2, rtol=rtol, atol=atol)
+        print(f"Outputs match within tolerance (rtol={rtol}, atol={atol}): {is_close}")
+        
+        if not is_close:
+            # Print more detailed error statistics if outputs don't match
+            rel_diff = torch.abs(out1 - out2) / (torch.abs(out2) + atol)
+            print(f"Max relative difference: {torch.max(rel_diff)}")
+            print(f"Mean absolute difference: {torch.mean(torch.abs(out1 - out2))}")
+            print(f"Number of differing elements: {torch.sum(~torch.isclose(out1, out2, rtol=rtol, atol=atol))}")
+    return ref_result
     return ref_result
 
-
-# iterator XBLOCK, YBLOCK, nwarps
-def benchmark_compiled_module2(times=10, repeat=10):
-    from torch._dynamo.testing import rand_strided
-    from torch._inductor.utils import print_performance
-
-    primals_1 = rand_strided(
-        (8192, 4096), (4096, 1), device="cuda:0", dtype=torch.float32
-    )
-    primals_2 = torch.randint(8192, (8, 2048), device="cuda:0", dtype=torch.int64)
-    results = {}
-    MAX_VAL = 4096*32+1
-    # MAX_VAL=33
-    import csv
-
-    with open("results_run2_opt2.csv", mode="w", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerow(
-            ["XBLOCK", "ares", "max_diff", "is_correct"]
-        )
-
-        # Get reference result first
-        def ref_fn():
-            return LigerEmbeddingFunction.forward(primals_1, primals_2)
-
-        ref_result = ref_fn()  # Get actual tensor result
-        ref_perf = print_performance(ref_fn, times=times, repeat=repeat)
-        print(f"=====ref: XBLOCK=128, YBLOCK=128, nwarps=4, ares={ref_perf}")
-        writer.writerow([128, 128, 4, ref_perf, 0.0, True])
-
-        for XBLOCK in [2**i for i in range(0, int(math.log2(MAX_VAL)), 1)]:
-            # Get result tensor and measure performance
-            print(f"=====XBLOCK={XBLOCK}, ")
-            test_result = call(
-                [primals_1, primals_2],
-                XBLOCK=XBLOCK,
-            )[
-                0
-            ]  # [0] to get only output tensor
-
-            fn = lambda: call(
-                [primals_1, primals_2],
-                XBLOCK=XBLOCK,
-            )
-            ares = float(print_performance(fn, times=times, repeat=repeat))
-
-            # Compare results
-            max_diff = torch.max(torch.abs(test_result - ref_result)).item()
-            is_correct = torch.allclose(
-                test_result, ref_result, rtol=1e-5, atol=1e-5
-            )
-
-            results[(XBLOCK)] = (ares, max_diff, is_correct)
-            writer.writerow(
-                [XBLOCK, ares, max_diff, is_correct]
-            )
-            print(
-                f"=====XBLOCK={XBLOCK}, "
-                f"ares={ares}, max_diff={max_diff:.2e}, correct={is_correct}"
-                    )
 
 if __name__ == "__main__":
     from torch._inductor.wrapper_benchmark import compiled_module_main
 
     compiled_module_main("None", benchmark_compiled_module)
-    # benchmark_compiled_module2()
