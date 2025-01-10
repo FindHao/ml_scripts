@@ -48,7 +48,7 @@ function upgrade_pack() {
     local package_name="$1"
     echo "Installing package: $package_name"
     git_upgrade_pack "$package_name"
-    pip uninstall -y "$package_name" || true # Don't fail if package isn't installed
+    pip uninstall -y "torch$package_name" || true # Don't fail if package isn't installed
     python setup.py clean || error_exit "Failed to clean $package_name"
     python setup.py install || error_exit "Failed to install $package_name"
     echo "$package_name installation completed successfully"
