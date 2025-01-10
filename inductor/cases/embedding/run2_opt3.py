@@ -69,12 +69,13 @@ def triton_poi_fused_embedding_0(
     in_ptr0, in_ptr1, out_ptr0, xnumel, XBLOCK: tl.constexpr
 ):
     xnumel = 67108864
+    b_times_t = 16384
     xoffset = tl.program_id(0) * XBLOCK
     xindex = xoffset + tl.arange(0, XBLOCK)[:]
     xmask = tl.full([XBLOCK], True, tl.int1)
-    x1 = xindex // 16384
-    x0 = xindex % 16384
-    x2 = xindex
+    x1 = xindex // b_times_t
+    x0 = xindex % b_times_t
+    x2 = x0 * 4096 + x1
     tmp0 = tl.load(in_ptr0 + (x0), None, eviction_policy="evict_last")
     tmp1 = tl.full([XBLOCK], 8192, tl.int32)
     tmp2 = tmp0 + tmp1
@@ -83,7 +84,7 @@ def triton_poi_fused_embedding_0(
     tl.device_assert(
         (0 <= tmp4) & (tmp4 < 8192), "index out of bounds: 0 <= tmp4 < 8192"
     )
-    tmp6 = tl.load(in_ptr1 + (x1 + 16384 * tmp4), None)
+    tmp6 = tl.load(in_ptr1 + (x1 + 4096 * tmp4), None)
     tl.store(out_ptr0 + (x2), tmp6, None)
 
 
@@ -218,6 +219,7 @@ def benchmark_compiled_module(times=10, repeat=10):
     fn = lambda: LigerEmbeddingFunction.forward(primals_1, primals_2)
     ref_result = print_performance(fn, times=times, repeat=repeat)
     print(f"=====ref: XBLOCK=128, YBLOCK=128, nwarps=4, ares={ref_result}")
+    return ref_result
     # Check correctness
     with torch.no_grad():
         out1 = call([primals_1, primals_2])[0]

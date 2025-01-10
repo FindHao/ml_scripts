@@ -28,7 +28,7 @@ from torch._inductor.runtime.triton_heuristics import (
 )
 from torch._inductor.select_algorithm import extern_kernels
 from torch._inductor.utils import maybe_profile
-
+import os
 aten = torch.ops.aten
 inductor_ops = torch.ops.inductor
 _quantized = torch.ops._quantized
@@ -222,8 +222,8 @@ def benchmark_compiled_module(times=10, repeat=10):
     )
     primals_2 = torch.randint(8192, (8, 2048), device="cuda:0", dtype=torch.int64)
 
-    XBLOCK = 128
-    YBLOCK = 128
+    XBLOCK = int(os.getenv('XBLOCK', 128))
+    YBLOCK = int(os.getenv('YBLOCK', 128))
     nwarps = 4
 
     fn = lambda: call(
@@ -238,6 +238,7 @@ def benchmark_compiled_module(times=10, repeat=10):
     fn = lambda: LigerEmbeddingFunction.forward(primals_1, primals_2)
     ref_result = print_performance(fn, times=times, repeat=repeat)
     print(f"=====ref: XBLOCK=128, YBLOCK=128, nwarps=4, ares={ref_result}")
+    return ref_result
     # Check correctness
     with torch.no_grad():
         out1 = call([primals_1, primals_2], XBLOCK=XBLOCK, YBLOCK=YBLOCK, num_warps=nwarps)[0]
@@ -252,6 +253,34 @@ def benchmark_compiled_module(times=10, repeat=10):
         atol = 1e-5
         is_close = torch.allclose(out1, out2, rtol=rtol, atol=atol)
         print(f"Outputs match within tolerance (rtol={rtol}, atol={atol}): {is_close}")
+        import csv
+
+        # Define the CSV file path
+        csv_file_path = "benchmark_results.csv"
+
+        # Prepare the data to be written
+        data = {
+            "XBLOCK": XBLOCK,
+            "YBLOCK": YBLOCK,
+            "ares": float(ares),
+            "ref_result": float(ref_result),
+            "correct": is_close
+        }
+
+        # Check if the file exists to determine if we need to write headers
+        file_exists = os.path.isfile(csv_file_path)
+
+        # Open the CSV file in append mode
+        with open(csv_file_path, mode='a', newline='') as csvfile:
+            fieldnames = ["XBLOCK", "YBLOCK", "ares", "ref_result", "correct"]
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+            # Write the header only if the file does not exist
+            if not file_exists:
+                writer.writeheader()
+
+            # Write the data
+            writer.writerow(data)
         
         if not is_close:
             # Print more detailed error statistics if outputs don't match

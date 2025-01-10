@@ -76,7 +76,7 @@ def call(
         primals_2,
     )
 
-def benchmark_compiled_module(times=10, repeat=10):
+def benchmark_compiled_module(times=10, repeat=10, XBLOCK=128, YBLOCK=128, num_warps=8):
     from torch._dynamo.testing import rand_strided
     from torch._inductor.utils import print_performance
 
@@ -85,18 +85,19 @@ def benchmark_compiled_module(times=10, repeat=10):
     )
     primals_2 = torch.randint(8192, (8, 2048), device="cuda:0", dtype=torch.int64)
 
-    XBLOCK = 128
-    YBLOCK = 128
-    nwarps = 4
-
     fn = lambda: call(
         [primals_1, primals_2],
         XBLOCK=XBLOCK,
         YBLOCK=YBLOCK,
-        num_warps=nwarps,
     )
     ares = print_performance(fn, times=times, repeat=repeat)
     print(f"ares={ares}")
+    import csv
+
+    with open('current_benchmark_result.csv', mode='a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([XBLOCK, YBLOCK, float(ares)])
+
     return ares
 
 
@@ -105,4 +106,20 @@ if __name__ == "__main__":
     # from torch._inductor.wrapper_benchmark import compiled_module_main
     # compiled_module_main("None", benchmark_compiled_module)
     # pure run
-    benchmark_compiled_module()
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Benchmark Compiled Module")
+    parser.add_argument("--times", type=int, default=10, help="Number of times to run the benchmark")
+    parser.add_argument("--repeat", type=int, default=10, help="Number of repeats for the benchmark")
+    parser.add_argument("--XBLOCK", type=int, default=128, help="XBLOCK size")
+    parser.add_argument("--YBLOCK", type=int, default=128, help="YBLOCK size")
+    parser.add_argument("--num_warps", type=int, default=8, help="Number of warps")
+
+    args = parser.parse_args()
+
+    print(benchmark_compiled_module(
+        times=args.times,
+        repeat=args.repeat,
+        XBLOCK=args.XBLOCK,
+        YBLOCK=args.YBLOCK,
+    ))
