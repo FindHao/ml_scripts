@@ -62,8 +62,17 @@ echo "torch_only: ${torch_only}"
 echo "torch_branch: ${torch_branch}"
 echo "torch_commit: ${torch_commit}"
 
-# if you have an error named like version `GLIBCXX_3.4.30' not found, you can add `-c conda-forge` to the following command. And also for your `conda create -n pt_compiled -c conda-forge python=3.10` command
-conda install -y magma-cuda126 -c pytorch
+# Extract CUDA version from nvcc --version with fallback
+CUDA_VERSION=$(nvcc --version | grep "release" | sed -E 's/.*release ([0-9]+\.[0-9]+).*/\1/' | sed 's/\.//')
+# Check if the version was detected correctly
+if [[ -z "$CUDA_VERSION" ]] || ! [[ "$CUDA_VERSION" =~ ^[0-9]+$ ]]; then
+    # Set default version if detection fails
+    CUDA_VERSION="126"
+    echo "WARNING: Could not detect CUDA version properly. Defaulting to CUDA 12.6 (CUDA_VERSION=${CUDA_VERSION})"
+else
+    echo "Detected CUDA version: ${CUDA_VERSION}"
+fi
+conda install -y magma-cuda${CUDA_VERSION} -c pytorch
 conda install -y ccache cmake ninja mkl mkl-include libpng libjpeg-turbo -c conda-forge
 # graphviz
 
