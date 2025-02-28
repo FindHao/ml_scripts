@@ -98,7 +98,7 @@ if [ -n "$torch_commit" ]; then
 else
     git checkout $torch_branch
 fi
-if [ $torch_pull -eq 1 ]; then
+if [ $torch_pull -eq 1 ] && [ -z "$torch_commit" ]; then
     git pull
 fi
 git submodule sync
