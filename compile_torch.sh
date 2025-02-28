@@ -62,19 +62,9 @@ echo "torch_only: ${torch_only}"
 echo "torch_branch: ${torch_branch}"
 echo "torch_commit: ${torch_commit}"
 
-# Extract CUDA version from nvcc --version with fallback
-CUDA_VERSION=$(nvcc --version | grep "release" | sed -E 's/.*release ([0-9]+\.[0-9]+).*/\1/' | sed 's/\.//')
-# Check if the version was detected correctly
-if [[ -z "$CUDA_VERSION" ]] || ! [[ "$CUDA_VERSION" =~ ^[0-9]+$ ]]; then
-    # Set default version if detection fails
-    CUDA_VERSION="126"
-    echo "WARNING: Could not detect CUDA version properly. Defaulting to CUDA 12.6 (CUDA_VERSION=${CUDA_VERSION})"
-else
-    echo "Detected CUDA version: ${CUDA_VERSION}"
-fi
-conda install -y magma-cuda${CUDA_VERSION} -c pytorch
+# https://anaconda.org/pytorch/repo?type=conda&label=main not all cuda versions are available
+conda install -y magma-cuda126 -c pytorch
 conda install -y ccache cmake ninja mkl mkl-include libpng libjpeg-turbo -c conda-forge
-# graphviz
 
 export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
 
