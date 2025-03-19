@@ -6,6 +6,9 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+# Start timing the script execution
+start_time=$(date +%s)
+
 # Consolidate and organize environment variables at the top
 declare -r MAX_JOBS=256
 declare -r DEFAULT_WORK_PATH="/home/yhao/p9"
@@ -33,6 +36,15 @@ function error_exit() {
     exit 1
 }
 
+# Function to format time
+function format_time() {
+    local seconds=$1
+    local hours=$((seconds / 3600))
+    local minutes=$(((seconds % 3600) / 60))
+    local secs=$((seconds % 60))
+    printf "%02d:%02d:%02d" $hours $minutes $secs
+}
+
 # Improve the git_upgrade_pack function with error handling
 function git_upgrade_pack() {
     local package_name="$1"
@@ -46,12 +58,15 @@ function git_upgrade_pack() {
 # Improve the upgrade_pack function
 function upgrade_pack() {
     local package_name="$1"
+    local package_start_time=$(date +%s)
     echo "Installing package: $package_name"
     git_upgrade_pack "$package_name"
     pip uninstall -y "torch$package_name" || true # Don't fail if package isn't installed
     python setup.py clean || error_exit "Failed to clean $package_name"
     python setup.py install || error_exit "Failed to install $package_name"
-    echo "$package_name installation completed successfully"
+    local package_end_time=$(date +%s)
+    local package_duration=$((package_end_time - package_start_time))
+    echo "$package_name installation completed successfully in $(format_time $package_duration)"
 }
 
 # print configs
@@ -82,15 +97,19 @@ if [ "$clean_install" -eq 1 ]; then
 fi
 
 function notify_finish() {
-    echo "PyTorch compilation completed successfully"
+    end_time=$(date +%s)
+    total_duration=$((end_time - start_time))
+    formatted_duration=$(format_time $total_duration)
+    echo "PyTorch compilation completed successfully in $formatted_duration"
     if command -v notify &>/dev/null; then
-        notify "PyTorch Compilation is done" || true # Don't fail if notify fails
+        notify "PyTorch Compilation finished in $formatted_duration" || true # Don't fail if notify fails
     fi
 }
 
 pip uninstall -y torch
 # install pytorch
 cd $work_path/pytorch
+torch_start_time=$(date +%s)
 git fetch
 if [ -n "$torch_commit" ]; then
     git checkout $torch_commit
@@ -117,6 +136,9 @@ else
 fi
 
 ${debug_prefix} python setup.py develop
+torch_end_time=$(date +%s)
+torch_duration=$((torch_end_time - torch_start_time))
+echo "PyTorch core installation completed in $(format_time $torch_duration)"
 
 if [ $torch_only -eq 1 ]; then
     notify_finish
@@ -145,13 +167,16 @@ if [ $no_torchbench -eq 1 ]; then
     exit 0
 fi
 # install torchbench
+torchbench_start_time=$(date +%s)
 pip install pyyaml
 cd $work_path/benchmark
 git pull
 git submodule sync
 git submodule update --init --recursive
 python install.py
-echo "torchbench installation is done"
+torchbench_end_time=$(date +%s)
+torchbench_duration=$((torchbench_end_time - torchbench_start_time))
+echo "torchbench installation completed in $(format_time $torchbench_duration)"
 notify_finish
 
 # Add trap for cleanup on script exit
