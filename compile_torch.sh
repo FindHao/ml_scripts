@@ -77,10 +77,9 @@ echo "torch_only: ${torch_only}"
 echo "torch_branch: ${torch_branch}"
 echo "torch_commit: ${torch_commit}"
 
-# if you have an error named like version `GLIBCXX_3.4.30' not found, you can add `-c conda-forge` to the following command. And also for your `conda create -n pt_compiled -c conda-forge python=3.10` command
+# https://anaconda.org/pytorch/repo?type=conda&label=main not all cuda versions are available
 conda install -y magma-cuda126 -c pytorch
 conda install -y ccache cmake ninja mkl mkl-include libpng libjpeg-turbo -c conda-forge
-# graphviz
 
 export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
 
