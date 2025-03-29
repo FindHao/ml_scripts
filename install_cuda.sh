@@ -3,7 +3,7 @@
 # Notice: Part of this script should be synced with https://github.com/pytorch/pytorch/blob/main/.ci/docker/common/install_cuda.sh
 set -ex
 
-NCCL_VERSION=v2.25.1-1
+NCCL_VERSION=v2.26.2-1
 CUDNN_VERSION=9.5.1.17
 
 # Make cuda install path configurable. By default, it is /usr/local.
