@@ -40,12 +40,16 @@ git fetch
 # Checkout specified commit
 echo "=== Checking out commit: $COMMIT_HASH ==="
 git checkout $COMMIT_HASH
+git submodule sync
+git submodule update --init --recursive
 
-# Create build directory if it doesn't exist
-if [ ! -d "$BUILD_DIR" ]; then
-    echo "=== Creating build directory ==="
-    mkdir -p "$BUILD_DIR"
+
+if [ -d "$BUILD_DIR" ]; then
+    echo "=== Removing existing build directory ==="
+    rm -rf "$BUILD_DIR"
 fi
+echo "=== Creating build directory ==="
+mkdir -p "$BUILD_DIR"
 
 # Navigate to build directory
 cd "$BUILD_DIR"
