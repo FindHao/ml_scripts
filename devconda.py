@@ -1,5 +1,30 @@
 #!/usr/bin/env python3
 
+"""
+devconda.py - Conda Environment Annotation Tool
+
+This script manages comments/annotations for conda environments, helping users
+track the purpose and characteristics of different environments. Comments are stored
+in a JSON file and organized by hostname, allowing for cross-server sharing.
+
+File format:
+    ~/.conda_comment.json - Stored as {hostname: {condaenvname: comment}}
+
+Usage:
+    No arguments     - Display comments for the current conda environment
+    --list, -l       - List all conda environment comments on the current host
+    --set, -s COMMENT - Set a comment for the current environment
+    --append, -a COMMENT - Append to the existing comment for the current environment
+    --env, -e ENV_NAME - Specify which conda environment to operate on (with --set or --append)
+
+Examples:
+    python devconda.py                              # Show current environment comment
+    python devconda.py --list                       # List all environment comments
+    python devconda.py --set "For data science projects"  # Set current environment comment
+    python devconda.py --append "with TensorFlow"   # Append to current environment comment
+    python devconda.py --set "ML env" --env ml_env  # Set comment for a specific environment
+"""
+
 import argparse
 import json
 import os
