@@ -29,7 +29,6 @@ import argparse
 import json
 import os
 import socket
-import sys
 import subprocess
 from pathlib import Path
 
@@ -208,6 +207,11 @@ def main():
     # If --append is specified, append to the comment
     if args.append:
         set_comment(args.append, env_name=args.env, append=True)
+        # Show the updated comment after appending
+        env_name = args.env or get_current_conda_env()
+        hostname = get_hostname()
+        updated_comment = get_comment(env_name, hostname)
+        print(f"Updated comment: [{hostname}] {env_name}: {updated_comment}")
         return
 
     # No arguments, display the current environment comment
