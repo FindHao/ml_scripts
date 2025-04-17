@@ -3,6 +3,12 @@
 # Notice: Part of this script should be synced with https://github.com/pytorch/pytorch/blob/main/.ci/docker/common/install_cuda.sh
 set -ex
 
+# set a user specific tmp directory. this can avoid the segmentation fault issue caused
+# by /tmp/cuda-installer.log permission issue.
+USER_TMPDIR="${HOME}/tmp/cuda_install"
+mkdir -p "${USER_TMPDIR}"
+export TMPDIR="${USER_TMPDIR}"
+
 NCCL_VERSION=v2.26.2-1
 CUDNN_VERSION=9.5.1.17
 
@@ -330,5 +336,9 @@ eval install_${version_no_dot}
 if [ "$SKIP_PRUNE" -eq 0 ]; then
   eval prune_${version_no_dot}
 fi
+
+# clean up the temp directory
+cleanup_temp_dirs
+rm -rf "${USER_TMPDIR}"
 
 echo "CUDA installation complete"
