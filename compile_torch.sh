@@ -78,8 +78,8 @@ echo "torch_branch: ${torch_branch}"
 echo "torch_commit: ${torch_commit}"
 
 # https://anaconda.org/pytorch/repo?type=conda&label=main not all cuda versions are available
-conda install -y magma-cuda126 -c pytorch
-conda install -y ccache cmake ninja mkl mkl-include libpng libjpeg-turbo -c conda-forge
+# conda install -y magma-cuda126 -c pytorch
+conda install -y ccache cmake==3.31.6 ninja mkl mkl-include libpng libjpeg-turbo -c conda-forge
 
 export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
 
@@ -93,6 +93,11 @@ if [ "$clean_install" -eq 1 ]; then
     for repo in pytorch text data vision audio benchmark; do
         git clone --recursive "git@github.com:pytorch/${repo}.git" || error_exit "Failed to clone $repo"
     done
+fi
+
+
+if [ -f "$HOME/.notify.sh" ]; then
+    source "$HOME/.notify.sh"
 fi
 
 function notify_finish() {
