@@ -1,7 +1,11 @@
 #!/bin/bash
 
 # Script to clone LLVM and compile a specific commit version
-# Usage: ./compile_llvm.sh <commit_hash> [build_dir]
+# Usage: ./compile_llvm.sh
+# Environment variables:
+#   COMMIT_HASH - LLVM commit hash to build (default: 2619c2ed584cdf3b38e6743ed3c785223f06e3f7)
+#   BUILD_DIR - Directory to build LLVM in (default: $HOME/g/opt/llvm-build)
+#   LLVM_DIR - Directory of LLVM repository (default: $HOME/g/llvm-project)
 # install dependencies
 # conda install -c conda-forge git cmake ninja compilers make
 
@@ -11,9 +15,9 @@ set -e
 START_TIME=$(date +%s)
 
 # Default values
-COMMIT_HASH=${1:-"2619c2ed584cdf3b38e6743ed3c785223f06e3f7"}
-BUILD_DIR=${2:-"$HOME/g/opt/llvm-build"}
-LLVM_DIR="$HOME/g/llvm-project"
+COMMIT_HASH=${COMMIT_HASH:-"2619c2ed584cdf3b38e6743ed3c785223f06e3f7"}
+BUILD_DIR=${BUILD_DIR:-"$HOME/g/opt/llvm-build"}
+LLVM_DIR=${LLVM_DIR:-"$HOME/g/llvm-project"}
 
 echo "=== Compiling LLVM commit: $COMMIT_HASH ==="
 echo "=== Build directory: $BUILD_DIR ==="
@@ -36,12 +40,16 @@ git fetch
 # Checkout specified commit
 echo "=== Checking out commit: $COMMIT_HASH ==="
 git checkout $COMMIT_HASH
+git submodule sync
+git submodule update --init --recursive
 
-# Create build directory if it doesn't exist
-if [ ! -d "$BUILD_DIR" ]; then
-    echo "=== Creating build directory ==="
-    mkdir -p "$BUILD_DIR"
+
+if [ -d "$BUILD_DIR" ]; then
+    echo "=== Removing existing build directory ==="
+    rm -rf "$BUILD_DIR"
 fi
+echo "=== Creating build directory ==="
+mkdir -p "$BUILD_DIR"
 
 # Navigate to build directory
 cd "$BUILD_DIR"
