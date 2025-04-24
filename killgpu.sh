@@ -21,6 +21,21 @@ if [ -z "$GPU_PIDS" ]; then
     exit 0
 fi
 
+# Check if any processes belong to current user
+HAS_USER_PROCESSES=false
+for PID in $GPU_PIDS; do
+    PROCESS_USER=$(ps -o user= -p $PID 2>/dev/null)
+    if [ "$PROCESS_USER" = "$CURRENT_USER" ]; then
+        HAS_USER_PROCESSES=true
+        break
+    fi
+done
+
+if [ "$HAS_USER_PROCESSES" = false ]; then
+    echo "No GPU processes found belonging to $CURRENT_USER."
+    exit 0
+fi
+
 # Count processes
 PROCESS_COUNT=$(echo "$GPU_PIDS" | wc -l)
 echo "Found $PROCESS_COUNT GPU processes. Checking ownership..."
