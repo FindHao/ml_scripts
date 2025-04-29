@@ -8,7 +8,7 @@ track the purpose and characteristics of different environments. Comments are st
 in a JSON file and organized by hostname, allowing for cross-server sharing.
 
 File format:
-    ~/.conda_comment.json - Stored as {hostname: {condaenvname: comment}}
+    ~/.conda_comment.json - Stored as {hostname: {condaenvname: comment, "_host_comment": host_comment}}
 
 Usage:
     No arguments     - Display comments for the current conda environment
@@ -16,6 +16,7 @@ Usage:
     --set, -s COMMENT - Set a comment for the current environment
     --append, -a COMMENT - Append to the existing comment for the current environment
     --env, -e ENV_NAME - Specify which conda environment to operate on (with --set or --append)
+    --host-comment, -hc COMMENT - Set a comment/alias for the current host
 
 Examples:
     python devconda.py                              # Show current environment comment
@@ -23,6 +24,7 @@ Examples:
     python devconda.py --set "For data science projects"  # Set current environment comment
     python devconda.py --append "with TensorFlow"   # Append to current environment comment
     python devconda.py --set "ML env" --env ml_env  # Set comment for a specific environment
+    python devconda.py --host-comment "myath"       # Set alias/comment for current host
 """
 
 import argparse
@@ -33,6 +35,7 @@ import subprocess
 from pathlib import Path
 
 COMMENT_FILE = os.path.expanduser("~/.conda_comment.json")
+HOST_COMMENT_KEY = "_host_comment"
 
 
 def get_current_conda_env():
@@ -111,6 +114,17 @@ def get_comment(env_name=None, hostname=None):
     return comments[hostname].get(env_name)
 
 
+def get_host_comment(hostname=None):
+    """Get the comment/alias for a specific hostname."""
+    comments = load_comments()
+    hostname = hostname or get_hostname()
+
+    if hostname not in comments:
+        return None
+
+    return comments[hostname].get(HOST_COMMENT_KEY)
+
+
 def set_comment(comment, env_name=None, hostname=None, append=False):
     """Set or append a comment for a specific environment and hostname."""
     comments = load_comments()
@@ -145,6 +159,28 @@ def set_comment(comment, env_name=None, hostname=None, append=False):
         f"Comment for environment [{env_name}] on host [{hostname}] updated.")
 
 
+def set_host_comment(comment, hostname=None, append=False):
+    """Set or append a comment for a specific hostname."""
+    comments = load_comments()
+    hostname = hostname or get_hostname()
+
+    # Initialize hostname entry if it doesn't exist
+    if hostname not in comments:
+        comments[hostname] = {}
+
+    # Get the current comment, if any
+    current_comment = comments[hostname].get(HOST_COMMENT_KEY, "")
+
+    # Set or append the comment
+    if append and current_comment:
+        comments[hostname][HOST_COMMENT_KEY] = current_comment + ", " + comment
+    else:
+        comments[hostname][HOST_COMMENT_KEY] = comment
+
+    save_comments(comments)
+    print(f"Comment for host [{hostname}] updated.")
+
+
 def list_comments(hostname=None):
     """List all comments for a specific hostname."""
     comments = load_comments()
@@ -155,10 +191,15 @@ def list_comments(hostname=None):
         print(f"No comments found for host [{hostname}].")
         return
 
-    print(f"[{hostname}]")
+    # Display host comment/alias if exists
+    host_comment = comments[hostname].get(HOST_COMMENT_KEY)
+    if host_comment:
+        print(f"[{hostname}] (Alias: {host_comment})")
+    else:
+        print(f"[{hostname}]")
 
     # Get all environments with comments
-    commented_envs = comments[hostname].keys()
+    commented_envs = [k for k in comments[hostname].keys() if k != HOST_COMMENT_KEY]
 
     # Check for environments with comments
     found_comments = False
@@ -177,7 +218,7 @@ def list_comments(hostname=None):
             found_comments = True
 
     if not found_comments:
-        print("\tNo comments found.")
+        print("\tNo environment comments found.")
 
 
 def main():
@@ -191,8 +232,22 @@ def main():
                         help="Append to the comment for the current conda environment.")
     parser.add_argument("--env", "-e", metavar="ENV_NAME",
                         help="Specify conda environment name.")
+    parser.add_argument("--host-comment", "-hc", metavar="COMMENT",
+                        help="Set a comment/alias for the current host.")
+    parser.add_argument("--append-host", "-ah", metavar="COMMENT",
+                        help="Append to the comment for the current host.")
 
     args = parser.parse_args()
+
+    # If --host-comment is specified, set the host comment
+    if args.host_comment:
+        set_host_comment(args.host_comment)
+        return
+        
+    # If --append-host is specified, append to the host comment
+    if args.append_host:
+        set_host_comment(args.append_host, append=True)
+        return
 
     # If --list is specified, list all comments and exit
     if args.list:
@@ -214,16 +269,22 @@ def main():
         print(f"Updated comment: [{hostname}] {env_name}: {updated_comment}")
         return
 
-    # No arguments, display the current environment comment
+    # No arguments, display the current environment comment and host comment
     env_name = args.env or get_current_conda_env()
     hostname = get_hostname()
-    comment = get_comment(env_name, hostname)
-
-    if comment:
-        print(f"[{hostname}] {env_name}: {comment}")
+    
+    # Display host comment/alias if exists
+    host_comment = get_host_comment(hostname)
+    if host_comment:
+        print(f"[{hostname}] (Alias: {host_comment})")
     else:
-        print(
-            f"No comment found for environment [{env_name}] on host [{hostname}].")
+        print(f"[{hostname}]")
+    
+    comment = get_comment(env_name, hostname)
+    if comment:
+        print(f"{env_name}: {comment}")
+    else:
+        print(f"No comment found for environment [{env_name}].")
 
 
 if __name__ == "__main__":
