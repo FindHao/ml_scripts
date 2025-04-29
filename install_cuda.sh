@@ -1,6 +1,6 @@
 #!/bin/bash
-# Usage: CUDA_INSTALL_PREFIX=/home/yhao/opt ./install_cuda.sh 11.8
-# Notice: Part of this script should be synced with https://github.com/pytorch/pytorch/blob/main/.ci/docker/common/install_cuda.sh
+# Usage: CUDA_INSTALL_PREFIX=/home/yhao/opt ./install_cuda.sh 12.8
+# Notice: Part of this script is synced with https://github.com/pytorch/pytorch/blob/main/.ci/docker/common/install_cuda.sh
 set -ex
 
 # set a user specific tmp directory. this can avoid the segmentation fault issue caused
@@ -9,15 +9,14 @@ USER_TMPDIR="${HOME}/tmp/cuda_install"
 mkdir -p "${USER_TMPDIR}"
 export TMPDIR="${USER_TMPDIR}"
 
-NCCL_VERSION=v2.26.2-1
 CUDNN_VERSION=9.5.1.17
 
 # Make cuda install path configurable. By default, it is /usr/local.
-CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX:-/usr/local}
+CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX:-$HOME/opt}
 # Remove trailing slash if present
 CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX%/}
 SKIP_PRUNE=${SKIP_PRUNE:-1}
-CUDA_VERSION=${CUDA_VERSION:-12.6}
+CUDA_VERSION=${CUDA_VERSION:-12.8}
 
 # Clean up any leftover temporary directories from previous failed installations
 cleanup_temp_dirs() {
@@ -66,10 +65,36 @@ function install_cusparselt {
   rm -rf tmp_cusparselt
 }
 
+function install_nccl {
+  NCCL_VERSION=""
+  if [[ ${CUDA_VERSION:0:2} == "11" ]]; then
+    NCCL_VERSION=$(curl -s https://github.com/pytorch/pytorch/raw/refs/heads/main/.ci/docker/ci_commit_pins/nccl-cu11.txt)
+  elif [[ ${CUDA_VERSION:0:2} == "12" ]]; then
+    NCCL_VERSION=$(curl -s https://github.com/pytorch/pytorch/raw/refs/heads/main/.ci/docker/ci_commit_pins/nccl-cu12.txt)
+  else
+    echo "Unexpected CUDA_VERSION ${CUDA_VERSION}"
+    exit 1
+  fi
+
+  if [[ -n "${NCCL_VERSION}" ]]; then
+    # NCCL license: https://docs.nvidia.com/deeplearning/nccl/#licenses
+    # Follow build: https://github.com/NVIDIA/nccl/tree/master?tab=readme-ov-file#build
+    git clone -b $NCCL_VERSION --depth 1 https://github.com/NVIDIA/nccl.git
+    pushd nccl
+    make -j src.build CUDA_HOME=${CUDA_INSTALL_PREFIX}/cuda
+    cp -a build/include/* ${CUDA_INSTALL_PREFIX}/cuda/include/
+    cp -a build/lib/* ${CUDA_INSTALL_PREFIX}/cuda/lib64/
+    popd
+    rm -rf nccl
+    if [ "$(id -u)" -eq 0 ]; then
+      ldconfig
+    fi
+  fi
+}
+
 function install_118 {
   CUDNN_VERSION=9.1.0.70
-  NCCL_VERSION=v2.21.5-1
-  echo "Installing CUDA 11.8 and cuDNN ${CUDNN_VERSION} and NCCL ${NCCL_VERSION} and cuSparseLt"
+  echo "Installing CUDA 11.8 and cuDNN ${CUDNN_VERSION} and NCCL and cuSparseLt"
   rm -rf ${CUDA_INSTALL_PREFIX}/cuda-11.8 ${CUDA_INSTALL_PREFIX}/cuda
   # install CUDA 11.8.0 in the same container
   wget -q https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda_11.8.0_520.61.05_linux.run -O cuda_11.8.0_520.61.05_linux.run
@@ -87,15 +112,7 @@ function install_118 {
   cd ..
   rm -rf tmp_cudnn
 
-  # NCCL license: https://docs.nvidia.com/deeplearning/nccl/#licenses
-  # Follow build: https://github.com/NVIDIA/nccl/tree/master?tab=readme-ov-file#build
-  git clone -b $NCCL_VERSION --depth 1 https://github.com/NVIDIA/nccl.git
-  cd nccl && make -j src.build CUDA_HOME=${CUDA_INSTALL_PREFIX}/cuda
-  cp -a build/include/* ${CUDA_INSTALL_PREFIX}/cuda/include/
-  cp -a build/lib/* ${CUDA_INSTALL_PREFIX}/cuda/lib64/
-  cd ..
-  rm -rf nccl
-
+  install_nccl
   install_cusparselt
 
   if [ "$(id -u)" -eq 0 ]; then
@@ -105,7 +122,7 @@ function install_118 {
 
 function install_124 {
   CUDNN_VERSION=9.1.0.70
-  echo "Installing CUDA 12.4.1 and cuDNN ${CUDNN_VERSION} and NCCL ${NCCL_VERSION} and cuSparseLt"
+  echo "Installing CUDA 12.4.1 and cuDNN ${CUDNN_VERSION} and NCCL and cuSparseLt"
   rm -rf ${CUDA_INSTALL_PREFIX}/cuda-12.4 ${CUDA_INSTALL_PREFIX}/cuda
   # install CUDA 12.4.1 in the same container
   wget -q https://developer.download.nvidia.com/compute/cuda/12.4.1/local_installers/cuda_12.4.1_550.54.15_linux.run -O cuda_12.4.1_550.54.15_linux.run
@@ -123,15 +140,7 @@ function install_124 {
   cd ..
   rm -rf tmp_cudnn
 
-  # NCCL license: https://docs.nvidia.com/deeplearning/nccl/#licenses
-  # Follow build: https://github.com/NVIDIA/nccl/tree/master?tab=readme-ov-file#build
-  git clone -b $NCCL_VERSION --depth 1 https://github.com/NVIDIA/nccl.git
-  cd nccl && make -j src.build CUDA_HOME=${CUDA_INSTALL_PREFIX}/cuda
-  cp -a build/include/* ${CUDA_INSTALL_PREFIX}/cuda/include/
-  cp -a build/lib/* ${CUDA_INSTALL_PREFIX}/cuda/lib64/
-  cd ..
-  rm -rf nccl
-
+  install_nccl
   install_cusparselt
 
   if [ "$(id -u)" -eq 0 ]; then
@@ -140,7 +149,7 @@ function install_124 {
 }
 
 function install_126 {
-  echo "Installing CUDA 12.6.3 and cuDNN ${CUDNN_VERSION} and NCCL ${NCCL_VERSION} and cuSparseLt"
+  echo "Installing CUDA 12.6.3 and cuDNN ${CUDNN_VERSION} and NCCL and cuSparseLt"
   rm -rf ${CUDA_INSTALL_PREFIX}/cuda-12.6 ${CUDA_INSTALL_PREFIX}/cuda
   # install CUDA 12.6.3 in the same container
   wget -q https://developer.download.nvidia.com/compute/cuda/12.6.3/local_installers/cuda_12.6.3_560.35.05_linux.run -O cuda_12.6.3_560.35.05_linux.run
@@ -158,18 +167,38 @@ function install_126 {
   cd ..
   rm -rf tmp_cudnn
 
-  # NCCL license: https://docs.nvidia.com/deeplearning/nccl/#licenses
-  # Follow build: https://github.com/NVIDIA/nccl/tree/master?tab=readme-ov-file#build
-  git clone -b $NCCL_VERSION --depth 1 https://github.com/NVIDIA/nccl.git
-  cd nccl && make -j src.build CUDA_HOME=${CUDA_INSTALL_PREFIX}/cuda
-  cp -a build/include/* ${CUDA_INSTALL_PREFIX}/cuda/include/
-  cp -a build/lib/* ${CUDA_INSTALL_PREFIX}/cuda/lib64/
-  cd ..
-  rm -rf nccl
-
+  install_nccl
   install_cusparselt
 
   # Only run ldconfig if we are root
+  if [ "$(id -u)" -eq 0 ]; then
+    ldconfig
+  fi
+}
+
+function install_128 {
+  CUDNN_VERSION=9.8.0.87
+  echo "Installing CUDA 12.8.0 and cuDNN ${CUDNN_VERSION} and NCCL and cuSparseLt"
+  rm -rf ${CUDA_INSTALL_PREFIX}/cuda-12.8 ${CUDA_INSTALL_PREFIX}/cuda
+  # install CUDA 12.8.0 in the same container
+  wget -q https://developer.download.nvidia.com/compute/cuda/12.8.0/local_installers/cuda_12.8.0_570.86.10_linux.run
+  chmod +x cuda_12.8.0_570.86.10_linux.run
+  ./cuda_12.8.0_570.86.10_linux.run --toolkit --silent --toolkitpath=${CUDA_INSTALL_PREFIX}/cuda-${CUDA_VERSION}
+  rm -f cuda_12.8.0_570.86.10_linux.run
+  rm -f ${CUDA_INSTALL_PREFIX}/cuda && ln -s ${CUDA_INSTALL_PREFIX}/cuda-12.8 ${CUDA_INSTALL_PREFIX}/cuda
+
+  # cuDNN license: https://developer.nvidia.com/cudnn/license_agreement
+  mkdir tmp_cudnn && cd tmp_cudnn
+  wget -q https://developer.download.nvidia.com/compute/cudnn/redist/cudnn/linux-x86_64/cudnn-linux-x86_64-${CUDNN_VERSION}_cuda12-archive.tar.xz -O cudnn-linux-x86_64-${CUDNN_VERSION}_cuda12-archive.tar.xz
+  tar xf cudnn-linux-x86_64-${CUDNN_VERSION}_cuda12-archive.tar.xz
+  cp -a cudnn-linux-x86_64-${CUDNN_VERSION}_cuda12-archive/include/* ${CUDA_INSTALL_PREFIX}/cuda/include/
+  cp -a cudnn-linux-x86_64-${CUDNN_VERSION}_cuda12-archive/lib/* ${CUDA_INSTALL_PREFIX}/cuda/lib64/
+  cd ..
+  rm -rf tmp_cudnn
+
+  install_nccl
+  install_cusparselt
+
   if [ "$(id -u)" -eq 0 ]; then
     ldconfig
   fi
@@ -274,42 +303,6 @@ function prune_126 {
   rm -rf $CUDA_BASE/libnvvp $CUDA_BASE/nsightee_plugins 
 }
 
-function install_128 {
-  CUDNN_VERSION=9.8.0.87
-  echo "Installing CUDA 12.8.0 and cuDNN ${CUDNN_VERSION} and NCCL ${NCCL_VERSION} and cuSparseLt"
-  rm -rf ${CUDA_INSTALL_PREFIX}/cuda-12.8 ${CUDA_INSTALL_PREFIX}/cuda
-  # install CUDA 12.8.0 in the same container
-  wget -q https://developer.download.nvidia.com/compute/cuda/12.8.0/local_installers/cuda_12.8.0_570.86.10_linux.run
-  chmod +x cuda_12.8.0_570.86.10_linux.run
-  ./cuda_12.8.0_570.86.10_linux.run --toolkit --silent --toolkitpath=${CUDA_INSTALL_PREFIX}/cuda-${CUDA_VERSION}
-  rm -f cuda_12.8.0_570.86.10_linux.run
-  rm -f ${CUDA_INSTALL_PREFIX}/cuda && ln -s ${CUDA_INSTALL_PREFIX}/cuda-12.8 ${CUDA_INSTALL_PREFIX}/cuda
-
-  # cuDNN license: https://developer.nvidia.com/cudnn/license_agreement
-  mkdir tmp_cudnn && cd tmp_cudnn
-  wget -q https://developer.download.nvidia.com/compute/cudnn/redist/cudnn/linux-x86_64/cudnn-linux-x86_64-${CUDNN_VERSION}_cuda12-archive.tar.xz -O cudnn-linux-x86_64-${CUDNN_VERSION}_cuda12-archive.tar.xz
-  tar xf cudnn-linux-x86_64-${CUDNN_VERSION}_cuda12-archive.tar.xz
-  cp -a cudnn-linux-x86_64-${CUDNN_VERSION}_cuda12-archive/include/* ${CUDA_INSTALL_PREFIX}/cuda/include/
-  cp -a cudnn-linux-x86_64-${CUDNN_VERSION}_cuda12-archive/lib/* ${CUDA_INSTALL_PREFIX}/cuda/lib64/
-  cd ..
-  rm -rf tmp_cudnn
-
-  # NCCL license: https://docs.nvidia.com/deeplearning/nccl/#licenses
-  # Follow build: https://github.com/NVIDIA/nccl/tree/master?tab=readme-ov-file#build
-  git clone -b $NCCL_VERSION --depth 1 https://github.com/NVIDIA/nccl.git
-  cd nccl && make -j src.build CUDA_HOME=${CUDA_INSTALL_PREFIX}/cuda
-  cp -a build/include/* ${CUDA_INSTALL_PREFIX}/cuda/include/
-  cp -a build/lib/* ${CUDA_INSTALL_PREFIX}/cuda/lib64/
-  cd ..
-  rm -rf nccl
-
-  install_cusparselt
-
-  if [ "$(id -u)" -eq 0 ]; then
-    ldconfig
-  fi
-}
-
 VALID_VERSIONS=("11.8" "12.4" "12.6" "12.8")
 
 # Make it compatible with previous usage
@@ -323,7 +316,7 @@ while test $# -gt 0; do
   shift
 done
 
-# 检查CUDA版本
+# Check if the CUDA version is valid
 if [[ ! " ${VALID_VERSIONS[@]} " =~ " ${CUDA_VERSION} " ]]; then
   echo "CUDA_VERSION must be 11.8, 12.4, 12.6, or 12.8"
   exit 1
