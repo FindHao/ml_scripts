@@ -68,9 +68,9 @@ function install_cusparselt {
 function install_nccl {
   NCCL_VERSION=""
   if [[ ${CUDA_VERSION:0:2} == "11" ]]; then
-    NCCL_VERSION=$(curl -s https://github.com/pytorch/pytorch/raw/refs/heads/main/.ci/docker/ci_commit_pins/nccl-cu11.txt)
+    NCCL_VERSION=$(curl -sL https://github.com/pytorch/pytorch/raw/refs/heads/main/.ci/docker/ci_commit_pins/nccl-cu11.txt)
   elif [[ ${CUDA_VERSION:0:2} == "12" ]]; then
-    NCCL_VERSION=$(curl -s https://github.com/pytorch/pytorch/raw/refs/heads/main/.ci/docker/ci_commit_pins/nccl-cu12.txt)
+    NCCL_VERSION=$(curl -sL https://github.com/pytorch/pytorch/raw/refs/heads/main/.ci/docker/ci_commit_pins/nccl-cu12.txt)
   else
     echo "Unexpected CUDA_VERSION ${CUDA_VERSION}"
     exit 1
@@ -89,6 +89,9 @@ function install_nccl {
     if [ "$(id -u)" -eq 0 ]; then
       ldconfig
     fi
+  else
+    echo "NCCL_VERSION is empty"
+    exit 1
   fi
 }
 
