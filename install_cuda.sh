@@ -9,8 +9,6 @@ USER_TMPDIR="${HOME}/tmp/cuda_install"
 mkdir -p "${USER_TMPDIR}"
 export TMPDIR="${USER_TMPDIR}"
 
-CUDNN_VERSION=9.5.1.17
-
 # Make cuda install path configurable. By default, it is /usr/local.
 CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX:-$HOME/opt}
 # Remove trailing slash if present
@@ -30,24 +28,64 @@ cleanup_temp_dirs() {
 cleanup_temp_dirs
 echo "Debug: After cleanup"
 
+function install_cuda {
+  version=$1
+  runfile=$2
+  major_minor=${version%.*}
+  
+  export TARGETARCH=${TARGETARCH:-$(uname -m)}
+  arch_path='x86_64'
+  if [ "${TARGETARCH}" = 'aarch64' ] || [ "${TARGETARCH}" = 'arm64' ]; then
+    arch_path='sbsa'
+  fi
+  
+  rm -rf ${CUDA_INSTALL_PREFIX}/cuda-${major_minor} ${CUDA_INSTALL_PREFIX}/cuda
+  if [[ ${arch_path} == 'sbsa' ]]; then
+      runfile="${runfile}_sbsa"
+  fi
+  runfile="${runfile}.run"
+  wget -q https://developer.download.nvidia.com/compute/cuda/${version}/local_installers/${runfile} -O ${runfile}
+  chmod +x ${runfile}
+  ./${runfile} --toolkit --silent --toolkitpath=${CUDA_INSTALL_PREFIX}/cuda-${major_minor}
+  rm -f ${runfile}
+  rm -f ${CUDA_INSTALL_PREFIX}/cuda && ln -s ${CUDA_INSTALL_PREFIX}/cuda-${major_minor} ${CUDA_INSTALL_PREFIX}/cuda
+}
+
+function install_cudnn {
+  cuda_major_version=$1
+  cudnn_version=$2
+  
+  export TARGETARCH=${TARGETARCH:-$(uname -m)}
+  arch_path='x86_64'
+  if [ "${TARGETARCH}" = 'aarch64' ] || [ "${TARGETARCH}" = 'arm64' ]; then
+    arch_path='sbsa'
+  fi
+  
+  mkdir tmp_cudnn && cd tmp_cudnn
+  # cuDNN license: https://developer.nvidia.com/cudnn/license_agreement
+  filepath="cudnn-linux-${arch_path}-${cudnn_version}_cuda${cuda_major_version}-archive"
+  wget -q https://developer.download.nvidia.com/compute/cudnn/redist/cudnn/linux-${arch_path}/${filepath}.tar.xz
+  tar xf ${filepath}.tar.xz
+  cp -a ${filepath}/include/* ${CUDA_INSTALL_PREFIX}/cuda/include/
+  cp -a ${filepath}/lib/* ${CUDA_INSTALL_PREFIX}/cuda/lib64/
+  cd ..
+  rm -rf tmp_cudnn
+}
+
 function install_cusparselt {
   # cuSparseLt license: https://docs.nvidia.com/cuda/cusparselt/license.html
   mkdir tmp_cusparselt && pushd tmp_cusparselt
 
+  export TARGETARCH=${TARGETARCH:-$(uname -m)}
+  arch_path='sbsa'
+  if [ ${TARGETARCH} = 'amd64' ] || [ "${TARGETARCH}" = 'x86_64' ]; then
+    arch_path='x86_64'
+  fi
+
   if [[ ${CUDA_VERSION:0:4} =~ ^12\.[5-8]$ ]]; then
-    arch_path='sbsa'
-    export TARGETARCH=${TARGETARCH:-$(uname -m)}
-    if [ ${TARGETARCH} = 'amd64' ] || [ "${TARGETARCH}" = 'x86_64' ]; then
-      arch_path='x86_64'
-    fi
     CUSPARSELT_NAME="libcusparse_lt-linux-${arch_path}-0.6.3.2-archive"
     curl --retry 3 -OLs https://developer.download.nvidia.com/compute/cusparselt/redist/libcusparse_lt/linux-${arch_path}/${CUSPARSELT_NAME}.tar.xz
   elif [[ ${CUDA_VERSION:0:4} == "12.4" ]]; then
-    arch_path='sbsa'
-    export TARGETARCH=${TARGETARCH:-$(uname -m)}
-    if [ ${TARGETARCH} = 'amd64' ] || [ "${TARGETARCH}" = 'x86_64' ]; then
-      arch_path='x86_64'
-    fi
     CUSPARSELT_NAME="libcusparse_lt-linux-${arch_path}-0.6.2.3-archive"
     curl --retry 3 -OLs https://developer.download.nvidia.com/compute/cusparselt/redist/libcusparse_lt/linux-${arch_path}/${CUSPARSELT_NAME}.tar.xz
   elif [[ ${CUDA_VERSION:0:4} == "11.8" ]]; then
@@ -96,25 +134,10 @@ function install_nccl {
 }
 
 function install_118 {
-  CUDNN_VERSION=9.1.0.70
+  local CUDNN_VERSION=9.1.0.70
   echo "Installing CUDA 11.8 and cuDNN ${CUDNN_VERSION} and NCCL and cuSparseLt"
-  rm -rf ${CUDA_INSTALL_PREFIX}/cuda-11.8 ${CUDA_INSTALL_PREFIX}/cuda
-  # install CUDA 11.8.0 in the same container
-  wget -q https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda_11.8.0_520.61.05_linux.run -O cuda_11.8.0_520.61.05_linux.run
-  chmod +x cuda_11.8.0_520.61.05_linux.run
-  ./cuda_11.8.0_520.61.05_linux.run --toolkit --silent --toolkitpath=${CUDA_INSTALL_PREFIX}/cuda-${CUDA_VERSION}
-  rm -f cuda_11.8.0_520.61.05_linux.run
-  rm -f ${CUDA_INSTALL_PREFIX}/cuda && ln -s ${CUDA_INSTALL_PREFIX}/cuda-11.8 ${CUDA_INSTALL_PREFIX}/cuda
-
-  # cuDNN license: https://developer.nvidia.com/cudnn/license_agreement
-  mkdir tmp_cudnn && cd tmp_cudnn
-  wget -q https://developer.download.nvidia.com/compute/cudnn/redist/cudnn/linux-x86_64/cudnn-linux-x86_64-${CUDNN_VERSION}_cuda11-archive.tar.xz -O cudnn-linux-x86_64-${CUDNN_VERSION}_cuda11-archive.tar.xz
-  tar xf cudnn-linux-x86_64-${CUDNN_VERSION}_cuda11-archive.tar.xz
-  cp -a cudnn-linux-x86_64-${CUDNN_VERSION}_cuda11-archive/include/* ${CUDA_INSTALL_PREFIX}/cuda/include/
-  cp -a cudnn-linux-x86_64-${CUDNN_VERSION}_cuda11-archive/lib/* ${CUDA_INSTALL_PREFIX}/cuda/lib64/
-  cd ..
-  rm -rf tmp_cudnn
-
+  install_cuda "11.8.0" "cuda_11.8.0_520.61.05_linux"
+  install_cudnn "11" "${CUDNN_VERSION}"
   install_nccl
   install_cusparselt
 
@@ -124,25 +147,10 @@ function install_118 {
 }
 
 function install_124 {
-  CUDNN_VERSION=9.1.0.70
+  local CUDNN_VERSION=9.1.0.70
   echo "Installing CUDA 12.4.1 and cuDNN ${CUDNN_VERSION} and NCCL and cuSparseLt"
-  rm -rf ${CUDA_INSTALL_PREFIX}/cuda-12.4 ${CUDA_INSTALL_PREFIX}/cuda
-  # install CUDA 12.4.1 in the same container
-  wget -q https://developer.download.nvidia.com/compute/cuda/12.4.1/local_installers/cuda_12.4.1_550.54.15_linux.run -O cuda_12.4.1_550.54.15_linux.run
-  chmod +x cuda_12.4.1_550.54.15_linux.run
-  ./cuda_12.4.1_550.54.15_linux.run --toolkit --silent --toolkitpath=${CUDA_INSTALL_PREFIX}/cuda-${CUDA_VERSION}
-  rm -f cuda_12.4.1_550.54.15_linux.run
-  rm -f ${CUDA_INSTALL_PREFIX}/cuda && ln -s ${CUDA_INSTALL_PREFIX}/cuda-12.4 ${CUDA_INSTALL_PREFIX}/cuda
-
-  # cuDNN license: https://developer.nvidia.com/cudnn/license_agreement
-  mkdir tmp_cudnn && cd tmp_cudnn
-  wget -q https://developer.download.nvidia.com/compute/cudnn/redist/cudnn/linux-x86_64/cudnn-linux-x86_64-${CUDNN_VERSION}_cuda12-archive.tar.xz -O cudnn-linux-x86_64-${CUDNN_VERSION}_cuda12-archive.tar.xz
-  tar xf cudnn-linux-x86_64-${CUDNN_VERSION}_cuda12-archive.tar.xz
-  cp -a cudnn-linux-x86_64-${CUDNN_VERSION}_cuda12-archive/include/* ${CUDA_INSTALL_PREFIX}/cuda/include/
-  cp -a cudnn-linux-x86_64-${CUDNN_VERSION}_cuda12-archive/lib/* ${CUDA_INSTALL_PREFIX}/cuda/lib64/
-  cd ..
-  rm -rf tmp_cudnn
-
+  install_cuda "12.4.1" "cuda_12.4.1_550.54.15_linux"
+  install_cudnn "12" "${CUDNN_VERSION}"
   install_nccl
   install_cusparselt
 
@@ -152,24 +160,10 @@ function install_124 {
 }
 
 function install_126 {
+  local CUDNN_VERSION=9.5.1.17
   echo "Installing CUDA 12.6.3 and cuDNN ${CUDNN_VERSION} and NCCL and cuSparseLt"
-  rm -rf ${CUDA_INSTALL_PREFIX}/cuda-12.6 ${CUDA_INSTALL_PREFIX}/cuda
-  # install CUDA 12.6.3 in the same container
-  wget -q https://developer.download.nvidia.com/compute/cuda/12.6.3/local_installers/cuda_12.6.3_560.35.05_linux.run -O cuda_12.6.3_560.35.05_linux.run
-  chmod +x cuda_12.6.3_560.35.05_linux.run
-  ./cuda_12.6.3_560.35.05_linux.run --toolkit --silent --toolkitpath=${CUDA_INSTALL_PREFIX}/cuda-${CUDA_VERSION}
-  rm -f cuda_12.6.3_560.35.05_linux.run
-  rm -f ${CUDA_INSTALL_PREFIX}/cuda && ln -s ${CUDA_INSTALL_PREFIX}/cuda-12.6 ${CUDA_INSTALL_PREFIX}/cuda
-
-  # cuDNN license: https://developer.nvidia.com/cudnn/license_agreement
-  mkdir tmp_cudnn && cd tmp_cudnn
-  wget -q https://developer.download.nvidia.com/compute/cudnn/redist/cudnn/linux-x86_64/cudnn-linux-x86_64-${CUDNN_VERSION}_cuda12-archive.tar.xz -O cudnn-linux-x86_64-${CUDNN_VERSION}_cuda12-archive.tar.xz
-  tar xf cudnn-linux-x86_64-${CUDNN_VERSION}_cuda12-archive.tar.xz
-  cp -a cudnn-linux-x86_64-${CUDNN_VERSION}_cuda12-archive/include/* ${CUDA_INSTALL_PREFIX}/cuda/include/
-  cp -a cudnn-linux-x86_64-${CUDNN_VERSION}_cuda12-archive/lib/* ${CUDA_INSTALL_PREFIX}/cuda/lib64/
-  cd ..
-  rm -rf tmp_cudnn
-
+  install_cuda "12.6.3" "cuda_12.6.3_560.35.05_linux"
+  install_cudnn "12" "${CUDNN_VERSION}"
   install_nccl
   install_cusparselt
 
@@ -180,25 +174,10 @@ function install_126 {
 }
 
 function install_128 {
-  CUDNN_VERSION=9.8.0.87
+  local CUDNN_VERSION=9.8.0.87
   echo "Installing CUDA 12.8.0 and cuDNN ${CUDNN_VERSION} and NCCL and cuSparseLt"
-  rm -rf ${CUDA_INSTALL_PREFIX}/cuda-12.8 ${CUDA_INSTALL_PREFIX}/cuda
-  # install CUDA 12.8.0 in the same container
-  wget -q https://developer.download.nvidia.com/compute/cuda/12.8.0/local_installers/cuda_12.8.0_570.86.10_linux.run
-  chmod +x cuda_12.8.0_570.86.10_linux.run
-  ./cuda_12.8.0_570.86.10_linux.run --toolkit --silent --toolkitpath=${CUDA_INSTALL_PREFIX}/cuda-${CUDA_VERSION}
-  rm -f cuda_12.8.0_570.86.10_linux.run
-  rm -f ${CUDA_INSTALL_PREFIX}/cuda && ln -s ${CUDA_INSTALL_PREFIX}/cuda-12.8 ${CUDA_INSTALL_PREFIX}/cuda
-
-  # cuDNN license: https://developer.nvidia.com/cudnn/license_agreement
-  mkdir tmp_cudnn && cd tmp_cudnn
-  wget -q https://developer.download.nvidia.com/compute/cudnn/redist/cudnn/linux-x86_64/cudnn-linux-x86_64-${CUDNN_VERSION}_cuda12-archive.tar.xz -O cudnn-linux-x86_64-${CUDNN_VERSION}_cuda12-archive.tar.xz
-  tar xf cudnn-linux-x86_64-${CUDNN_VERSION}_cuda12-archive.tar.xz
-  cp -a cudnn-linux-x86_64-${CUDNN_VERSION}_cuda12-archive/include/* ${CUDA_INSTALL_PREFIX}/cuda/include/
-  cp -a cudnn-linux-x86_64-${CUDNN_VERSION}_cuda12-archive/lib/* ${CUDA_INSTALL_PREFIX}/cuda/lib64/
-  cd ..
-  rm -rf tmp_cudnn
-
+  install_cuda "12.8.0" "cuda_12.8.0_570.86.10_linux"
+  install_cudnn "12" "${CUDNN_VERSION}"
   install_nccl
   install_cusparselt
 
@@ -302,7 +281,7 @@ function prune_126 {
   #####################################################################################
   # CUDA 12.6 prune visual tools
   #####################################################################################
-  export CUDA_BASE="/usr/local/cuda-12.6/"
+  export CUDA_BASE="${CUDA_INSTALL_PREFIX}/cuda-12.6/"
   rm -rf $CUDA_BASE/libnvvp $CUDA_BASE/nsightee_plugins 
 }
 
