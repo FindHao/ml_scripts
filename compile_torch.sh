@@ -112,6 +112,8 @@ cd /tmp/
 ./install_magma_conda.sh "$cuda_version" || error_exit "install_magma_conda.sh failed"
 echo "MAGMA installation/check completed."
 
+pip install mkl-static mkl-include -y
+
 # Improve directory handling
 cd "$work_path" || error_exit "Failed to change to work directory"
 
