@@ -100,7 +100,7 @@ function get_cuda_version_from_nvcc() {
 cuda_version=$(get_cuda_version_from_nvcc)
 echo "Detected CUDA version: $cuda_version"
 
-conda install -y ccache cmake==3.31.6 ninja -c conda-forge
+conda install -y ccache cmake ninja -c conda-forge
 conda install -y libpng libjpeg-turbo -c conda-forge
 export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
 # Download and install Magma for the detected CUDA version
@@ -112,7 +112,7 @@ cd /tmp/
 ./install_magma_conda.sh "$cuda_version" || error_exit "install_magma_conda.sh failed"
 echo "MAGMA installation/check completed."
 
-pip install mkl-static mkl-include -y
+pip install mkl-static mkl-include 
 
 # Improve directory handling
 cd "$work_path" || error_exit "Failed to change to work directory"
