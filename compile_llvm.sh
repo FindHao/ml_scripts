@@ -19,6 +19,12 @@ COMMIT_HASH=${COMMIT_HASH:-"2619c2ed584cdf3b38e6743ed3c785223f06e3f7"}
 BUILD_DIR=${BUILD_DIR:-"$HOME/g/opt/llvm-build"}
 LLVM_DIR=${LLVM_DIR:-"$HOME/g/llvm-project"}
 
+export CMAKE_PREFIX_PATH="$CONDA_PREFIX"
+export LIBRARY_PATH=$CONDA_PREFIX/lib:$LIBRARY_PATH
+export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
+export CXXFLAGS="-I$CONDA_PREFIX/include"
+export LDFLAGS="-L$CONDA_PREFIX/lib"
+
 echo "=== Compiling LLVM commit: $COMMIT_HASH ==="
 echo "=== Build directory: $BUILD_DIR ==="
 
