@@ -77,11 +77,40 @@ echo "torch_only: ${torch_only}"
 echo "torch_branch: ${torch_branch}"
 echo "torch_commit: ${torch_commit}"
 
-# https://anaconda.org/pytorch/repo?type=conda&label=main not all cuda versions are available
-# conda install -y magma-cuda126 -c pytorch
-conda install -y ccache cmake==3.31.6 ninja mkl mkl-include libpng libjpeg-turbo -c conda-forge
+# Function to get CUDA version from nvcc
+function get_cuda_version_from_nvcc() {
+    if command -v nvcc &>/dev/null; then
+        local nvcc_output
+        nvcc_output=$(nvcc --version)
+        if [[ "$nvcc_output" =~ release[[:space:]]([0-9]+\\.[0-9]+) ]]; then
+            echo "${BASH_REMATCH[1]}"
+        else
+            echo "Could not parse CUDA version from nvcc output." >&2
+            # Default to a common version or ask user, here defaulting to 11.8 as a fallback
+            echo "12.8"
+        fi
+    else
+        echo "nvcc not found. Please ensure CUDA toolkit is installed and nvcc is in PATH." >&2
+        # Default to a common version or ask user, here defaulting to 11.8 as a fallback
+        echo "12.8"
+    fi
+}
 
+# Determine CUDA version
+cuda_version=$(get_cuda_version_from_nvcc)
+echo "Detected CUDA version: $cuda_version"
+
+conda install -y ccache cmake==3.31.6 ninja -c conda-forge
+conda install -y libpng libjpeg-turbo -c conda-forge
 export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
+# Download and install Magma for the detected CUDA version
+echo "Downloading install_magma_conda.sh..."
+wget https://raw.githubusercontent.com/pytorch/pytorch/main/.ci/docker/common/install_magma_conda.sh -O /tmp/install_magma_conda.sh || error_exit "Failed to download install_magma_conda.sh"
+chmod +x /tmp/install_magma_conda.sh
+echo "Running install_magma_conda.sh for CUDA $cuda_version..."
+cd /tmp/
+./install_magma_conda.sh "$cuda_version" || error_exit "install_magma_conda.sh failed"
+echo "MAGMA installation/check completed."
 
 # Improve directory handling
 cd "$work_path" || error_exit "Failed to change to work directory"
@@ -94,7 +123,6 @@ if [ "$clean_install" -eq 1 ]; then
         git clone --recursive "git@github.com:pytorch/${repo}.git" || error_exit "Failed to clone $repo"
     done
 fi
-
 
 if [ -f "$HOME/.notify.sh" ]; then
     source "$HOME/.notify.sh"
