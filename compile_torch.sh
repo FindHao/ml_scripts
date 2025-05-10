@@ -179,15 +179,6 @@ if [ $torch_only -eq 1 ]; then
     exit 0
 fi
 
-# install torchdata
-cd $work_path
-upgrade_pack data
-
-# install torchtext
-cd $work_path
-export CC=$(which gcc)
-export CXX=$(which g++)
-upgrade_pack text
 
 # install torchvision
 export FORCE_CUDA=1
