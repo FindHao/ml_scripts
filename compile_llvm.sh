@@ -1,5 +1,17 @@
 #!/bin/bash
 
+# Notice: A better way to build LLVM and install triton is to run the following commands:
+# ###### compile and install llvm and triton ######
+# conda install  libstdcxx-ng lld zstd zlib libgcc-ng clang=20 clangxx=20 ninja ccache cmake -y -c conda-forge
+# export CMAKE_PREFIX_PATH="$CONDA_PREFIX"
+# export LIBRARY_PATH=$CONDA_PREFIX/lib:$LIBRARY_PATH
+# export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
+# export CXXFLAGS="-I$CONDA_PREFIX/include"
+# export LDFLAGS="-L$CONDA_PREFIX/lib"
+# rm -rf .llvm-project build
+# make dev-install-llvm
+# ###### end ########
+
 # Script to clone LLVM and compile a specific commit version
 # Usage: ./compile_llvm.sh
 # Environment variables:
