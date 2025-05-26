@@ -368,7 +368,7 @@ function install_128 {
   echo "Starting installation for CUDA 12.8..."
   
   echo "STEP 1: Installing CUDA toolkit..."
-  install_cuda "12.8.0" "cuda_12.8.0_570.86.10_linux" || error_exit "CUDA 12.8.0 toolkit installation failed"
+  install_cuda "12.8.1" "cuda_12.8.1_570.124.06_linux" || error_exit "CUDA 12.8.1 toolkit installation failed"
   
   echo "STEP 2: Installing cuDNN..."
   install_cudnn "12" "${CUDNN_VERSION}" || error_exit "cuDNN installation failed"
