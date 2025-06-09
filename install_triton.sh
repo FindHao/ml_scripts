@@ -1,5 +1,7 @@
 
 # This file is not a runnable script but a set of instructions to install Triton.
+# Sometimes, pip install triton does not work due to various issues. This script will let triton installation use 
+# the conda environment to install the required dependencies.
 
 conda create -n pta python=3.11
 conda activate pta
