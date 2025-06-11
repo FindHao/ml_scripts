@@ -236,21 +236,14 @@ function install_nccl {
 # Real cuSparseLt installation function
 function install_cusparselt {
   echo "Installing cuSparseLt for CUDA ${CUDA_VERSION}..."
-  # cuSparseLt license: https://docs.nvidia.com/cuda/cusparselt/license.html
   mkdir -p tmp_cusparselt 
   pushd tmp_cusparselt || error_exit "Failed to create cuSparseLt temporary directory"
   
   local cusparselt_version
   local arch_path=${ARCH_PATH}
   
-  if [[ ${CUDA_VERSION:0:4} =~ ^12\.[5-8]$ ]]; then
-    cusparselt_version="0.6.3.2"
-  elif [[ ${CUDA_VERSION:0:4} == "12.4" ]]; then
-    cusparselt_version="0.6.2.3"
-  elif [[ ${CUDA_VERSION:0:4} == "11.8" ]]; then
-    cusparselt_version="0.4.0.7"
-    # 11.8 only supports x86_64
-    arch_path="x86_64"
+  if [[ ${CUDA_VERSION:0:4} =~ ^12\.[5-9]$ ]]; then
+    cusparselt_version="0.7.1.0"
   else
     popd
     rm -rf tmp_cusparselt
@@ -280,60 +273,9 @@ function install_cusparselt {
   popd
   rm -rf tmp_cusparselt
   
-  # Create cuSparseLt installation complete marker
   touch "${USER_TMPDIR}/cusparselt_installed"
   
   echo "cuSparseLt installation completed"
-  return 0
-}
-
-# CUDA 11.8 installation function
-function install_118 {
-  local CUDNN_VERSION=9.1.0.70
-  echo "Starting installation for CUDA 11.8..."
-  
-  echo "STEP 1: Installing CUDA toolkit..."
-  install_cuda "11.8.0" "cuda_11.8.0_520.61.05_linux" || error_exit "CUDA 11.8.0 toolkit installation failed"
-  
-  echo "STEP 2: Installing cuDNN..."
-  install_cudnn "11" "${CUDNN_VERSION}" || error_exit "cuDNN installation failed"
-  
-  echo "STEP 3: Installing NCCL..."
-  install_nccl || error_exit "NCCL installation failed"
-  
-  echo "STEP 4: Installing cuSparseLt..."
-  install_cusparselt || error_exit "cuSparseLt installation failed"
-  
-  if [ "$(id -u)" -eq 0 ]; then
-    ldconfig
-  fi
-  
-  echo "CUDA 11.8 installation completed"
-  return 0
-}
-
-# CUDA 12.4 installation function
-function install_124 {
-  local CUDNN_VERSION=9.1.0.70
-  echo "Starting installation for CUDA 12.4..."
-  
-  echo "STEP 1: Installing CUDA toolkit..."
-  install_cuda "12.4.1" "cuda_12.4.1_550.54.15_linux" || error_exit "CUDA 12.4.1 toolkit installation failed"
-  
-  echo "STEP 2: Installing cuDNN..."
-  install_cudnn "12" "${CUDNN_VERSION}" || error_exit "cuDNN installation failed"
-  
-  echo "STEP 3: Installing NCCL..."
-  install_nccl || error_exit "NCCL installation failed"
-  
-  echo "STEP 4: Installing cuSparseLt..."
-  install_cusparselt || error_exit "cuSparseLt installation failed"
-  
-  if [ "$(id -u)" -eq 0 ]; then
-    ldconfig
-  fi
-  
-  echo "CUDA 12.4 installation completed"
   return 0
 }
 
@@ -387,6 +329,31 @@ function install_128 {
   return 0
 }
 
+# Add CUDA 12.9 installation function
+function install_129 {
+  local CUDNN_VERSION=9.10.1.4
+  echo "Starting installation for CUDA 12.9..."
+
+  echo "STEP 1: Installing CUDA toolkit..."
+  install_cuda "12.9.1" "cuda_12.9.1_575.57.08_linux" || error_exit "CUDA 12.9.1 toolkit installation failed"
+
+  echo "STEP 2: Installing cuDNN..."
+  install_cudnn "12" "${CUDNN_VERSION}" || error_exit "cuDNN installation failed"
+
+  echo "STEP 3: Installing NCCL..."
+  install_nccl || error_exit "NCCL installation failed"
+
+  echo "STEP 4: Installing cuSparseLt..."
+  install_cusparselt || error_exit "cuSparseLt installation failed"
+
+  if [ "$(id -u)" -eq 0 ]; then
+    ldconfig
+  fi
+
+  echo "CUDA 12.9 installation completed"
+  return 0
+}
+
 # Simplified pruning function - enable as needed
 function prune_cuda {
   local cuda_version=$1
@@ -405,21 +372,13 @@ function prune_cuda {
 }
 
 # Version-specific pruning functions
-function prune_118 {
-  prune_cuda "118" "11.8"
-}
-
-function prune_124 {
-  prune_cuda "124" "12.4"
-}
-
 function prune_126 {
   prune_cuda "126" "12.6"
 }
 
 # Main execution logic
 echo "===== Parsing command line arguments ====="
-VALID_VERSIONS=("11.8" "12.4" "12.6" "12.8")
+VALID_VERSIONS=("12.6" "12.8" "12.9")
 
 # Parse command line arguments
 while test $# -gt 0; do
