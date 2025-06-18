@@ -185,9 +185,7 @@ function install_nccl {
   local NCCL_VERSION=""
   
   echo "Getting NCCL version information..."
-  if [[ ${CUDA_VERSION:0:2} == "11" ]]; then
-    NCCL_VERSION=$(curl -sL https://github.com/pytorch/pytorch/raw/refs/heads/main/.ci/docker/ci_commit_pins/nccl-cu11.txt)
-  elif [[ ${CUDA_VERSION:0:2} == "12" ]]; then
+  if [[ ${CUDA_VERSION:0:2} == "12" ]]; then
     NCCL_VERSION=$(curl -sL https://github.com/pytorch/pytorch/raw/refs/heads/main/.ci/docker/ci_commit_pins/nccl-cu12.txt)
   else
     error_exit "Unsupported CUDA version: ${CUDA_VERSION}"
@@ -281,7 +279,7 @@ function install_cusparselt {
 
 # CUDA 12.6 installation function
 function install_126 {
-  local CUDNN_VERSION=9.5.1.17
+  local CUDNN_VERSION=9.10.2.21 
   echo "Starting installation for CUDA 12.6..."
   
   echo "STEP 1: Installing CUDA toolkit..."
@@ -306,7 +304,7 @@ function install_126 {
 
 # CUDA 12.8 installation function
 function install_128 {
-  local CUDNN_VERSION=9.8.0.87
+  local CUDNN_VERSION=9.10.2.21 
   echo "Starting installation for CUDA 12.8..."
   
   echo "STEP 1: Installing CUDA toolkit..."
@@ -331,7 +329,7 @@ function install_128 {
 
 # Add CUDA 12.9 installation function
 function install_129 {
-  local CUDNN_VERSION=9.10.1.4
+  local CUDNN_VERSION=9.10.2.21
   echo "Starting installation for CUDA 12.9..."
 
   echo "STEP 1: Installing CUDA toolkit..."
