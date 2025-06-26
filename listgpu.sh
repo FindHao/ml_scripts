@@ -52,5 +52,41 @@ echo "GPU Memory Usage:"
 nvidia-smi --query-gpu=index,name,memory.used,memory.total,utilization.gpu --format=csv
 
 echo ""
+echo "============================================="
 echo "Detailed GPU Process Information:"
-nvidia-smi --query-compute-apps=pid,process_name,gpu_uuid,used_memory --format=csv 
+echo "============================================="
+
+# Get GPU UUID to index mapping
+GPU_MAPPING=$(nvidia-smi --query-gpu=index,uuid --format=csv,noheader,nounits)
+
+# Get compute apps with GPU UUID
+COMPUTE_APPS=$(nvidia-smi --query-compute-apps=gpu_uuid,pid,process_name,used_memory --format=csv,noheader,nounits)
+
+if [ -n "$COMPUTE_APPS" ]; then
+    # Print header with better alignment
+    printf "%-10s %-12s %-45s %-15s\n" "GPU Index" "PID" "Process Name" "Memory Used"
+    printf "%-10s %-12s %-45s %-15s\n" "==========" "============" "=============================================" "==============="
+    
+    while IFS=',' read -r gpu_uuid pid process_name memory_used; do
+        # Find GPU index for this UUID
+        gpu_index=$(echo "$GPU_MAPPING" | grep "$gpu_uuid" | cut -d',' -f1)
+        
+        # Clean up whitespace from fields
+        gpu_index=$(echo "$gpu_index" | xargs)
+        pid=$(echo "$pid" | xargs)
+        process_name=$(echo "$process_name" | xargs)
+        memory_used=$(echo "$memory_used" | xargs)
+        
+        # Truncate process name if too long (increased limit to 44 characters)
+        if [ ${#process_name} -gt 44 ]; then
+            process_name="${process_name:0:41}..."
+        fi
+        
+        printf "%-10s %-12s %-45s %-15s\n" "$gpu_index" "$pid" "$process_name" "$memory_used"
+    done <<< "$COMPUTE_APPS"
+    
+    echo "============================================="
+else
+    echo "No compute applications found."
+    echo "============================================="
+fi 
