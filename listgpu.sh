@@ -64,8 +64,8 @@ COMPUTE_APPS=$(nvidia-smi --query-compute-apps=gpu_uuid,pid,process_name,used_me
 
 if [ -n "$COMPUTE_APPS" ]; then
     # Print header with better alignment
-    printf "%-10s %-12s %-45s %-15s\n" "GPU Index" "PID" "Process Name" "Memory Used"
-    printf "%-10s %-12s %-45s %-15s\n" "==========" "============" "=============================================" "==============="
+    printf "%-6s %-8s %-70s %-12s\n" "GPU" "PID" "Process Name" "Memory Used"
+    printf "%-6s %-8s %-70s %-12s\n" "===" "========" "======================================================================" "============"
     
     while IFS=',' read -r gpu_uuid pid process_name memory_used; do
         # Find GPU index for this UUID
@@ -77,12 +77,12 @@ if [ -n "$COMPUTE_APPS" ]; then
         process_name=$(echo "$process_name" | xargs)
         memory_used=$(echo "$memory_used" | xargs)
         
-        # Truncate process name if too long (increased limit to 44 characters)
-        if [ ${#process_name} -gt 44 ]; then
-            process_name="${process_name:0:41}..."
+        # Truncate process name if too long (increased limit to 69 characters)
+        if [ ${#process_name} -gt 69 ]; then
+            process_name="${process_name:0:66}..."
         fi
         
-        printf "%-10s %-12s %-45s %-15s\n" "$gpu_index" "$pid" "$process_name" "$memory_used"
+        printf "%-6s %-8s %-70s %-12s\n" "$gpu_index" "$pid" "$process_name" "$memory_used"
     done <<< "$COMPUTE_APPS"
     
     echo "============================================="
