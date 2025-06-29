@@ -2,6 +2,9 @@
 
 # Script to list all GPU processes with detailed process information
 
+# Add to ~/.local/bin and make executable: chmod +x listgpu.sh
+# ln -s `realpath listgpu.sh` ~/.local/bin/listgpu
+
 # Check if nvidia-smi is available
 if ! command -v nvidia-smi &>/dev/null; then
     echo "nvidia-smi command not found. Are NVIDIA drivers installed?"
