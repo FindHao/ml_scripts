@@ -19,35 +19,34 @@ GPU_PIDS=$(nvidia-smi --query-compute-apps=pid --format=csv,noheader,nounits)
 
 if [ -z "$GPU_PIDS" ]; then
     echo "No GPU processes found."
-    exit 0
-fi
+else
+    # Print header
+    printf "%-8s %-12s %-15s %-20s %-10s %-s\n" "PID" "USER" "COMMAND" "START_TIME" "CPU%" "FULL_COMMAND"
+    printf "%-8s %-12s %-15s %-20s %-10s %-s\n" "----" "----" "-------" "----------" "----" "------------"
 
-# Print header
-printf "%-8s %-12s %-15s %-20s %-10s %-s\n" "PID" "USER" "COMMAND" "START_TIME" "CPU%" "FULL_COMMAND"
-printf "%-8s %-12s %-15s %-20s %-10s %-s\n" "----" "----" "-------" "----------" "----" "------------"
-
-# Process each GPU PID
-for PID in $GPU_PIDS; do
-    # Get process information
-    PROCESS_USER=$(ps -o user= -p $PID 2>/dev/null)
-    PROCESS_COMMAND=$(ps -o comm= -p $PID 2>/dev/null)
-    PROCESS_START=$(ps -o lstart= -p $PID 2>/dev/null)
-    PROCESS_CPU=$(ps -o pcpu= -p $PID 2>/dev/null)
-    PROCESS_FULL_CMD=$(ps -o cmd= -p $PID 2>/dev/null)
-    
-    # Check if process still exists
-    if [ -z "$PROCESS_USER" ]; then
-        printf "%-8s %-12s %-15s %-20s %-10s %-s\n" "$PID" "N/A" "N/A" "N/A" "N/A" "Process not found"
-    else
-        # Truncate long commands for display
-        TRUNCATED_CMD=$(echo "$PROCESS_FULL_CMD" | cut -c1-50)
-        if [ ${#PROCESS_FULL_CMD} -gt 50 ]; then
-            TRUNCATED_CMD="${TRUNCATED_CMD}..."
-        fi
+    # Process each GPU PID
+    for PID in $GPU_PIDS; do
+        # Get process information
+        PROCESS_USER=$(ps -o user= -p $PID 2>/dev/null)
+        PROCESS_COMMAND=$(ps -o comm= -p $PID 2>/dev/null)
+        PROCESS_START=$(ps -o lstart= -p $PID 2>/dev/null)
+        PROCESS_CPU=$(ps -o pcpu= -p $PID 2>/dev/null)
+        PROCESS_FULL_CMD=$(ps -o cmd= -p $PID 2>/dev/null)
         
-        printf "%-8s %-12s %-15s %-20s %-10s %-s\n" "$PID" "$PROCESS_USER" "$PROCESS_COMMAND" "$PROCESS_START" "${PROCESS_CPU}%" "$TRUNCATED_CMD"
-    fi
-done
+        # Check if process still exists
+        if [ -z "$PROCESS_USER" ]; then
+            printf "%-8s %-12s %-15s %-20s %-10s %-s\n" "$PID" "N/A" "N/A" "N/A" "N/A" "Process not found"
+        else
+            # Truncate long commands for display
+            TRUNCATED_CMD=$(echo "$PROCESS_FULL_CMD" | cut -c1-50)
+            if [ ${#PROCESS_FULL_CMD} -gt 50 ]; then
+                TRUNCATED_CMD="${TRUNCATED_CMD}..."
+            fi
+            
+            printf "%-8s %-12s %-15s %-20s %-10s %-s\n" "$PID" "$PROCESS_USER" "$PROCESS_COMMAND" "$PROCESS_START" "${PROCESS_CPU}%" "$TRUNCATED_CMD"
+        fi
+    done
+fi
 
 echo ""
 echo "============================================="
@@ -58,8 +57,8 @@ echo "============================================="
 GPU_MEMORY_INFO=$(nvidia-smi --query-gpu=index,name,memory.used,memory.total,utilization.gpu --format=csv,noheader,nounits)
 
 # Print header
-printf "%-5s %-25s %-12s %-12s %-10s\n" "GPU" "Name" "Used (MiB)" "Total (MiB)" "GPU (%)"
-printf "%-5s %-25s %-12s %-12s %-10s\n" "====" "=========================" "============" "============" "=========="
+printf "%-5s %-40s %-12s %-12s %-10s\n" "GPU" "Name" "Used (MiB)" "Total (MiB)" "GPU (%)"
+printf "%-5s %-40s %-12s %-12s %-10s\n" "====" "========================================" "============" "============" "=========="
 
 # Process each GPU
 while IFS=',' read -r gpu_index gpu_name memory_used memory_total gpu_util; do
@@ -70,12 +69,12 @@ while IFS=',' read -r gpu_index gpu_name memory_used memory_total gpu_util; do
     memory_total=$(echo "$memory_total" | xargs)
     gpu_util=$(echo "$gpu_util" | xargs)
     
-    # Truncate GPU name if too long (limit to 24 characters)
-    if [ ${#gpu_name} -gt 24 ]; then
-        gpu_name="${gpu_name:0:21}..."
+    # Truncate GPU name if too long (limit to 39 characters)
+    if [ ${#gpu_name} -gt 39 ]; then
+        gpu_name="${gpu_name:0:36}..."
     fi
     
-    printf "%-5s %-25s %-12s %-12s %-10s\n" "$gpu_index" "$gpu_name" "$memory_used" "$memory_total" "$gpu_util%"
+    printf "%-5s %-40s %-12s %-12s %-10s\n" "$gpu_index" "$gpu_name" "$memory_used" "$memory_total" "$gpu_util%"
 done <<< "$GPU_MEMORY_INFO"
 
 echo ""
