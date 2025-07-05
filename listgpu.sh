@@ -50,81 +50,92 @@ fi
 
 echo ""
 echo "============================================="
-echo "GPU Memory Usage:"
+echo "GPU Status Overview:"
 echo "============================================="
 
-# Get GPU memory usage in a formatted way
-GPU_MEMORY_INFO=$(nvidia-smi --query-gpu=index,name,memory.used,memory.total,utilization.gpu --format=csv,noheader,nounits)
+# Display nvidia-smi output but only the GPU information part (exclude processes)
+nvidia-smi | awk '/^Processes:/{exit} {print}'
 
-# Print header
-printf "%-5s %-40s %-12s %-12s %-10s\n" "GPU" "Name" "Used (MiB)" "Total (MiB)" "GPU (%)"
-printf "%-5s %-40s %-12s %-12s %-10s\n" "====" "========================================" "============" "============" "=========="
+# Only show memory usage and detailed process info if there are GPU processes
+if [ -n "$GPU_PIDS" ]; then
+    echo ""
+    echo "============================================="
+    echo "GPU Memory Usage:"
+    echo "============================================="
 
-# Process each GPU
-while IFS=',' read -r gpu_index gpu_name memory_used memory_total gpu_util; do
-    # Clean up whitespace from fields
-    gpu_index=$(echo "$gpu_index" | xargs)
-    gpu_name=$(echo "$gpu_name" | xargs)
-    memory_used=$(echo "$memory_used" | xargs)
-    memory_total=$(echo "$memory_total" | xargs)
-    gpu_util=$(echo "$gpu_util" | xargs)
-    
-    # Truncate GPU name if too long (limit to 39 characters)
-    if [ ${#gpu_name} -gt 39 ]; then
-        gpu_name="${gpu_name:0:36}..."
-    fi
-    
-    printf "%-5s %-40s %-12s %-12s %-10s\n" "$gpu_index" "$gpu_name" "$memory_used" "$memory_total" "$gpu_util%"
-done <<< "$GPU_MEMORY_INFO"
+    # Get GPU memory usage in a formatted way
+    GPU_MEMORY_INFO=$(nvidia-smi --query-gpu=index,name,memory.used,memory.total,utilization.gpu --format=csv,noheader,nounits)
 
-echo ""
-echo "============================================="
-echo "Detailed GPU Process Information:"
-echo "============================================="
+    # Print header
+    printf "%-5s %-40s %-12s %-12s %-10s\n" "GPU" "Name" "Used (MiB)" "Total (MiB)" "GPU (%)"
+    printf "%-5s %-40s %-12s %-12s %-10s\n" "====" "========================================" "============" "============" "=========="
 
-# Get GPU UUID to index mapping
-GPU_MAPPING=$(nvidia-smi --query-gpu=index,uuid --format=csv,noheader,nounits)
-
-# Get compute apps with GPU UUID
-COMPUTE_APPS=$(nvidia-smi --query-compute-apps=gpu_uuid,pid,process_name,used_memory --format=csv,noheader,nounits)
-
-if [ -n "$COMPUTE_APPS" ]; then
-    # Print header with better alignment
-    printf "%-6s %-8s %-s %12s\n" "GPU" "PID" "Process" "Memory Used"
-    printf "%-6s %-8s %-s %12s\n" "===" "========" "=======" "============"
-    
-    while IFS=',' read -r gpu_uuid pid process_name memory_used; do
-        # Find GPU index for this UUID
-        gpu_index=$(echo "$GPU_MAPPING" | grep "$gpu_uuid" | cut -d',' -f1)
-        
+    # Process each GPU
+    while IFS=',' read -r gpu_index gpu_name memory_used memory_total gpu_util; do
         # Clean up whitespace from fields
         gpu_index=$(echo "$gpu_index" | xargs)
-        pid=$(echo "$pid" | xargs)
-        process_name=$(echo "$process_name" | xargs)
+        gpu_name=$(echo "$gpu_name" | xargs)
         memory_used=$(echo "$memory_used" | xargs)
+        memory_total=$(echo "$memory_total" | xargs)
+        gpu_util=$(echo "$gpu_util" | xargs)
         
-        # Get full command line for this process
-        full_cmd=$(ps -o cmd= -p "$pid" 2>/dev/null)
-        
-        if [ -n "$full_cmd" ]; then
-            # Extract the first argument (executable name) from the command line
-            exec_path=$(echo "$full_cmd" | awk '{print $1}')
-        else
-            # Fallback to nvidia-smi process name if ps fails
-            exec_path="$process_name"
-            full_cmd="$process_name"
+        # Truncate GPU name if too long (limit to 39 characters)
+        if [ ${#gpu_name} -gt 39 ]; then
+            gpu_name="${gpu_name:0:36}..."
         fi
         
-        # Print first line: GPU, PID, full executable path, memory (no truncation)
-        printf "%-6s %-8s %-s %12s\n" "$gpu_index" "$pid" "$exec_path" "$memory_used"
+        printf "%-5s %-40s %-12s %-12s %-10s\n" "$gpu_index" "$gpu_name" "$memory_used" "$memory_total" "$gpu_util%"
+    done <<< "$GPU_MEMORY_INFO"
+
+    echo ""
+    echo "============================================="
+    echo "Detailed GPU Process Information:"
+    echo "============================================="
+
+    # Get GPU UUID to index mapping
+    GPU_MAPPING=$(nvidia-smi --query-gpu=index,uuid --format=csv,noheader,nounits)
+
+    # Get compute apps with GPU UUID
+    COMPUTE_APPS=$(nvidia-smi --query-compute-apps=gpu_uuid,pid,process_name,used_memory --format=csv,noheader,nounits)
+
+    if [ -n "$COMPUTE_APPS" ]; then
+        # Print header with better alignment
+        printf "%-6s %-8s %-s %12s\n" "GPU" "PID" "Process" "Memory Used"
+        printf "%-6s %-8s %-s %12s\n" "===" "========" "=======" "============"
         
-        # Print second line: full command line (indented)
-        printf "%15s└─ %s\n" "" "$full_cmd"
-        printf "\n"
-    done <<< "$COMPUTE_APPS"
-    
-    echo "============================================="
-else
-    echo "No compute applications found."
-    echo "============================================="
+        while IFS=',' read -r gpu_uuid pid process_name memory_used; do
+            # Find GPU index for this UUID
+            gpu_index=$(echo "$GPU_MAPPING" | grep "$gpu_uuid" | cut -d',' -f1)
+            
+            # Clean up whitespace from fields
+            gpu_index=$(echo "$gpu_index" | xargs)
+            pid=$(echo "$pid" | xargs)
+            process_name=$(echo "$process_name" | xargs)
+            memory_used=$(echo "$memory_used" | xargs)
+            
+            # Get full command line for this process
+            full_cmd=$(ps -o cmd= -p "$pid" 2>/dev/null)
+            
+            if [ -n "$full_cmd" ]; then
+                # Extract the first argument (executable name) from the command line
+                exec_path=$(echo "$full_cmd" | awk '{print $1}')
+            else
+                # Fallback to nvidia-smi process name if ps fails
+                exec_path="$process_name"
+                full_cmd="$process_name"
+            fi
+            
+            # Print first line: GPU, PID, full executable path, memory (no truncation)
+            printf "%-6s %-8s %-s %12s\n" "$gpu_index" "$pid" "$exec_path" "$memory_used"
+            
+            # Print second line: full command line (indented)
+            printf "%15s└─ %s\n" "" "$full_cmd"
+            printf "\n"
+        done <<< "$COMPUTE_APPS"
+        
+        echo "============================================="
+    else
+        echo "No compute applications found."
+        echo "============================================="
+    fi
 fi 
