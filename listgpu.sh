@@ -54,7 +54,7 @@ echo "GPU Status Overview:"
 echo "============================================="
 
 # Display nvidia-smi output but only the GPU information part (exclude processes)
-nvidia-smi | awk '/^Processes:/{exit} {print}'
+nvidia-smi | sed '/| Processes:/,$d'
 
 # Only show memory usage and detailed process info if there are GPU processes
 if [ -n "$GPU_PIDS" ]; then
