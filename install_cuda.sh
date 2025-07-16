@@ -8,7 +8,7 @@ exec 5>/tmp/cuda_install_debug.txt
 BASH_XTRACEFD="5"
 PS4='${LINENO}: '
 
-echo "===== Script execution started ====="
+echo "🚀 ===== CUDA Installation Script Started ====="
 
 # Basic settings
 CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX:-$HOME/opt}
@@ -29,7 +29,7 @@ export TMPDIR="${USER_TMPDIR}"
 
 # Error handling function
 function error_exit {
-  echo "ERROR: $1" >&2
+  echo "❌ ERROR: $1" >&2
   # Save error message to log file
   echo "$(date): ERROR - $1" >>"${USER_TMPDIR}/error.log"
   # Leave error marker file for debugging
@@ -55,7 +55,7 @@ else
   ARCH_PATH='x86_64'
 fi
 
-echo "Architecture: ${ARCH_PATH}"
+echo "🏗️  Architecture: ${ARCH_PATH}"
 
 # Check if command exists
 function command_exists {
@@ -77,7 +77,7 @@ function check_dependencies {
     error_exit "Missing required dependencies: ${missing_deps[*]}"
   fi
 
-  echo "All dependency checks passed"
+  echo "✅ All dependency checks passed"
 }
 
 # Check if file or directory exists
@@ -346,26 +346,26 @@ function install_126 {
   local CUDNN_VERSION=9.10.2.21
   echo "Starting installation for CUDA 12.6..."
 
-  echo "STEP 1: Installing CUDA toolkit..."
+  echo "📦 STEP 1: Installing CUDA toolkit..."
   install_cuda "12.6.3" "cuda_12.6.3_560.35.05_linux" || error_exit "CUDA 12.6.3 toolkit installation failed"
 
-  echo "STEP 2: Installing cuDNN..."
+  echo "🧠 STEP 2: Installing cuDNN..."
   install_cudnn "12" "${CUDNN_VERSION}" || error_exit "cuDNN installation failed"
 
-  echo "STEP 3: Installing NCCL..."
+  echo "🔗 STEP 3: Installing NCCL..."
   install_nccl || error_exit "NCCL installation failed"
 
-  echo "STEP 4: Installing cuSparseLt..."
+  echo "⚡ STEP 4: Installing cuSparseLt..."
   install_cusparselt || error_exit "cuSparseLt installation failed"
 
-  echo "STEP 5: Installing nvSHMEM..."
+  echo "💾 STEP 5: Installing nvSHMEM..."
   install_nvshmem "12" || error_exit "nvSHMEM installation failed"
 
   if [ "$(id -u)" -eq 0 ]; then
     ldconfig
   fi
 
-  echo "CUDA 12.6 installation completed"
+  echo "✅ CUDA 12.6 installation completed"
   return 0
 }
 
@@ -374,26 +374,26 @@ function install_128 {
   local CUDNN_VERSION=9.10.2.21
   echo "Starting installation for CUDA 12.8..."
 
-  echo "STEP 1: Installing CUDA toolkit..."
+  echo "📦 STEP 1: Installing CUDA toolkit..."
   install_cuda "12.8.1" "cuda_12.8.1_570.124.06_linux" || error_exit "CUDA 12.8.1 toolkit installation failed"
 
-  echo "STEP 2: Installing cuDNN..."
+  echo "🧠 STEP 2: Installing cuDNN..."
   install_cudnn "12" "${CUDNN_VERSION}" || error_exit "cuDNN installation failed"
 
-  echo "STEP 3: Installing NCCL..."
+  echo "🔗 STEP 3: Installing NCCL..."
   install_nccl || error_exit "NCCL installation failed"
 
-  echo "STEP 4: Installing cuSparseLt..."
+  echo "⚡ STEP 4: Installing cuSparseLt..."
   install_cusparselt || error_exit "cuSparseLt installation failed"
 
-  echo "STEP 5: Installing nvSHMEM..."
+  echo "💾 STEP 5: Installing nvSHMEM..."
   install_nvshmem "12" || error_exit "nvSHMEM installation failed"
 
   if [ "$(id -u)" -eq 0 ]; then
     ldconfig
   fi
 
-  echo "CUDA 12.8 installation completed"
+  echo "✅ CUDA 12.8 installation completed"
   return 0
 }
 
@@ -402,26 +402,26 @@ function install_129 {
   local CUDNN_VERSION=9.10.2.21
   echo "Starting installation for CUDA 12.9..."
 
-  echo "STEP 1: Installing CUDA toolkit..."
+  echo "📦 STEP 1: Installing CUDA toolkit..."
   install_cuda "12.9.1" "cuda_12.9.1_575.57.08_linux" || error_exit "CUDA 12.9.1 toolkit installation failed"
 
-  echo "STEP 2: Installing cuDNN..."
+  echo "🧠 STEP 2: Installing cuDNN..."
   install_cudnn "12" "${CUDNN_VERSION}" || error_exit "cuDNN installation failed"
 
-  echo "STEP 3: Installing NCCL..."
+  echo "🔗 STEP 3: Installing NCCL..."
   install_nccl || error_exit "NCCL installation failed"
 
-  echo "STEP 4: Installing cuSparseLt..."
+  echo "⚡ STEP 4: Installing cuSparseLt..."
   install_cusparselt || error_exit "cuSparseLt installation failed"
 
-  echo "STEP 5: Installing nvSHMEM..."
+  echo "💾 STEP 5: Installing nvSHMEM..."
   install_nvshmem "12" || error_exit "nvSHMEM installation failed"
 
   if [ "$(id -u)" -eq 0 ]; then
     ldconfig
   fi
 
-  echo "CUDA 12.9 installation completed"
+  echo "✅ CUDA 12.9 installation completed"
   return 0
 }
 
@@ -448,7 +448,7 @@ function prune_126 {
 }
 
 # Main execution logic
-echo "===== Parsing command line arguments ====="
+echo "🔧 ===== Parsing command line arguments ====="
 VALID_VERSIONS=("12.6" "12.8" "12.9")
 
 # Parse command line arguments
@@ -473,7 +473,7 @@ fi
 cleanup_temp_dirs
 
 # Perform installation
-echo "===== Starting installation of CUDA ${CUDA_VERSION} ====="
+echo "⚙️  ===== Starting installation of CUDA ${CUDA_VERSION} ====="
 version_no_dot="${CUDA_VERSION//./}"
 echo "Calling install_${version_no_dot} function"
 
@@ -496,12 +496,30 @@ fi
 # Final cleanup
 cleanup_temp_dirs
 
-echo "===== Script execution completed ====="
+# Version verification
+echo "🔍 ===== Verifying CUDA installation ====="
+if [ -f "${CUDA_INSTALL_PREFIX}/cuda/bin/nvcc" ]; then
+  echo "✅ nvcc found - checking version:"
+  echo "📋 $( "${CUDA_INSTALL_PREFIX}/cuda/bin/nvcc" --version | head -1 )"
+  echo ""
+else
+  echo "⚠️  Warning: nvcc not found at ${CUDA_INSTALL_PREFIX}/cuda/bin/nvcc"
+fi
+
+if [ -f "${CUDA_INSTALL_PREFIX}/cuda/bin/nvidia-smi" ]; then
+  echo "✅ nvidia-smi found - checking version:"
+  echo "📋 $( "${CUDA_INSTALL_PREFIX}/cuda/bin/nvidia-smi" --version | head -1 )"
+  echo ""
+else
+  echo "ℹ️  Note: nvidia-smi not found (this is normal for toolkit-only installation)"
+fi
+
+echo "🎉 ===== Script execution completed ====="
 touch "${USER_TMPDIR}/script_completed_successfully"
-echo "CUDA ${CUDA_VERSION} has been successfully installed to ${CUDA_INSTALL_PREFIX}"
-echo "========================================="
-echo " CUDA & Related Libraries Installation Summary"
-echo "========================================="
+echo "✅ CUDA ${CUDA_VERSION} has been successfully installed to ${CUDA_INSTALL_PREFIX}"
+echo "📊 ========================================="
+echo " 📋 CUDA & Related Libraries Installation Summary"
+echo "📊 ========================================="
 echo "  CUDA        : ${CUDA_VERSION}"
 echo "  cuDNN       : ${CUDNN_VERSION:-(see install function)}"
 if [ "$INSTALL_NCCL" -eq 1 ]; then
@@ -521,9 +539,9 @@ else
   echo "  cuSparseLt  : (not found)"
 fi
 echo "  nvSHMEM     : ${NVSHMEM_VERSION}"
-echo "-----------------------------------------"
-echo "  Install Path : ${CUDA_INSTALL_PREFIX}/cuda"
-echo "  Usage:"
+echo "🔗 -----------------------------------------"
+echo "📁  Install Path : ${CUDA_INSTALL_PREFIX}/cuda"
+echo "💡  Usage:"
 echo "    export PATH=${CUDA_INSTALL_PREFIX}/cuda/bin:\$PATH"
 echo "    export LD_LIBRARY_PATH=${CUDA_INSTALL_PREFIX}/cuda/lib64:\$LD_LIBRARY_PATH"
-echo "========================================="
+echo "📊 ========================================="
