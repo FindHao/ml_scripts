@@ -30,7 +30,7 @@ jobs:
       - name: Make script executable
         run: chmod +x install_cuda.sh
 
-      - name: Run install_cuda.sh (simulate, skip GPU driver install)
+      - name: Run install_cuda.sh (skip GPU driver install)
         env:
           CUDA_INSTALL_PREFIX: /tmp/test-cuda-install
           SKIP_PRUNE: 1
@@ -38,7 +38,7 @@ jobs:
           NVCC_GENCODE: -gencode arch=compute_75,code=sm_75
           INSTALL_NCCL: 0
         run: |
-          # Only test logic, not GPU driver install (no root, no real GPU)
+          # Only test CUDA Toolkit installation, no GPU driver install (no root, no real GPU)
           # Use a supported version, e.g. 12.8
           # NCCL installation is disabled to avoid compilation errors in CI environment
           bash install_cuda.sh 12.8 || (cat /tmp/${USER}/cuda_install/error.log || true; exit 1)
