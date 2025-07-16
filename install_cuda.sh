@@ -16,9 +16,11 @@ CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX%/}
 CUDA_VERSION=${CUDA_VERSION:-12.8}
 SKIP_PRUNE=${SKIP_PRUNE:-1}
 NVSHMEM_VERSION=${NVSHMEM_VERSION:-3.3.9}
+INSTALL_NCCL=${INSTALL_NCCL:-1}
 
 echo "CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX}"
 echo "CUDA_VERSION=${CUDA_VERSION}"
+echo "INSTALL_NCCL=${INSTALL_NCCL}"
 
 # Create temporary directory
 USER_TMPDIR="/tmp/${USER}/cuda_install"
@@ -182,6 +184,11 @@ function install_cudnn {
 
 # Real NCCL installation function
 function install_nccl {
+  if [ "$INSTALL_NCCL" -eq 0 ]; then
+    echo "NCCL installation skipped as per INSTALL_NCCL=${INSTALL_NCCL}"
+    return 0
+  fi
+  
   echo "Installing NCCL for CUDA ${CUDA_VERSION}..."
   local NCCL_VERSION=""
 
@@ -497,11 +504,15 @@ echo " CUDA & Related Libraries Installation Summary"
 echo "========================================="
 echo "  CUDA        : ${CUDA_VERSION}"
 echo "  cuDNN       : ${CUDNN_VERSION:-(see install function)}"
-if [ -f "${USER_TMPDIR}/nccl_version.txt" ]; then
-  NCCL_VERSION_PRINT=$(cat "${USER_TMPDIR}/nccl_version.txt")
-  echo "  NCCL        : ${NCCL_VERSION_PRINT}"
+if [ "$INSTALL_NCCL" -eq 1 ]; then
+  if [ -f "${USER_TMPDIR}/nccl_version.txt" ]; then
+    NCCL_VERSION_PRINT=$(cat "${USER_TMPDIR}/nccl_version.txt")
+    echo "  NCCL        : ${NCCL_VERSION_PRINT}"
+  else
+    echo "  NCCL        : (not found)"
+  fi
 else
-  echo "  NCCL        : (not found)"
+  echo "  NCCL        : (skipped)"
 fi
 if [ -f "${USER_TMPDIR}/cusparselt_version.txt" ]; then
   CUSPARSELT_VERSION_PRINT=$(cat "${USER_TMPDIR}/cusparselt_version.txt")

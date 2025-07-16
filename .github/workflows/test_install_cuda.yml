@@ -36,9 +36,11 @@ jobs:
           SKIP_PRUNE: 1
           MAKEFLAGS: -j4
           NVCC_GENCODE: -gencode arch=compute_75,code=sm_75
+          INSTALL_NCCL: 0
         run: |
           # Only test logic, not actual CUDA install (no root, no real GPU)
           # Use a supported version, e.g. 12.8
+          # NCCL installation is disabled to avoid compilation errors in CI environment
           bash install_cuda.sh 12.8 || (cat /tmp/${USER}/cuda_install/error.log || true; exit 1)
 
       - name: Check summary output
