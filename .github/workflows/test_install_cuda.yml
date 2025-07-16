@@ -3,12 +3,12 @@ name: Test CUDA Install Script
 on:
   push:
     paths:
-      - 'ml_scripts/install_cuda.sh'
-      - 'ml_scripts/.github/workflows/test_install_cuda.yml'
+      - 'install_cuda.sh'
+      - '.github/workflows/test_install_cuda.yml'
   pull_request:
     paths:
-      - 'ml_scripts/install_cuda.sh'
-      - 'ml_scripts/.github/workflows/test_install_cuda.yml'
+      - 'install_cuda.sh'
+      - '.github/workflows/test_install_cuda.yml'
   workflow_dispatch:
 
 jobs:
