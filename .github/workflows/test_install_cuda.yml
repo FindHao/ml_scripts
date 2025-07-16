@@ -26,7 +26,7 @@ jobs:
           echo "Created /tmp/test-cuda-install"
 
       - name: Make script executable
-        run: chmod +x ml_scripts/install_cuda.sh
+        run: chmod +x install_cuda.sh
 
       - name: Run install_cuda.sh (simulate, skip actual CUDA install)
         env:
@@ -35,7 +35,7 @@ jobs:
         run: |
           # Only test logic, not actual CUDA install (no root, no real GPU)
           # Use a supported version, e.g. 12.8
-          bash ml_scripts/install_cuda.sh 12.8 || (cat /tmp/${USER}/cuda_install/error.log || true; exit 1)
+          bash install_cuda.sh 12.8 || (cat /tmp/${USER}/cuda_install/error.log || true; exit 1)
 
       - name: Check summary output
         run: |
