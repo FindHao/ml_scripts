@@ -15,6 +15,7 @@ CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX:-$HOME/opt}
 CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX%/}
 CUDA_VERSION=${CUDA_VERSION:-12.8}
 SKIP_PRUNE=${SKIP_PRUNE:-1}
+NVSHMEM_VERSION=${NVSHMEM_VERSION:-3.3.9}
 
 echo "CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX}"
 echo "CUDA_VERSION=${CUDA_VERSION}"
@@ -196,6 +197,7 @@ function install_nccl {
   fi
   
   echo "Retrieved NCCL version: ${NCCL_VERSION}"
+  echo "${NCCL_VERSION}" > "${USER_TMPDIR}/nccl_version.txt"
   
   # NCCL license: https://docs.nvidia.com/deeplearning/nccl/#licenses
   # Follow build: https://github.com/NVIDIA/nccl/tree/master?tab=readme-ov-file#build
@@ -248,6 +250,8 @@ function install_cusparselt {
     error_exit "Unsupported CUDA version: ${CUDA_VERSION}"
   fi
   
+  echo "${cusparselt_version}" > "${USER_TMPDIR}/cusparselt_version.txt"
+  
   local CUSPARSELT_NAME="libcusparse_lt-linux-${arch_path}-${cusparselt_version}-archive"
   echo "Downloading cuSparseLt: ${CUSPARSELT_NAME}.tar.xz"
   
@@ -277,6 +281,59 @@ function install_cusparselt {
   return 0
 }
 
+# nvSHMEM installation function
+function install_nvshmem {
+  local cuda_major_version=$1      # e.g. "12"
+  local nvshmem_version=${NVSHMEM_VERSION}
+  local arch_path=${ARCH_PATH}
+
+  case "${arch_path}" in
+    sbsa)
+      dl_arch="aarch64"
+      ;;
+    x86_64)
+      dl_arch="x64"
+      ;;
+    *)
+      dl_arch="${arch_path}"
+      ;;
+  esac
+
+  local tmpdir="tmp_nvshmem"
+  mkdir -p "${tmpdir}" && cd "${tmpdir}"
+
+  # nvSHMEM license: https://docs.nvidia.com/nvshmem/api/sla.html
+  local filename="libnvshmem_cuda${cuda_major_version}-linux-${arch_path}-${nvshmem_version}"
+  local url="https://developer.download.nvidia.com/compute/redist/nvshmem/${nvshmem_version}/builds/cuda${cuda_major_version}/txz/agnostic/${dl_arch}/${filename}.tar.gz"
+
+  echo "Downloading nvSHMEM: ${filename}.tar.gz"
+  if ! wget -q "${url}"; then
+    cd ..
+    rm -rf "${tmpdir}"
+    error_exit "nvSHMEM download failed: ${filename}.tar.gz"
+  fi
+
+  echo "Extracting nvSHMEM..."
+  if ! tar xf "${filename}.tar.gz"; then
+    cd ..
+    rm -rf "${tmpdir}"
+    error_exit "nvSHMEM extraction failed: ${filename}.tar.gz"
+  fi
+
+  echo "Installing nvSHMEM to CUDA directory..."
+  cp -a "libnvshmem/include/"* ${CUDA_INSTALL_PREFIX}/cuda/include/
+  cp -a "libnvshmem/lib/"*     ${CUDA_INSTALL_PREFIX}/cuda/lib64/
+
+  cd ..
+  rm -rf "${tmpdir}"
+
+  # Create nvshmem installation complete marker
+  touch "${USER_TMPDIR}/nvshmem_${nvshmem_version}_installed"
+
+  echo "nvSHMEM ${nvshmem_version} for CUDA ${cuda_major_version} (${arch_path}) installed."
+  return 0
+}
+
 # CUDA 12.6 installation function
 function install_126 {
   local CUDNN_VERSION=9.10.2.21 
@@ -293,7 +350,10 @@ function install_126 {
   
   echo "STEP 4: Installing cuSparseLt..."
   install_cusparselt || error_exit "cuSparseLt installation failed"
-  
+
+  echo "STEP 5: Installing nvSHMEM..."
+  install_nvshmem "12" || error_exit "nvSHMEM installation failed"
+
   if [ "$(id -u)" -eq 0 ]; then
     ldconfig
   fi
@@ -318,7 +378,10 @@ function install_128 {
   
   echo "STEP 4: Installing cuSparseLt..."
   install_cusparselt || error_exit "cuSparseLt installation failed"
-  
+
+  echo "STEP 5: Installing nvSHMEM..."
+  install_nvshmem "12" || error_exit "nvSHMEM installation failed"
+
   if [ "$(id -u)" -eq 0 ]; then
     ldconfig
   fi
@@ -343,6 +406,9 @@ function install_129 {
 
   echo "STEP 4: Installing cuSparseLt..."
   install_cusparselt || error_exit "cuSparseLt installation failed"
+
+  echo "STEP 5: Installing nvSHMEM..."
+  install_nvshmem "12" || error_exit "nvSHMEM installation failed"
 
   if [ "$(id -u)" -eq 0 ]; then
     ldconfig
@@ -426,5 +492,27 @@ cleanup_temp_dirs
 echo "===== Script execution completed ====="
 touch "${USER_TMPDIR}/script_completed_successfully"
 echo "CUDA ${CUDA_VERSION} has been successfully installed to ${CUDA_INSTALL_PREFIX}"
-echo "Usage: export PATH=${CUDA_INSTALL_PREFIX}/cuda/bin:\$PATH"
-echo "       export LD_LIBRARY_PATH=${CUDA_INSTALL_PREFIX}/cuda/lib64:\$LD_LIBRARY_PATH"
+echo "========================================="
+echo " CUDA & Related Libraries Installation Summary"
+echo "========================================="
+echo "  CUDA        : ${CUDA_VERSION}"
+echo "  cuDNN       : ${CUDNN_VERSION:-(see install function)}"
+if [ -f "${USER_TMPDIR}/nccl_version.txt" ]; then
+  NCCL_VERSION_PRINT=$(cat "${USER_TMPDIR}/nccl_version.txt")
+  echo "  NCCL        : ${NCCL_VERSION_PRINT}"
+else
+  echo "  NCCL        : (not found)"
+fi
+if [ -f "${USER_TMPDIR}/cusparselt_version.txt" ]; then
+  CUSPARSELT_VERSION_PRINT=$(cat "${USER_TMPDIR}/cusparselt_version.txt")
+  echo "  cuSparseLt  : ${CUSPARSELT_VERSION_PRINT}"
+else
+  echo "  cuSparseLt  : (not found)"
+fi
+echo "  nvSHMEM     : ${NVSHMEM_VERSION}"
+echo "-----------------------------------------"
+echo "  Install Path : ${CUDA_INSTALL_PREFIX}/cuda"
+echo "  Usage:"
+echo "    export PATH=${CUDA_INSTALL_PREFIX}/cuda/bin:\$PATH"
+echo "    export LD_LIBRARY_PATH=${CUDA_INSTALL_PREFIX}/cuda/lib64:\$LD_LIBRARY_PATH"
+echo "========================================="
