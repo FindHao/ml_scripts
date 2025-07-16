@@ -4,17 +4,17 @@
 
 # precisions=("bf16" "fp32")
 
-directions=( "fwd_bwd")
+directions=("fwd_bwd")
 
-precisions=( "fp32")
+precisions=("fp32")
 
 # Add start time before the loops
 start_time=$(date +%s)
 
 if [ ! -f "run.py" ]; then
-    echo "Error: run.py not found in current directory"
-    echo "Please run this script in the root directory of tritonbench"
-    exit 1
+  echo "Error: run.py not found in current directory"
+  echo "Please run this script in the root directory of tritonbench"
+  exit 1
 fi
 
 DATE_STR=$(date +%Y%m%d_%H%M%S)
@@ -22,18 +22,18 @@ output_dir="/tmp/tritonbench/${DATE_STR}"
 mkdir -p $output_dir
 
 for direction in "${directions[@]}"; do
-    for precision in "${precisions[@]}"; do
-        echo "Running with direction: $direction, precision: $precision"
-        echo "Running: python run.py --op-collection liger --mode $direction --precision $precision --metrics nsys_gpu_kernel_sum,nsys_launch_overhead,nsys_kernel_names,nsys_kernel_durations,nsys_nvtx_range_duration,nsys_num_of_kernels --dump-csv"
-        python run.py \
-            --op-collection liger \
-            --mode $direction \
-            --precision $precision \
-            --metrics nsys_gpu_kernel_sum,nsys_launch_overhead,nsys_kernel_names,nsys_kernel_durations,nsys_nvtx_range_duration,nsys_num_of_kernels \
-            --dump-csv
-        mkdir -p $output_dir/${direction}_${precision}
-        mv /tmp/tritonbench/*.csv $output_dir/${direction}_${precision}/
-    done
+  for precision in "${precisions[@]}"; do
+    echo "Running with direction: $direction, precision: $precision"
+    echo "Running: python run.py --op-collection liger --mode $direction --precision $precision --metrics nsys_gpu_kernel_sum,nsys_launch_overhead,nsys_kernel_names,nsys_kernel_durations,nsys_nvtx_range_duration,nsys_num_of_kernels --dump-csv"
+    python run.py \
+      --op-collection liger \
+      --mode $direction \
+      --precision $precision \
+      --metrics nsys_gpu_kernel_sum,nsys_launch_overhead,nsys_kernel_names,nsys_kernel_durations,nsys_nvtx_range_duration,nsys_num_of_kernels \
+      --dump-csv
+    mkdir -p $output_dir/${direction}_${precision}
+    mv /tmp/tritonbench/*.csv $output_dir/${direction}_${precision}/
+  done
 done
 
 # Calculate duration

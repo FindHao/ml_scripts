@@ -31,42 +31,42 @@ export USE_NCCL=1
 
 # Improve error handling function
 function error_exit() {
-    local message="$1"
-    echo "ERROR: $message" >&2
-    exit 1
+  local message="$1"
+  echo "ERROR: $message" >&2
+  exit 1
 }
 
 # Function to format time
 function format_time() {
-    local seconds=$1
-    local hours=$((seconds / 3600))
-    local minutes=$(((seconds % 3600) / 60))
-    local secs=$((seconds % 60))
-    printf "%02d:%02d:%02d" $hours $minutes $secs
+  local seconds=$1
+  local hours=$((seconds / 3600))
+  local minutes=$(((seconds % 3600) / 60))
+  local secs=$((seconds % 60))
+  printf "%02d:%02d:%02d" $hours $minutes $secs
 }
 
 # Improve the git_upgrade_pack function with error handling
 function git_upgrade_pack() {
-    local package_name="$1"
-    echo "Upgrading package: $package_name"
-    cd "$work_path/$package_name" || error_exit "Failed to change directory to $package_name"
-    git pull || error_exit "Failed to pull latest changes for $package_name"
-    git submodule sync || error_exit "Failed to sync submodules for $package_name"
-    git submodule update --init --recursive || error_exit "Failed to update submodules for $package_name"
+  local package_name="$1"
+  echo "Upgrading package: $package_name"
+  cd "$work_path/$package_name" || error_exit "Failed to change directory to $package_name"
+  git pull || error_exit "Failed to pull latest changes for $package_name"
+  git submodule sync || error_exit "Failed to sync submodules for $package_name"
+  git submodule update --init --recursive || error_exit "Failed to update submodules for $package_name"
 }
 
 # Improve the upgrade_pack function
 function upgrade_pack() {
-    local package_name="$1"
-    local package_start_time=$(date +%s)
-    echo "Installing package: $package_name"
-    git_upgrade_pack "$package_name"
-    pip uninstall -y "torch$package_name" || true # Don't fail if package isn't installed
-    python setup.py clean || error_exit "Failed to clean $package_name"
-    python setup.py install || error_exit "Failed to install $package_name"
-    local package_end_time=$(date +%s)
-    local package_duration=$((package_end_time - package_start_time))
-    echo "$package_name installation completed successfully in $(format_time $package_duration)"
+  local package_name="$1"
+  local package_start_time=$(date +%s)
+  echo "Installing package: $package_name"
+  git_upgrade_pack "$package_name"
+  pip uninstall -y "torch$package_name" || true # Don't fail if package isn't installed
+  python setup.py clean || error_exit "Failed to clean $package_name"
+  python setup.py install || error_exit "Failed to install $package_name"
+  local package_end_time=$(date +%s)
+  local package_duration=$((package_end_time - package_start_time))
+  echo "$package_name installation completed successfully in $(format_time $package_duration)"
 }
 
 # print configs
@@ -79,21 +79,21 @@ echo "torch_commit: ${torch_commit}"
 
 # Function to get CUDA version from nvcc
 function get_cuda_version_from_nvcc() {
-    if command -v nvcc &>/dev/null; then
-        local nvcc_output
-        nvcc_output=$(nvcc --version)
-        if [[ "$nvcc_output" =~ release[[:space:]]([0-9]+\\.[0-9]+) ]]; then
-            echo "${BASH_REMATCH[1]}"
-        else
-            echo "Could not parse CUDA version from nvcc output." >&2
-            # Default to a common version or ask user, here defaulting to 11.8 as a fallback
-            echo "12.8"
-        fi
+  if command -v nvcc &>/dev/null; then
+    local nvcc_output
+    nvcc_output=$(nvcc --version)
+    if [[ "$nvcc_output" =~ release[[:space:]]([0-9]+\\.[0-9]+) ]]; then
+      echo "${BASH_REMATCH[1]}"
     else
-        echo "nvcc not found. Please ensure CUDA toolkit is installed and nvcc is in PATH." >&2
-        # Default to a common version or ask user, here defaulting to 11.8 as a fallback
-        echo "12.8"
+      echo "Could not parse CUDA version from nvcc output." >&2
+      # Default to a common version or ask user, here defaulting to 11.8 as a fallback
+      echo "12.8"
     fi
+  else
+    echo "nvcc not found. Please ensure CUDA toolkit is installed and nvcc is in PATH." >&2
+    # Default to a common version or ask user, here defaulting to 11.8 as a fallback
+    echo "12.8"
+  fi
 }
 
 # Determine CUDA version
@@ -112,32 +112,32 @@ cd /tmp/
 ./install_magma_conda.sh "$cuda_version" || error_exit "install_magma_conda.sh failed"
 echo "MAGMA installation/check completed."
 
-pip install mkl-static mkl-include 
+pip install mkl-static mkl-include
 
 # Improve directory handling
 cd "$work_path" || error_exit "Failed to change to work directory"
 
 # Improve clean install section with error handling
 if [ "$clean_install" -eq 1 ]; then
-    echo "Performing clean installation..."
-    rm -rf pytorch text vision audio benchmark data
-    for repo in pytorch text data vision audio benchmark; do
-        git clone --recursive "git@github.com:pytorch/${repo}.git" || error_exit "Failed to clone $repo"
-    done
+  echo "Performing clean installation..."
+  rm -rf pytorch text vision audio benchmark data
+  for repo in pytorch text data vision audio benchmark; do
+    git clone --recursive "git@github.com:pytorch/${repo}.git" || error_exit "Failed to clone $repo"
+  done
 fi
 
 if [ -f "$HOME/.notify.sh" ]; then
-    source "$HOME/.notify.sh"
+  source "$HOME/.notify.sh"
 fi
 
 function notify_finish() {
-    end_time=$(date +%s)
-    total_duration=$((end_time - start_time))
-    formatted_duration=$(format_time $total_duration)
-    echo "PyTorch compilation completed successfully in $formatted_duration"
-    if command -v notify &>/dev/null; then
-        notify "PyTorch Compilation finished in $formatted_duration" || true # Don't fail if notify fails
-    fi
+  end_time=$(date +%s)
+  total_duration=$((end_time - start_time))
+  formatted_duration=$(format_time $total_duration)
+  echo "PyTorch compilation completed successfully in $formatted_duration"
+  if command -v notify &>/dev/null; then
+    notify "PyTorch Compilation finished in $formatted_duration" || true # Don't fail if notify fails
+  fi
 }
 
 pip uninstall -y torch
@@ -146,13 +146,13 @@ cd $work_path/pytorch
 torch_start_time=$(date +%s)
 git fetch
 if [ -n "$torch_commit" ]; then
-    git checkout $torch_commit
-    echo "warnging: you are using a specific commit. don't forget to create a new branch if you want to make changes"
+  git checkout $torch_commit
+  echo "warnging: you are using a specific commit. don't forget to create a new branch if you want to make changes"
 else
-    git checkout $torch_branch
+  git checkout $torch_branch
 fi
 if [ $torch_pull -eq 1 ] && [ -z "$torch_commit" ]; then
-    git pull
+  git pull
 fi
 git submodule sync
 git submodule update --init --recursive
@@ -160,13 +160,13 @@ pip install -r requirements.txt
 make triton
 
 if [ $clean_torch -eq 1 ]; then
-    python setup.py clean
+  python setup.py clean
 fi
 
 if [ $debug -eq 1 ]; then
-    debug_prefix="env DEBUG=1"
+  debug_prefix="env DEBUG=1"
 else
-    debug_prefix=""
+  debug_prefix=""
 fi
 
 ${debug_prefix} python setup.py develop
@@ -175,10 +175,9 @@ torch_duration=$((torch_end_time - torch_start_time))
 echo "PyTorch core installation completed in $(format_time $torch_duration)"
 
 if [ $torch_only -eq 1 ]; then
-    notify_finish
-    exit 0
+  notify_finish
+  exit 0
 fi
-
 
 # install torchvision
 export FORCE_CUDA=1
@@ -188,8 +187,8 @@ upgrade_pack vision
 upgrade_pack audio
 
 if [ $no_torchbench -eq 1 ]; then
-    notify_finish
-    exit 0
+  notify_finish
+  exit 0
 fi
 # install torchbench
 torchbench_start_time=$(date +%s)

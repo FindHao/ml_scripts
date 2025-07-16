@@ -1,0 +1,20 @@
+# ShellCheck configuration file
+# See https://github.com/koalaman/shellcheck/wiki/Ignore
+
+# Disable warnings for unused variables (common in script templates)
+disable=SC2034
+
+# Disable warnings for cd without error checking (we use pushd/popd pattern)
+disable=SC2164
+
+# Disable warnings for command substitution in variable assignment
+disable=SC2155
+
+# Enable additional checks
+enable=all
+
+# Set shell dialect (bash by default)
+shell=bash
+
+# External sources (if any)
+# external-sources=true 

@@ -4,7 +4,7 @@
 set -ex
 
 # Debug settings - log all execution steps
-exec 5> /tmp/cuda_install_debug.txt
+exec 5>/tmp/cuda_install_debug.txt
 BASH_XTRACEFD="5"
 PS4='${LINENO}: '
 
@@ -29,9 +29,9 @@ export TMPDIR="${USER_TMPDIR}"
 function error_exit {
   echo "ERROR: $1" >&2
   # Save error message to log file
-  echo "$(date): ERROR - $1" >> "${USER_TMPDIR}/error.log"
+  echo "$(date): ERROR - $1" >>"${USER_TMPDIR}/error.log"
   # Leave error marker file for debugging
-  echo "$1" > "${USER_TMPDIR}/error_message"
+  echo "$1" >"${USER_TMPDIR}/error_message"
   touch "${USER_TMPDIR}/error_occurred"
   exit 1
 }
@@ -57,24 +57,24 @@ echo "Architecture: ${ARCH_PATH}"
 
 # Check if command exists
 function command_exists {
-  command -v "$1" &> /dev/null
+  command -v "$1" &>/dev/null
 }
 
 # Check dependencies
 function check_dependencies {
   echo "Checking dependencies..."
   local missing_deps=()
-  
+
   for cmd in wget curl git make; do
     if ! command_exists $cmd; then
       missing_deps+=($cmd)
     fi
   done
-  
+
   if [ ${#missing_deps[@]} -gt 0 ]; then
     error_exit "Missing required dependencies: ${missing_deps[*]}"
   fi
-  
+
   echo "All dependency checks passed"
 }
 
@@ -96,43 +96,43 @@ function install_cuda {
   local version=$1
   local runfile=$2
   local major_minor=${version%.*}
-  
+
   echo "Installing CUDA ${version}..."
   rm -rf ${CUDA_INSTALL_PREFIX}/cuda-${major_minor} ${CUDA_INSTALL_PREFIX}/cuda
-  
+
   if [[ ${ARCH_PATH} == 'sbsa' ]]; then
     runfile="${runfile}_sbsa"
   fi
   runfile="${runfile}.run"
-  
+
   echo "Downloading CUDA installation file: ${runfile}"
   # Use --progress=dot:giga parameter to show download progress
   # Use -t 3 option to set retry count to 3 times
   if ! wget --progress=dot:giga -t 3 -q https://developer.download.nvidia.com/compute/cuda/${version}/local_installers/${runfile} -O ${runfile}; then
     error_exit "CUDA installation file download failed: ${runfile}"
   fi
-  
+
   echo "CUDA installation file download complete, preparing to install..."
   chmod +x ${runfile}
-  
+
   # Create installation progress marker
   touch "${USER_TMPDIR}/cuda_${version}_download_complete"
-  
+
   echo "Executing CUDA installation script..."
   if ! ./${runfile} --toolkit --silent --toolkitpath=${CUDA_INSTALL_PREFIX}/cuda-${major_minor}; then
     echo "CUDA installation failed, keeping installation file for troubleshooting"
     error_exit "CUDA ${version} installation failed"
   fi
-  
+
   # Create installation complete marker
   touch "${USER_TMPDIR}/cuda_${version}_install_complete"
-  
+
   echo "CUDA installation complete, creating symbolic link..."
   rm -f ${CUDA_INSTALL_PREFIX}/cuda && ln -s ${CUDA_INSTALL_PREFIX}/cuda-${major_minor} ${CUDA_INSTALL_PREFIX}/cuda
-  
+
   echo "Removing installation file..."
   rm -f ${runfile}
-  
+
   echo "CUDA ${version} installation completed"
   return 0
 }
@@ -141,41 +141,41 @@ function install_cuda {
 function install_cudnn {
   local cuda_major_version=$1
   local cudnn_version=$2
-  
+
   echo "Installing cuDNN ${cudnn_version} for CUDA ${cuda_major_version}..."
-  
+
   # Create temporary directory
   mkdir -p tmp_cudnn
   cd tmp_cudnn || error_exit "Failed to create cuDNN temporary directory"
-  
+
   # cuDNN license: https://developer.nvidia.com/cudnn/license_agreement
   local filepath="cudnn-linux-${ARCH_PATH}-${cudnn_version}_cuda${cuda_major_version}-archive"
   echo "Downloading cuDNN: ${filepath}.tar.xz"
-  
+
   if ! wget -q https://developer.download.nvidia.com/compute/cudnn/redist/cudnn/linux-${ARCH_PATH}/${filepath}.tar.xz; then
     cd ..
     rm -rf tmp_cudnn
     error_exit "cuDNN download failed: ${filepath}.tar.xz"
   fi
-  
+
   echo "cuDNN download complete, preparing to extract..."
   if ! tar xf ${filepath}.tar.xz; then
     cd ..
     rm -rf tmp_cudnn
     error_exit "cuDNN extraction failed: ${filepath}.tar.xz"
   fi
-  
+
   echo "cuDNN extraction complete, installing to CUDA directory..."
   cp -a ${filepath}/include/* ${CUDA_INSTALL_PREFIX}/cuda/include/
   cp -a ${filepath}/lib/* ${CUDA_INSTALL_PREFIX}/cuda/lib64/
-  
+
   echo "cuDNN installation complete, cleaning up temporary files..."
   cd ..
   rm -rf tmp_cudnn
-  
+
   # Create cuDNN installation complete marker
   touch "${USER_TMPDIR}/cudnn_${cudnn_version}_installed"
-  
+
   echo "cuDNN ${cudnn_version} installation completed"
   return 0
 }
@@ -184,51 +184,51 @@ function install_cudnn {
 function install_nccl {
   echo "Installing NCCL for CUDA ${CUDA_VERSION}..."
   local NCCL_VERSION=""
-  
+
   echo "Getting NCCL version information..."
   if [[ ${CUDA_VERSION:0:2} == "12" ]]; then
     NCCL_VERSION=$(curl -sL https://github.com/pytorch/pytorch/raw/refs/heads/main/.ci/docker/ci_commit_pins/nccl-cu12.txt)
   else
     error_exit "Unsupported CUDA version: ${CUDA_VERSION}"
   fi
-  
+
   if [[ -z "${NCCL_VERSION}" ]]; then
     error_exit "Failed to get NCCL version information"
   fi
-  
+
   echo "Retrieved NCCL version: ${NCCL_VERSION}"
-  echo "${NCCL_VERSION}" > "${USER_TMPDIR}/nccl_version.txt"
-  
+  echo "${NCCL_VERSION}" >"${USER_TMPDIR}/nccl_version.txt"
+
   # NCCL license: https://docs.nvidia.com/deeplearning/nccl/#licenses
   # Follow build: https://github.com/NVIDIA/nccl/tree/master?tab=readme-ov-file#build
   echo "Cloning NCCL repository..."
   if ! git clone -b $NCCL_VERSION --depth 1 https://github.com/NVIDIA/nccl.git; then
     error_exit "NCCL repository clone failed"
   fi
-  
+
   echo "Starting NCCL compilation..."
   pushd nccl || error_exit "Failed to enter NCCL directory"
-  
+
   if ! make -j src.build CUDA_HOME=${CUDA_INSTALL_PREFIX}/cuda; then
     popd
     rm -rf nccl
     error_exit "NCCL compilation failed"
   fi
-  
+
   echo "NCCL compilation complete, installing to CUDA directory..."
   cp -a build/include/* ${CUDA_INSTALL_PREFIX}/cuda/include/
   cp -a build/lib/* ${CUDA_INSTALL_PREFIX}/cuda/lib64/
-  
+
   popd
   rm -rf nccl
-  
+
   if [ "$(id -u)" -eq 0 ]; then
     ldconfig
   fi
-  
+
   # Create NCCL installation complete marker
   touch "${USER_TMPDIR}/nccl_installed"
-  
+
   echo "NCCL installation completed"
   return 0
 }
@@ -236,12 +236,12 @@ function install_nccl {
 # Real cuSparseLt installation function
 function install_cusparselt {
   echo "Installing cuSparseLt for CUDA ${CUDA_VERSION}..."
-  mkdir -p tmp_cusparselt 
+  mkdir -p tmp_cusparselt
   pushd tmp_cusparselt || error_exit "Failed to create cuSparseLt temporary directory"
-  
+
   local cusparselt_version
   local arch_path=${ARCH_PATH}
-  
+
   if [[ ${CUDA_VERSION:0:4} =~ ^12\.[5-9]$ ]]; then
     cusparselt_version="0.7.1.0"
   else
@@ -249,41 +249,41 @@ function install_cusparselt {
     rm -rf tmp_cusparselt
     error_exit "Unsupported CUDA version: ${CUDA_VERSION}"
   fi
-  
-  echo "${cusparselt_version}" > "${USER_TMPDIR}/cusparselt_version.txt"
-  
+
+  echo "${cusparselt_version}" >"${USER_TMPDIR}/cusparselt_version.txt"
+
   local CUSPARSELT_NAME="libcusparse_lt-linux-${arch_path}-${cusparselt_version}-archive"
   echo "Downloading cuSparseLt: ${CUSPARSELT_NAME}.tar.xz"
-  
+
   if ! curl --retry 3 -OLs https://developer.download.nvidia.com/compute/cusparselt/redist/libcusparse_lt/linux-${arch_path}/${CUSPARSELT_NAME}.tar.xz; then
     popd
     rm -rf tmp_cusparselt
     error_exit "cuSparseLt download failed"
   fi
-  
+
   echo "cuSparseLt download complete, preparing to extract..."
   if ! tar xf ${CUSPARSELT_NAME}.tar.xz; then
     popd
     rm -rf tmp_cusparselt
     error_exit "cuSparseLt extraction failed"
   fi
-  
+
   echo "cuSparseLt extraction complete, installing to CUDA directory..."
   cp -a ${CUSPARSELT_NAME}/include/* ${CUDA_INSTALL_PREFIX}/cuda/include/
   cp -a ${CUSPARSELT_NAME}/lib/* ${CUDA_INSTALL_PREFIX}/cuda/lib64/
-  
+
   popd
   rm -rf tmp_cusparselt
-  
+
   touch "${USER_TMPDIR}/cusparselt_installed"
-  
+
   echo "cuSparseLt installation completed"
   return 0
 }
 
 # nvSHMEM installation function
 function install_nvshmem {
-  local cuda_major_version=$1      # e.g. "12"
+  local cuda_major_version=$1 # e.g. "12"
   local nvshmem_version=${NVSHMEM_VERSION}
   local arch_path=${ARCH_PATH}
 
@@ -322,7 +322,7 @@ function install_nvshmem {
 
   echo "Installing nvSHMEM to CUDA directory..."
   cp -a "libnvshmem/include/"* ${CUDA_INSTALL_PREFIX}/cuda/include/
-  cp -a "libnvshmem/lib/"*     ${CUDA_INSTALL_PREFIX}/cuda/lib64/
+  cp -a "libnvshmem/lib/"* ${CUDA_INSTALL_PREFIX}/cuda/lib64/
 
   cd ..
   rm -rf "${tmpdir}"
@@ -336,18 +336,18 @@ function install_nvshmem {
 
 # CUDA 12.6 installation function
 function install_126 {
-  local CUDNN_VERSION=9.10.2.21 
+  local CUDNN_VERSION=9.10.2.21
   echo "Starting installation for CUDA 12.6..."
-  
+
   echo "STEP 1: Installing CUDA toolkit..."
   install_cuda "12.6.3" "cuda_12.6.3_560.35.05_linux" || error_exit "CUDA 12.6.3 toolkit installation failed"
-  
+
   echo "STEP 2: Installing cuDNN..."
   install_cudnn "12" "${CUDNN_VERSION}" || error_exit "cuDNN installation failed"
-  
+
   echo "STEP 3: Installing NCCL..."
   install_nccl || error_exit "NCCL installation failed"
-  
+
   echo "STEP 4: Installing cuSparseLt..."
   install_cusparselt || error_exit "cuSparseLt installation failed"
 
@@ -357,25 +357,25 @@ function install_126 {
   if [ "$(id -u)" -eq 0 ]; then
     ldconfig
   fi
-  
+
   echo "CUDA 12.6 installation completed"
   return 0
 }
 
 # CUDA 12.8 installation function
 function install_128 {
-  local CUDNN_VERSION=9.10.2.21 
+  local CUDNN_VERSION=9.10.2.21
   echo "Starting installation for CUDA 12.8..."
-  
+
   echo "STEP 1: Installing CUDA toolkit..."
   install_cuda "12.8.1" "cuda_12.8.1_570.124.06_linux" || error_exit "CUDA 12.8.1 toolkit installation failed"
-  
+
   echo "STEP 2: Installing cuDNN..."
   install_cudnn "12" "${CUDNN_VERSION}" || error_exit "cuDNN installation failed"
-  
+
   echo "STEP 3: Installing NCCL..."
   install_nccl || error_exit "NCCL installation failed"
-  
+
   echo "STEP 4: Installing cuSparseLt..."
   install_cusparselt || error_exit "cuSparseLt installation failed"
 
@@ -385,7 +385,7 @@ function install_128 {
   if [ "$(id -u)" -eq 0 ]; then
     ldconfig
   fi
-  
+
   echo "CUDA 12.8 installation completed"
   return 0
 }
@@ -422,15 +422,15 @@ function install_129 {
 function prune_cuda {
   local cuda_version=$1
   local major_minor=$2
-  
+
   echo "Pruning CUDA ${major_minor}..."
-  
+
   # CUDA pruning logic can be added back as needed
   # Kept empty for now for easier troubleshooting
 
   # Pruning complete marker
   touch "${USER_TMPDIR}/cuda_${major_minor}_pruned"
-  
+
   echo "CUDA ${major_minor} pruning completed"
   return 0
 }

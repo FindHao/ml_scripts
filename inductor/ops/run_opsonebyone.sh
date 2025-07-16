@@ -12,31 +12,29 @@ ops=("cross_entropy" "embedding" "fused_linear_cross_entropy" "fused_linear_jsd"
 start_time=$(date +%s)
 
 if [ ! -f "run.py" ]; then
-    echo "Error: run.py not found in current directory"
-    echo "Please run this script in the root directory of tritonbench"
-    exit 1
+  echo "Error: run.py not found in current directory"
+  echo "Please run this script in the root directory of tritonbench"
+  exit 1
 fi
 
 DATE_STR=$(date +%Y%m%d_%H%M%S)
 
-
-
 for direction in "${directions[@]}"; do
-    for precision in "${precisions[@]}"; do
-        output_dir="/tmp/tritonbench/${DATE_STR}_${direction}_${precision}"
-        mkdir -p $output_dir
-        for op in "${ops[@]}"; do
-            echo "Running with direction: $direction, precision: $precision, op: $op"
-            echo "Running: python run.py --op $op --mode $direction --precision $precision --metrics latency,gpu_peak_mem,speedup,mem_footprint_compression_ratio,accuracy --cudagraph --output $output_dir/${op}_${direction}_${precision}.csv"
-            python run.py \
-                --op $op \
-                --mode $direction \
-                --precision $precision \
-                --metrics latency,gpu_peak_mem,speedup,mem_footprint_compression_ratio,accuracy \
-                --cudagraph \
-                --output $output_dir/${op}_${direction}_${precision}.csv
-        done
+  for precision in "${precisions[@]}"; do
+    output_dir="/tmp/tritonbench/${DATE_STR}_${direction}_${precision}"
+    mkdir -p $output_dir
+    for op in "${ops[@]}"; do
+      echo "Running with direction: $direction, precision: $precision, op: $op"
+      echo "Running: python run.py --op $op --mode $direction --precision $precision --metrics latency,gpu_peak_mem,speedup,mem_footprint_compression_ratio,accuracy --cudagraph --output $output_dir/${op}_${direction}_${precision}.csv"
+      python run.py \
+        --op $op \
+        --mode $direction \
+        --precision $precision \
+        --metrics latency,gpu_peak_mem,speedup,mem_footprint_compression_ratio,accuracy \
+        --cudagraph \
+        --output $output_dir/${op}_${direction}_${precision}.csv
     done
+  done
 done
 
 # Calculate duration

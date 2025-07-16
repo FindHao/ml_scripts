@@ -42,10 +42,10 @@ echo "=== Build directory: $BUILD_DIR ==="
 
 # Check if LLVM repository exists, clone if not
 if [ ! -d "$LLVM_DIR" ]; then
-    echo "=== Cloning LLVM repository ==="
-    git clone https://github.com/llvm/llvm-project.git "$LLVM_DIR"
+  echo "=== Cloning LLVM repository ==="
+  git clone https://github.com/llvm/llvm-project.git "$LLVM_DIR"
 else
-    echo "=== LLVM repository already exists at $LLVM_DIR ==="
+  echo "=== LLVM repository already exists at $LLVM_DIR ==="
 fi
 
 # Navigate to LLVM repository
@@ -61,10 +61,9 @@ git checkout $COMMIT_HASH
 git submodule sync
 git submodule update --init --recursive
 
-
 if [ -d "$BUILD_DIR" ]; then
-    echo "=== Removing existing build directory ==="
-    rm -rf "$BUILD_DIR"
+  echo "=== Removing existing build directory ==="
+  rm -rf "$BUILD_DIR"
 fi
 echo "=== Creating build directory ==="
 mkdir -p "$BUILD_DIR"
@@ -75,11 +74,11 @@ cd "$BUILD_DIR"
 # Configure with CMake
 echo "=== Configuring with CMake ==="
 cmake -G Ninja \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DLLVM_ENABLE_ASSERTIONS=ON \
-    -DLLVM_ENABLE_PROJECTS="mlir;llvm;lld" \
-    -DLLVM_TARGETS_TO_BUILD="host;NVPTX;AMDGPU" \
-    "$LLVM_DIR/llvm"
+  -DCMAKE_BUILD_TYPE=Release \
+  -DLLVM_ENABLE_ASSERTIONS=ON \
+  -DLLVM_ENABLE_PROJECTS="mlir;llvm;lld" \
+  -DLLVM_TARGETS_TO_BUILD="host;NVPTX;AMDGPU" \
+  "$LLVM_DIR/llvm"
 
 # Build
 echo "=== Building LLVM ==="
@@ -94,19 +93,19 @@ SECONDS=$((ELAPSED_TIME % 60))
 
 # Format the time string
 if [ $HOURS -gt 0 ]; then
-    TIME_STRING="${HOURS}h ${MINUTES}m ${SECONDS}s"
+  TIME_STRING="${HOURS}h ${MINUTES}m ${SECONDS}s"
 elif [ $MINUTES -gt 0 ]; then
-    TIME_STRING="${MINUTES}m ${SECONDS}s"
+  TIME_STRING="${MINUTES}m ${SECONDS}s"
 else
-    TIME_STRING="${SECONDS}s"
+  TIME_STRING="${SECONDS}s"
 fi
 
 echo "=== Build completed successfully in $TIME_STRING ==="
 echo "LLVM binaries can be found in $BUILD_DIR/bin"
 
 function notify_finish() {
-    if command -v notify &>/dev/null; then
-        notify "LLVM build completed successfully in $TIME_STRING! LLVM binaries can be found in $BUILD_DIR/bin" || true # Don't fail if notify fails
-    fi
+  if command -v notify &>/dev/null; then
+    notify "LLVM build completed successfully in $TIME_STRING! LLVM binaries can be found in $BUILD_DIR/bin" || true # Don't fail if notify fails
+  fi
 }
 notify_finish

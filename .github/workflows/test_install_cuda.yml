@@ -5,15 +5,45 @@ on:
     paths:
       - 'install_cuda.sh'
       - '.github/workflows/test_install_cuda.yml'
+      - '*.sh'
   pull_request:
     paths:
       - 'install_cuda.sh'
       - '.github/workflows/test_install_cuda.yml'
+      - '*.sh'
   workflow_dispatch:
 
 jobs:
+  shellcheck:
+    runs-on: ubuntu-latest
+    name: ShellCheck and Format Check
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+
+      - name: Run format and check script
+        run: |
+          chmod +x format_scripts.sh
+          ./format_scripts.sh
+
+      - name: Check if any files were modified by formatting
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "❌ Files need formatting! Please run ./format_scripts.sh locally and commit the changes."
+            git diff
+            exit 1
+          else
+            echo "✅ All files are properly formatted!"
+          fi
+
   test-install-cuda:
     runs-on: ubuntu-latest
+    needs: shellcheck
     timeout-minutes: 30
 
     steps:

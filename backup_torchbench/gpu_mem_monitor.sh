@@ -9,7 +9,7 @@ while true; do
 
     # Call the test.py script using Python
     bash training_scripts/single_gpu/run_350m.sh
-    
+
     # Check the return code of the script
     if [[ $? -eq 0 ]]; then
       # If the script returns successfully, send a "successfully" notification
@@ -18,11 +18,10 @@ while true; do
       # If the script fails, send a "fail" notification
       notify "Task failed."
     fi
-    
+
     exit 0
   fi
 
   # Sleep for 60 seconds before the next check
   sleep 60
 done
-
