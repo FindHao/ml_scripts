@@ -57,23 +57,18 @@ echo "✓ Python version: $python_version"
 
 # 读取tritonparse环境变量，默认为false
 tritonparse=${TRITONPARSE:-false}
+export TRITON_TRACE_GZIP=${TRITON_TRACE_GZIP:-false}
 
 # 操作符列表
 ops=(
-    'addmm'
     'bf16xint16_gemm'
     'blackwell_attentions'
     'cross_entropy'
-    'decoding_attention'
     'embedding'
     'flash_attention'
     'flex_attention'
     'fp8_attention'
-    'fp8_fused_quant_gemm_rowwise'
     'fp8_gemm'
-    'fp8_gemm_blockwise'
-    'fp8_gemm_rowwise'
-    'fp8_gemm_rowwise_grouped'
     'fused_linear_cross_entropy'
     'fused_linear_jsd'
     'gather_gemv'
