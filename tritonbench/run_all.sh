@@ -5,6 +5,10 @@ CONDA_PATH="~/miniconda3"
 PYTHON_ENV="~/miniconda3/envs/ptd/bin/python"
 CONDA_ENV_NAME="ptd"
 
+# 设置默认GPU设备
+export ROCR_VISIBLE_DEVICES=${ROCR_VISIBLE_DEVICES:-1}
+echo "GPU device set to: ROCR_VISIBLE_DEVICES=$ROCR_VISIBLE_DEVICES"
+
 echo "Initializing conda environment..."
 
 # 严格检查并初始化conda
@@ -108,13 +112,13 @@ work_dir="/home/yhao/ptd/tritonbench"
 # 创建时间记录文件和日志目录（在脚本目录下）
 timestamp=$(date +"%Y%m%d_%H%M%S")
 if [ "$tritonparse" = "true" ]; then
-    time_log_file="$script_dir/benchmark_times_${timestamp}_tritonparse.log"
+    time_log_file="$script_dir/benchmark_times_${timestamp}_tritonparse.csv"
     log_dir="$script_dir/benchmark_logs_${timestamp}_tritonparse"
     echo "========================================="
     echo "Running TRITONPARSE version benchmarks"
     echo "========================================="
 else
-    time_log_file="$script_dir/benchmark_times_${timestamp}.log"
+    time_log_file="$script_dir/benchmark_times_${timestamp}.csv"
     log_dir="$script_dir/benchmark_logs_${timestamp}"
     echo "========================================="
     echo "Running ORIGINAL version benchmarks"
