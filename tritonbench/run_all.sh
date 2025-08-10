@@ -59,6 +59,10 @@ echo "✓ Python version: $python_version"
 tritonparse=${TRITONPARSE:-false}
 export TRITON_TRACE_GZIP=${TRITON_TRACE_GZIP:-false}
 
+# 设置tritonparse日志目录，可从环境变量读取
+TRITONPARSE_LOGS_DIR=${TRITONPARSE_LOGS_DIR:-tritonparse_logs}
+echo "Tritonparse logs directory: $TRITONPARSE_LOGS_DIR"
+
 # 操作符列表
 ops=(
     'bf16xint16_gemm'
@@ -155,7 +159,7 @@ for op in "${ops[@]}"; do
         # 使用/usr/bin/time提取精确的real time并捕获执行状态
         set +e  # 临时允许命令失败
         if [ "$tritonparse" = "true" ]; then
-            cd "$work_dir" && /usr/bin/time -f "%e" "$python_cmd" run.py --op "$op" --num-inputs 50 --tritonparse "tritonparse/$op" >"$op_log_file" 2>&1
+            cd "$work_dir" && /usr/bin/time -f "%e" "$python_cmd" run.py --op "$op" --num-inputs 50 --tritonparse "$TRITONPARSE_LOGS_DIR/$op" >"$op_log_file" 2>&1
         else
             cd "$work_dir" && /usr/bin/time -f "%e" "$python_cmd" run.py --op "$op" --num-inputs 50 >"$op_log_file" 2>&1
         fi
@@ -188,7 +192,7 @@ for op in "${ops[@]}"; do
         # 使用内置time命令的备用方案
         set +e
         if [ "$tritonparse" = "true" ]; then
-            cd "$work_dir" && { time "$python_cmd" run.py --op "$op" --num-inputs 50 --tritonparse "tritonparse/$op" >"$op_log_file" 2>&1; } 2>&1
+            cd "$work_dir" && { time "$python_cmd" run.py --op "$op" --num-inputs 50 --tritonparse "$TRITONPARSE_LOGS_DIR/$op" >"$op_log_file" 2>&1; } 2>&1
         else
             cd "$work_dir" && { time "$python_cmd" run.py --op "$op" --num-inputs 50 >"$op_log_file" 2>&1; } 2>&1
         fi
