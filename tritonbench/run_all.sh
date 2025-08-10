@@ -1,5 +1,59 @@
 #!/bin/bash
 
+# 设置conda和Python环境
+CONDA_PATH="~/miniconda3"
+PYTHON_ENV="~/miniconda3/envs/ptd/bin/python"
+CONDA_ENV_NAME="ptd"
+
+echo "Initializing conda environment..."
+
+# 严格检查并初始化conda
+if [[ ! -f "$HOME/miniconda3/etc/profile.d/conda.sh" ]]; then
+    echo "ERROR: Conda not found at $HOME/miniconda3/etc/profile.d/conda.sh"
+    echo "Please ensure conda is properly installed."
+    exit 1
+fi
+
+source "$HOME/miniconda3/etc/profile.d/conda.sh"
+echo "✓ Conda initialized successfully"
+
+# 严格检查conda命令是否可用
+if ! command -v conda >/dev/null 2>&1; then
+    echo "ERROR: Conda command not available after initialization"
+    exit 1
+fi
+
+# 严格激活conda环境
+echo "Activating conda environment: $CONDA_ENV_NAME"
+if ! conda activate "$CONDA_ENV_NAME" 2>/dev/null; then
+    echo "ERROR: Failed to activate conda environment '$CONDA_ENV_NAME'"
+    echo "Please ensure the environment exists: conda env list"
+    exit 1
+fi
+echo "✓ Activated conda environment: $CONDA_ENV_NAME"
+
+# 严格验证Python环境
+python_cmd="${PYTHON_ENV/\~/$HOME}"
+if [[ ! -f "$python_cmd" ]]; then
+    echo "ERROR: Python executable not found at $python_cmd"
+    echo "Please check your conda environment installation."
+    exit 1
+fi
+
+echo "✓ Using Python: $python_cmd"
+
+# 验证Python可以正常执行
+if ! "$python_cmd" --version >/dev/null 2>&1; then
+    echo "ERROR: Python executable is not working properly"
+    exit 1
+fi
+
+python_version=$("$python_cmd" --version 2>&1)
+echo "✓ Python version: $python_version"
+
+# 读取tritonparse环境变量，默认为false
+tritonparse=${TRITONPARSE:-false}
+
 # 操作符列表
 ops=(
     'addmm'
@@ -53,12 +107,25 @@ work_dir="/home/yhao/ptd/tritonbench"
 
 # 创建时间记录文件和日志目录（在脚本目录下）
 timestamp=$(date +"%Y%m%d_%H%M%S")
-time_log_file="$script_dir/benchmark_times_${timestamp}.log"
-log_dir="$script_dir/benchmark_logs_${timestamp}"
+if [ "$tritonparse" = "true" ]; then
+    time_log_file="$script_dir/benchmark_times_${timestamp}_tritonparse.log"
+    log_dir="$script_dir/benchmark_logs_${timestamp}_tritonparse"
+    echo "========================================="
+    echo "Running TRITONPARSE version benchmarks"
+    echo "========================================="
+else
+    time_log_file="$script_dir/benchmark_times_${timestamp}.log"
+    log_dir="$script_dir/benchmark_logs_${timestamp}"
+    echo "========================================="
+    echo "Running ORIGINAL version benchmarks"
+    echo "========================================="
+fi
+
 mkdir -p "$log_dir"
 
 echo "Script directory: $script_dir"
 echo "Work directory: $work_dir"
+echo "Tritonparse mode: $tritonparse"
 echo "Time log will be saved to: $time_log_file"
 echo "Error logs will be saved to: $log_dir/"
 
@@ -88,7 +155,11 @@ for op in "${ops[@]}"; do
     if command -v /usr/bin/time >/dev/null 2>&1; then
         # 使用/usr/bin/time提取精确的real time并捕获执行状态
         set +e  # 临时允许命令失败
-        cd "$work_dir" && /usr/bin/time -f "%e" python run.py --op "$op" --num-inputs 50 >"$op_log_file" 2>&1
+        if [ "$tritonparse" = "true" ]; then
+            cd "$work_dir" && /usr/bin/time -f "%e" "$python_cmd" run.py --op "$op" --num-inputs 50 --tritonparse "tritonparse/$op" >"$op_log_file" 2>&1
+        else
+            cd "$work_dir" && /usr/bin/time -f "%e" "$python_cmd" run.py --op "$op" --num-inputs 50 >"$op_log_file" 2>&1
+        fi
         exit_code=$?
         cd "$script_dir"  # 切换回脚本目录
         set -e  # 重新启用错误时退出
@@ -117,7 +188,11 @@ for op in "${ops[@]}"; do
     else
         # 使用内置time命令的备用方案
         set +e
-        cd "$work_dir" && { time python run.py --op "$op" --num-inputs 50 >"$op_log_file" 2>&1; } 2>&1
+        if [ "$tritonparse" = "true" ]; then
+            cd "$work_dir" && { time "$python_cmd" run.py --op "$op" --num-inputs 50 --tritonparse "tritonparse/$op" >"$op_log_file" 2>&1; } 2>&1
+        else
+            cd "$work_dir" && { time "$python_cmd" run.py --op "$op" --num-inputs 50 >"$op_log_file" 2>&1; } 2>&1
+        fi
         exit_code=$?
         cd "$script_dir"  # 切换回脚本目录
         set -e
