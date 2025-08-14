@@ -139,3 +139,16 @@ if [ -n "$GPU_PIDS" ]; then
     echo "============================================="
   fi
 fi
+
+# Optional: run CUDA sample vectorAdd to sanity-check default GPU availability
+VECTOR_ADD_PATH="$HOME/cuda-samples/Samples/0_Introduction/vectorAdd/vectorAdd"
+if [ -x "$VECTOR_ADD_PATH" ]; then
+  # Run with timeout to avoid hanging; suppress output
+  echo "Running CUDA sample vectorAdd to sanity-check default GPU availability..."
+  timeout 10s "$VECTOR_ADD_PATH" >/dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    echo "❌ The current GPU is not available."
+  else
+    echo "✅ Passed."
+  fi
+fi
