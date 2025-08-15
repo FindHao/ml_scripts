@@ -1,58 +1,56 @@
 name: Test CUDA Install Script
 
 on:
-  push:
-    paths:
-      - 'install_cuda.sh'
-      - '.github/workflows/test_install_cuda.yml'
-      - '*.sh'
-  pull_request:
-    paths:
-      - 'install_cuda.sh'
-      - '.github/workflows/test_install_cuda.yml'
-      - '*.sh'
-  workflow_dispatch:
+    push:
+        paths:
+            - "install_cuda.sh"
+            - ".github/workflows/test_install_cuda.yml"
+    pull_request:
+        paths:
+            - "install_cuda.sh"
+            - ".github/workflows/test_install_cuda.yml"
+    workflow_dispatch:
 
 jobs:
-  test-install-cuda:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+    test-install-cuda:
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
 
-      - name: Set up test install prefix
-        run: |
-          mkdir -p /tmp/test-cuda-install
-          echo "Created /tmp/test-cuda-install"
+            - name: Set up test install prefix
+              run: |
+                  mkdir -p /tmp/test-cuda-install
+                  echo "Created /tmp/test-cuda-install"
 
-      - name: Make script executable
-        run: chmod +x install_cuda.sh
+            - name: Make script executable
+              run: chmod +x install_cuda.sh
 
-      - name: Run install_cuda.sh (skip GPU driver install)
-        env:
-          CUDA_INSTALL_PREFIX: /tmp/test-cuda-install
-          SKIP_PRUNE: 1
-          MAKEFLAGS: -j4
-          NVCC_GENCODE: -gencode arch=compute_75,code=sm_75
-          INSTALL_NCCL: 0
-        run: |
-          # Only test CUDA Toolkit installation, no GPU driver install (no root, no real GPU)
-          # Use a supported version, e.g. 12.8
-          # NCCL installation is disabled to avoid compilation errors in CI environment
-          bash install_cuda.sh 12.8 || (cat /tmp/${USER}/cuda_install/error.log || true; exit 1)
+            - name: Run install_cuda.sh (skip GPU driver install)
+              env:
+                  CUDA_INSTALL_PREFIX: /tmp/test-cuda-install
+                  SKIP_PRUNE: 1
+                  MAKEFLAGS: -j4
+                  NVCC_GENCODE: -gencode arch=compute_75,code=sm_75
+                  INSTALL_NCCL: 0
+              run: |
+                  # Only test CUDA Toolkit installation, no GPU driver install (no root, no real GPU)
+                  # Use a supported version, e.g. 12.8
+                  # NCCL installation is disabled to avoid compilation errors in CI environment
+                  bash install_cuda.sh 12.8 || (cat /tmp/${USER}/cuda_install/error.log || true; exit 1)
 
-      - name: Check summary output
-        run: |
-          SUMMARY_FILE="/tmp/${USER}/cuda_install/script_completed_successfully"
-          if [ ! -f "$SUMMARY_FILE" ]; then
-            echo "Script did not complete successfully!"
-            exit 1
-          fi
-          echo "Install script ran to completion."
+            - name: Check summary output
+              run: |
+                  SUMMARY_FILE="/tmp/${USER}/cuda_install/script_completed_successfully"
+                  if [ ! -f "$SUMMARY_FILE" ]; then
+                    echo "Script did not complete successfully!"
+                    exit 1
+                  fi
+                  echo "Install script ran to completion."
 
-      - name: Show install log
-        if: always()
-        run: |
-          cat /tmp/cuda_install_debug.txt || true 
+            - name: Show install log
+              if: always()
+              run: |
+                  cat /tmp/cuda_install_debug.txt || true
