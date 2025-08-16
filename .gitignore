@@ -146,3 +146,6 @@ report*
 torch_compile_debug/
 
 cuda*.run
+*.json
+*.ndjson
+*.gz

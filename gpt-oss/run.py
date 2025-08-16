@@ -1,6 +1,13 @@
 from transformers import pipeline
 import tritonparse.structured_logging
-tritonparse.structured_logging.init("./logs/", enable_trace_launch=True)
+from datetime import datetime
+
+# Generate a unique log directory name with a timestamp
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+log_dir = f"./logs_{timestamp}/"
+output_dir = f"./parsed_output_{timestamp}/"
+
+tritonparse.structured_logging.init(log_dir, enable_trace_launch=True)
 
 generator = pipeline(
     "text-generation",
@@ -22,4 +29,4 @@ result = generator(
 print(result[0]["generated_text"])
 
 import tritonparse.utils
-tritonparse.utils.unified_parse("./logs/")
+tritonparse.utils.unified_parse(log_dir, out=output_dir, overwrite=True)
