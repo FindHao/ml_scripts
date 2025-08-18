@@ -1,13 +1,20 @@
 from transformers import pipeline
-import tritonparse.structured_logging
 from datetime import datetime
+import os
 
-# Generate a unique log directory name with a timestamp
-timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-log_dir = f"./logs_{timestamp}/"
-output_dir = f"./parsed_output_{timestamp}/"
+# Check environment variable to enable/disable tritonparse-related functionality
+TRITONPARSE_ENABLE = os.environ.get("TRITONPARSE_ENABLE") == "1"
 
-tritonparse.structured_logging.init(log_dir, enable_trace_launch=True)
+if TRITONPARSE_ENABLE:
+    # Generate a unique log directory name with a timestamp
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    # Use a single environment variable as the common parent directory
+    parent_dir = os.environ.get("TRITONPARSE_LOG_DIR", ".")
+    log_dir = os.path.join(parent_dir, f"logs_{timestamp}") + "/"
+    print(f"===>debug: Log directory: {log_dir}")
+    output_dir = os.path.join(parent_dir, f"parsed_output_{timestamp}") + "/"
+    import tritonparse.structured_logging
+    tritonparse.structured_logging.init(log_dir, enable_trace_launch=True)
 
 generator = pipeline(
     "text-generation",
@@ -28,5 +35,6 @@ result = generator(
 
 print(result[0]["generated_text"])
 
-import tritonparse.utils
-tritonparse.utils.unified_parse(log_dir, out=output_dir, overwrite=True)
+if TRITONPARSE_ENABLE:
+    import tritonparse.utils
+    tritonparse.utils.unified_parse(log_dir, out=output_dir, overwrite=True)
