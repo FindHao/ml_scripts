@@ -15,6 +15,10 @@ jobs:
     test-install-cuda:
         runs-on: ubuntu-latest
         timeout-minutes: 30
+        strategy:
+            fail-fast: false
+            matrix:
+                cuda_version: [12.8, 13.0]
 
         steps:
             - name: Checkout code
@@ -28,7 +32,7 @@ jobs:
             - name: Make script executable
               run: chmod +x install_cuda.sh
 
-            - name: Run install_cuda.sh (skip GPU driver install)
+            - name: Run install_cuda.sh (CUDA ${{ matrix.cuda_version }})
               env:
                   CUDA_INSTALL_PREFIX: /tmp/test-cuda-install
                   SKIP_PRUNE: 1
@@ -37,9 +41,9 @@ jobs:
                   INSTALL_NCCL: 0
               run: |
                   # Only test CUDA Toolkit installation, no GPU driver install (no root, no real GPU)
-                  # Use a supported version, e.g. 12.8
+                  # Use a supported version from the matrix
                   # NCCL installation is disabled to avoid compilation errors in CI environment
-                  bash install_cuda.sh 12.8 || (cat /tmp/${USER}/cuda_install/error.log || true; exit 1)
+                  bash install_cuda.sh ${{ matrix.cuda_version }} || (cat /tmp/${USER}/cuda_install/error.log || true; exit 1)
 
             - name: Check summary output
               run: |

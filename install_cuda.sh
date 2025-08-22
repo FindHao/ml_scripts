@@ -14,8 +14,7 @@ echo "🚀 ===== CUDA Installation Script Started ====="
 CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX:-$HOME/opt}
 CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX%/}
 CUDA_VERSION=${CUDA_VERSION:-12.8}
-SKIP_PRUNE=${SKIP_PRUNE:-1}
-NVSHMEM_VERSION=${NVSHMEM_VERSION:-3.3.9}
+NVSHMEM_VERSION=${NVSHMEM_VERSION:-3.3.20}
 INSTALL_NCCL=${INSTALL_NCCL:-1}
 
 echo "CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX}"
@@ -195,6 +194,8 @@ function install_nccl {
   echo "Getting NCCL version information..."
   if [[ ${CUDA_VERSION:0:2} == "12" ]]; then
     NCCL_VERSION=$(curl -sL https://github.com/pytorch/pytorch/raw/refs/heads/main/.ci/docker/ci_commit_pins/nccl-cu12.txt)
+  elif [[ ${CUDA_VERSION:0:2} == "13" ]]; then
+    NCCL_VERSION=$(curl -sL https://github.com/pytorch/pytorch/raw/refs/heads/main/.ci/docker/ci_commit_pins/nccl-cu13.txt)
   else
     error_exit "Unsupported CUDA version: ${CUDA_VERSION}"
   fi
@@ -249,8 +250,13 @@ function install_cusparselt {
   local cusparselt_version
   local arch_path=${ARCH_PATH}
 
-  if [[ ${CUDA_VERSION:0:4} =~ ^12\.[5-9]$ ]]; then
+  local CUSPARSELT_NAME
+  if [[ ${CUDA_VERSION:0:2} == "13" ]]; then
+    cusparselt_version="0.8.0.4"
+    CUSPARSELT_NAME="libcusparse_lt-linux-${arch_path}-${cusparselt_version}_cuda13-archive"
+  elif [[ ${CUDA_VERSION:0:4} =~ ^12\.[5-9]$ ]]; then
     cusparselt_version="0.7.1.0"
+    CUSPARSELT_NAME="libcusparse_lt-linux-${arch_path}-${cusparselt_version}-archive"
   else
     popd
     rm -rf tmp_cusparselt
@@ -259,7 +265,6 @@ function install_cusparselt {
 
   echo "${cusparselt_version}" >"${USER_TMPDIR}/cusparselt_version.txt"
 
-  local CUSPARSELT_NAME="libcusparse_lt-linux-${arch_path}-${cusparselt_version}-archive"
   echo "Downloading cuSparseLt: ${CUSPARSELT_NAME}.tar.xz"
 
   if ! curl --retry 3 -OLs https://developer.download.nvidia.com/compute/cusparselt/redist/libcusparse_lt/linux-${arch_path}/${CUSPARSELT_NAME}.tar.xz; then
@@ -310,26 +315,27 @@ function install_nvshmem {
   mkdir -p "${tmpdir}" && cd "${tmpdir}"
 
   # nvSHMEM license: https://docs.nvidia.com/nvshmem/api/sla.html
-  local filename="libnvshmem_cuda${cuda_major_version}-linux-${arch_path}-${nvshmem_version}"
-  local url="https://developer.download.nvidia.com/compute/redist/nvshmem/${nvshmem_version}/builds/cuda${cuda_major_version}/txz/agnostic/${dl_arch}/${filename}.tar.gz"
+  local filename="libnvshmem-linux-${arch_path}-${nvshmem_version}_cuda${cuda_major_version}-archive"
+  local suffix=".tar.xz"
+  local url="https://developer.download.nvidia.com/compute/redist/nvshmem/${nvshmem_version}/builds/cuda${cuda_major_version}/txz/agnostic/${dl_arch}/${filename}${suffix}"
 
-  echo "Downloading nvSHMEM: ${filename}.tar.gz"
+  echo "Downloading nvSHMEM: ${filename}${suffix}"
   if ! wget -q "${url}"; then
     cd ..
     rm -rf "${tmpdir}"
-    error_exit "nvSHMEM download failed: ${filename}.tar.gz"
+    error_exit "nvSHMEM download failed: ${filename}${suffix}"
   fi
 
   echo "Extracting nvSHMEM..."
-  if ! tar xf "${filename}.tar.gz"; then
+  if ! tar xf "${filename}${suffix}"; then
     cd ..
     rm -rf "${tmpdir}"
-    error_exit "nvSHMEM extraction failed: ${filename}.tar.gz"
+    error_exit "nvSHMEM extraction failed: ${filename}${suffix}"
   fi
 
   echo "Installing nvSHMEM to CUDA directory..."
-  cp -a "libnvshmem/include/"* ${CUDA_INSTALL_PREFIX}/cuda/include/
-  cp -a "libnvshmem/lib/"* ${CUDA_INSTALL_PREFIX}/cuda/lib64/
+  cp -a "${filename}/include/"* ${CUDA_INSTALL_PREFIX}/cuda/include/
+  cp -a "${filename}/lib/"*     ${CUDA_INSTALL_PREFIX}/cuda/lib64/
 
   cd ..
   rm -rf "${tmpdir}"
@@ -371,7 +377,7 @@ function install_126 {
 
 # CUDA 12.8 installation function
 function install_128 {
-  local CUDNN_VERSION=9.10.2.21
+  local CUDNN_VERSION=9.8.0.87
   echo "Starting installation for CUDA 12.8..."
 
   echo "📦 STEP 1: Installing CUDA toolkit..."
@@ -425,31 +431,39 @@ function install_129 {
   return 0
 }
 
-# Simplified pruning function - enable as needed
-function prune_cuda {
-  local cuda_version=$1
-  local major_minor=$2
+# CUDA 13.0 installation function
+function install_130 {
+  local CUDNN_VERSION=9.12.0.46
+  echo "Starting installation for CUDA 13.0..."
 
-  echo "Pruning CUDA ${major_minor}..."
+  echo "📦 STEP 1: Installing CUDA toolkit..."
+  install_cuda "13.0.0" "cuda_13.0.0_580.65.06_linux" || error_exit "CUDA 13.0.0 toolkit installation failed"
 
-  # CUDA pruning logic can be added back as needed
-  # Kept empty for now for easier troubleshooting
+  echo "🧠 STEP 2: Installing cuDNN..."
+  install_cudnn "13" "${CUDNN_VERSION}" || error_exit "cuDNN installation failed"
 
-  # Pruning complete marker
-  touch "${USER_TMPDIR}/cuda_${major_minor}_pruned"
+  echo "🔗 STEP 3: Installing NCCL..."
+  install_nccl || error_exit "NCCL installation failed"
 
-  echo "CUDA ${major_minor} pruning completed"
+  echo "⚡ STEP 4: Installing cuSparseLt..."
+  install_cusparselt || error_exit "cuSparseLt installation failed"
+
+  echo "💾 STEP 5: Installing nvSHMEM..."
+  install_nvshmem "13" || error_exit "nvSHMEM installation failed"
+
+  if [ "$(id -u)" -eq 0 ]; then
+    ldconfig
+  fi
+
+  echo "✅ CUDA 13.0 installation completed"
   return 0
 }
 
-# Version-specific pruning functions
-function prune_126 {
-  prune_cuda "126" "12.6"
-}
+ 
 
 # Main execution logic
 echo "🔧 ===== Parsing command line arguments ====="
-VALID_VERSIONS=("12.6" "12.8" "12.9")
+VALID_VERSIONS=("12.6" "12.8" "12.9" "13.0")
 
 # Parse command line arguments
 while test $# -gt 0; do
@@ -487,11 +501,7 @@ if [ $INSTALL_RESULT -ne 0 ]; then
   error_exit "Installation failed, exit code: $INSTALL_RESULT"
 fi
 
-# Perform pruning if requested
-if [ "$SKIP_PRUNE" -eq 0 ]; then
-  echo "Performing CUDA pruning operations..."
-  eval "prune_${version_no_dot}" || error_exit "Pruning failed"
-fi
+ 
 
 # Final cleanup
 cleanup_temp_dirs
