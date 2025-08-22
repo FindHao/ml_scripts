@@ -63,6 +63,14 @@ export TRITON_TRACE_GZIP=${TRITON_TRACE_GZIP:-false}
 TRITONPARSE_LOGS_DIR=${TRITONPARSE_LOGS_DIR:-tritonparse_logs}
 echo "Tritonparse logs directory: $TRITONPARSE_LOGS_DIR"
 
+# 读取warmup相关环境变量
+WARMUP_ENABLED=${WARMUP_ENABLED:-true}
+WARMUP_RUNS=${WARMUP_RUNS:-2}
+BENCHMARK_RUNS=${BENCHMARK_RUNS:-10}
+echo "Warmup enabled: $WARMUP_ENABLED"
+echo "Warmup runs: $WARMUP_RUNS"
+echo "Benchmark runs: $BENCHMARK_RUNS"
+
 # 操作符列表
 ops=(
     'bf16xint16_gemm'
@@ -144,7 +152,49 @@ if [ ! -f "$work_dir/run.py" ]; then
     exit 1
 fi
 
-echo "Operator,Real_Time,Status" > "$time_log_file"
+# 公共执行函数
+# 参数: $1=操作符名称, $2=是否记录时间(true/false), $3=输出文件路径, $4=标识符(用于tritonparse日志)
+run_benchmark() {
+    local op="$1"
+    local measure_time="$2"
+    local output_file="$3"
+    local identifier="$4"
+
+    local cmd_prefix=""
+    local redirect_output=""
+
+    # 根据是否需要测量时间设置命令前缀
+    if [ "$measure_time" = "true" ]; then
+        if command -v /usr/bin/time >/dev/null 2>&1; then
+            cmd_prefix="/usr/bin/time -f %e"
+        fi
+    fi
+
+    # 设置输出重定向
+    if [ -n "$output_file" ]; then
+        redirect_output=">\"$output_file\" 2>&1"
+    else
+        redirect_output=">/dev/null 2>&1"
+    fi
+
+    # 构建完整命令
+    if [ "$tritonparse" = "true" ]; then
+        full_cmd="cd \"$work_dir\" && $cmd_prefix \"$python_cmd\" run.py --op \"$op\" --num-inputs 50 --tritonparse \"$TRITONPARSE_LOGS_DIR/${op}${identifier}\" $redirect_output"
+    else
+        full_cmd="cd \"$work_dir\" && $cmd_prefix \"$python_cmd\" run.py --op \"$op\" --num-inputs 50 $redirect_output"
+    fi
+
+    # 执行命令
+    set +e  # 临时允许命令失败
+    eval "$full_cmd"
+    local exit_code=$?
+    cd "$script_dir"  # 切换回脚本目录
+    set -e  # 重新启用错误时退出
+
+    return $exit_code
+}
+
+echo "Operator,Min_Time,Max_Time,Mean_Time,Median_Time,Std_Dev,Status" > "$time_log_file"
 
 # 遍历每个操作符并执行命令
 for op in "${ops[@]}"; do
@@ -154,60 +204,120 @@ for op in "${ops[@]}"; do
     # 为每个操作符创建日志文件
     op_log_file="$log_dir/${op}.log"
 
-    # 使用time命令记录执行时间，捕获错误和执行状态
-    if command -v /usr/bin/time >/dev/null 2>&1; then
-        # 使用/usr/bin/time提取精确的real time并捕获执行状态
-        set +e  # 临时允许命令失败
-        if [ "$tritonparse" = "true" ]; then
-            cd "$work_dir" && /usr/bin/time -f "%e" "$python_cmd" run.py --op "$op" --num-inputs 50 --tritonparse "$TRITONPARSE_LOGS_DIR/$op" >"$op_log_file" 2>&1
-        else
-            cd "$work_dir" && /usr/bin/time -f "%e" "$python_cmd" run.py --op "$op" --num-inputs 50 >"$op_log_file" 2>&1
-        fi
-        exit_code=$?
-        cd "$script_dir"  # 切换回脚本目录
-        set -e  # 重新启用错误时退出
-
-        if [ $exit_code -eq 0 ]; then
-            # 成功执行，从时间输出中提取real time
-            real_time=$(tail -n1 "$op_log_file" | grep -o '[0-9]*\.[0-9]*')
-            if [ -n "$real_time" ]; then
-                echo "Real time: ${real_time}s"
-                echo "$op,$real_time,Success" >> "$time_log_file"
-                # 清理成功执行的日志文件（只保留时间信息）
-                echo "Benchmark completed successfully at $(date)" > "$op_log_file"
-                echo "Real time: ${real_time}s" >> "$op_log_file"
-            else
-                echo "Real time: N/A (parsing failed)"
-                echo "$op,N/A,Success" >> "$time_log_file"
+    # 执行warmup运行（如果启用）
+    if [ "$WARMUP_ENABLED" = "true" ]; then
+        echo "Running warmup ($WARMUP_RUNS times)..."
+        for ((i=1; i<=WARMUP_RUNS; i++)); do
+            echo "  Warmup run $i/$WARMUP_RUNS"
+            if ! run_benchmark "$op" "false" "" "_warmup${i}"; then
+                echo "  Warning: Warmup run $i failed"
             fi
-            echo "Status: SUCCESS"
-        else
-            echo "Real time: N/A (execution failed)"
-            echo "Status: FAILED (exit code: $exit_code)"
-            echo "$op,N/A,Failed" >> "$time_log_file"
-            # 错误日志已经写入到op_log_file中
-            echo "Check error details in: $op_log_file"
-        fi
-    else
-        # 使用内置time命令的备用方案
-        set +e
-        if [ "$tritonparse" = "true" ]; then
-            cd "$work_dir" && { time "$python_cmd" run.py --op "$op" --num-inputs 50 --tritonparse "$TRITONPARSE_LOGS_DIR/$op" >"$op_log_file" 2>&1; } 2>&1
-        else
-            cd "$work_dir" && { time "$python_cmd" run.py --op "$op" --num-inputs 50 >"$op_log_file" 2>&1; } 2>&1
-        fi
-        exit_code=$?
-        cd "$script_dir"  # 切换回脚本目录
-        set -e
+        done
+        echo "Warmup completed. Starting benchmark..."
+    fi
 
-        if [ $exit_code -eq 0 ]; then
-            echo "Status: SUCCESS (time measurement unavailable with built-in time)"
-            echo "$op,N/A,Success" >> "$time_log_file"
+    # 执行多次基准测试并收集时间数据
+    echo "Running benchmark ($BENCHMARK_RUNS times)..."
+    times=()
+    failed_runs=0
+
+    for ((i=1; i<=BENCHMARK_RUNS; i++)); do
+        echo "  Benchmark run $i/$BENCHMARK_RUNS"
+
+        # 临时文件保存单次运行的输出
+        temp_log="$log_dir/${op}_run${i}.log"
+
+        if run_benchmark "$op" "true" "$temp_log" "_run${i}"; then
+            # 成功执行，提取时间
+            real_time=$(tail -n1 "$temp_log" | grep -o '[0-9]*\.[0-9]*')
+            if [ -n "$real_time" ]; then
+                times+=("$real_time")
+                echo "    Time: ${real_time}s"
+            else
+                echo "    Warning: Could not parse time from output"
+                failed_runs=$((failed_runs + 1))
+            fi
         else
-            echo "Status: FAILED (exit code: $exit_code)"
-            echo "$op,N/A,Failed" >> "$time_log_file"
-            echo "Check error details in: $op_log_file"
+            echo "    Failed (keeping error log: $temp_log)"
+            failed_runs=$((failed_runs + 1))
         fi
+    done
+
+    # 计算统计信息
+    if [ ${#times[@]} -gt 0 ]; then
+        # 计算最小值、最大值、平均值
+        min_time=${times[0]}
+        max_time=${times[0]}
+        sum=0
+
+        for time in "${times[@]}"; do
+            sum=$(echo "$sum + $time" | bc -l)
+            if (( $(echo "$time < $min_time" | bc -l) )); then
+                min_time=$time
+            fi
+            if (( $(echo "$time > $max_time" | bc -l) )); then
+                max_time=$time
+            fi
+        done
+
+        mean_time=$(echo "scale=6; $sum / ${#times[@]}" | bc -l)
+
+        # 计算中位数
+        sorted_times=($(printf '%s\n' "${times[@]}" | sort -n))
+        array_len=${#sorted_times[@]}
+        if (( array_len % 2 == 1 )); then
+            median_time=${sorted_times[$((array_len/2))]}
+        else
+            mid1=${sorted_times[$((array_len/2-1))]}
+            mid2=${sorted_times[$((array_len/2))]}
+            median_time=$(echo "scale=6; ($mid1 + $mid2) / 2" | bc -l)
+        fi
+
+        # 计算标准差
+        variance_sum=0
+        for time in "${times[@]}"; do
+            diff=$(echo "$time - $mean_time" | bc -l)
+            variance_sum=$(echo "$variance_sum + ($diff * $diff)" | bc -l)
+        done
+        variance=$(echo "scale=6; $variance_sum / ${#times[@]}" | bc -l)
+        std_dev=$(echo "scale=6; sqrt($variance)" | bc -l)
+
+        # 格式化输出（保留6位小数）
+        min_time=$(printf "%.6f" "$min_time")
+        max_time=$(printf "%.6f" "$max_time")
+        mean_time=$(printf "%.6f" "$mean_time")
+        median_time=$(printf "%.6f" "$median_time")
+        std_dev=$(printf "%.6f" "$std_dev")
+
+        echo "Statistics:"
+        echo "  Successful runs: ${#times[@]}/$BENCHMARK_RUNS"
+        echo "  Min time: ${min_time}s"
+        echo "  Max time: ${max_time}s"
+        echo "  Mean time: ${mean_time}s"
+        echo "  Median time: ${median_time}s"
+        echo "  Std deviation: ${std_dev}s"
+
+        echo "$op,$min_time,$max_time,$mean_time,$median_time,$std_dev,Success" >> "$time_log_file"
+        echo "Status: SUCCESS"
+
+        # 创建最终日志文件
+        {
+            echo "Benchmark completed successfully at $(date)"
+            echo "Successful runs: ${#times[@]}/$BENCHMARK_RUNS"
+            echo "Min time: ${min_time}s"
+            echo "Max time: ${max_time}s"
+            echo "Mean time: ${mean_time}s"
+            echo "Median time: ${median_time}s"
+            echo "Std deviation: ${std_dev}s"
+            echo ""
+            echo "All times: ${times[*]}"
+        } > "$op_log_file"
+
+    else
+        echo "All benchmark runs failed!"
+        echo "$op,N/A,N/A,N/A,N/A,N/A,Failed" >> "$time_log_file"
+        echo "Status: FAILED"
+        echo "All benchmark runs failed at $(date)" > "$op_log_file"
     fi
 
     echo "Completed benchmark for operator: $op"
