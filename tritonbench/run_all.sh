@@ -60,13 +60,13 @@ tritonparse=${TRITONPARSE:-false}
 export TRITON_TRACE_GZIP=${TRITON_TRACE_GZIP:-false}
 
 # 设置tritonparse日志目录，可从环境变量读取
-TRITONPARSE_LOGS_DIR=${TRITONPARSE_LOGS_DIR:-tritonparse_logs}
+TRITONPARSE_LOGS_DIR=${TRITONPARSE_LOGS_DIR:-/tmp/tritonparse_logs_$(date +%Y%m%d_%H%M%S)}
 echo "Tritonparse logs directory: $TRITONPARSE_LOGS_DIR"
 
 # 读取warmup相关环境变量
 WARMUP_ENABLED=${WARMUP_ENABLED:-true}
-WARMUP_RUNS=${WARMUP_RUNS:-2}
-BENCHMARK_RUNS=${BENCHMARK_RUNS:-10}
+WARMUP_RUNS=${WARMUP_RUNS:-1}
+BENCHMARK_RUNS=${BENCHMARK_RUNS:-5}
 echo "Warmup enabled: $WARMUP_ENABLED"
 echo "Warmup runs: $WARMUP_RUNS"
 echo "Benchmark runs: $BENCHMARK_RUNS"
@@ -89,6 +89,7 @@ ops=(
     'gemm'
     'grouped_gemm'
     'int4_gemm'
+
     'jagged_layer_norm'
     'jagged_mean'
     'jagged_softmax'
