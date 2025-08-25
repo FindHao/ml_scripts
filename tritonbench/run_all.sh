@@ -135,11 +135,24 @@ fi
 
 mkdir -p "$log_dir"
 
+echo "========================================="
+echo "Runtime Parameters:"
+echo "========================================="
 echo "Script directory: $script_dir"
 echo "Work directory: $work_dir"
+echo "Python executable: $python_cmd"
+echo "GPU device: ROCR_VISIBLE_DEVICES=$ROCR_VISIBLE_DEVICES"
 echo "Tritonparse mode: $tritonparse"
-echo "Time log will be saved to: $time_log_file"
-echo "Error logs will be saved to: $log_dir/"
+echo "TRITON_TRACE_GZIP: $TRITON_TRACE_GZIP"
+echo "TRITONPARSE_LOGS_DIR: $TRITONPARSE_LOGS_DIR"
+echo "Warmup enabled: $WARMUP_ENABLED"
+echo "Warmup runs: $WARMUP_RUNS"
+echo "Benchmark runs: $BENCHMARK_RUNS"
+echo "Time log file: $time_log_file"
+echo "Error logs directory: $log_dir"
+echo "Timestamp: $timestamp"
+echo "========================================="
+echo ""
 
 # 检查工作目录是否存在
 if [ ! -d "$work_dir" ]; then
