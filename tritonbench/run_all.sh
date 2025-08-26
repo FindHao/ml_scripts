@@ -66,7 +66,7 @@ echo "Tritonparse logs directory: $TRITONPARSE_LOGS_DIR"
 # 读取warmup相关环境变量
 WARMUP_ENABLED=${WARMUP_ENABLED:-true}
 WARMUP_RUNS=${WARMUP_RUNS:-1}
-BENCHMARK_RUNS=${BENCHMARK_RUNS:-5}
+BENCHMARK_RUNS=${BENCHMARK_RUNS:-4}
 echo "Warmup enabled: $WARMUP_ENABLED"
 echo "Warmup runs: $WARMUP_RUNS"
 echo "Benchmark runs: $BENCHMARK_RUNS"
