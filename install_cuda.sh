@@ -14,7 +14,7 @@ echo "🚀 ===== CUDA Installation Script Started ====="
 CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX:-$HOME/opt}
 CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX%/}
 CUDA_VERSION=${CUDA_VERSION:-12.8}
-NVSHMEM_VERSION=${NVSHMEM_VERSION:-3.3.20}
+NVSHMEM_VERSION=${NVSHMEM_VERSION:-3.3.24}
 INSTALL_NCCL=${INSTALL_NCCL:-1}
 
 echo "CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX}"
@@ -317,7 +317,7 @@ function install_nvshmem {
   # nvSHMEM license: https://docs.nvidia.com/nvshmem/api/sla.html
   local filename="libnvshmem-linux-${arch_path}-${nvshmem_version}_cuda${cuda_major_version}-archive"
   local suffix=".tar.xz"
-  local url="https://developer.download.nvidia.com/compute/redist/nvshmem/${nvshmem_version}/builds/cuda${cuda_major_version}/txz/agnostic/${dl_arch}/${filename}${suffix}"
+  local url="https://developer.download.nvidia.com/compute/nvshmem/redist/libnvshmem/linux-${arch_path}/${filename}${suffix}"
 
   echo "Downloading nvSHMEM: ${filename}${suffix}"
   if ! wget -q "${url}"; then
