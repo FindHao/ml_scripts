@@ -15,4 +15,7 @@ export LDFLAGS="-L$CONDA_PREFIX/lib"
 # set -DLLVM_ENABLE_LLD=OFF in `scripts/build-llvm-project.sh`
 
 rm -rf .llvm-project build
+# either compile llvm again 
 make dev-install-llvm
+# or directly try the pip install 
+pip install -e .
