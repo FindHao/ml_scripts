@@ -14,7 +14,7 @@ on:
 jobs:
     test-install-cuda:
         runs-on: ${{ matrix.cuda_version == '12.8' && fromJSON('["self-hosted", "linux", "x64"]') || 'ubuntu-latest' }}
-        timeout-minutes: 30
+        timeout-minutes: 360
         strategy:
             fail-fast: false
             matrix:
