@@ -14,7 +14,7 @@ echo "🚀 ===== CUDA Installation Script Started ====="
 CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX:-$HOME/opt}
 CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX%/}
 CUDA_VERSION=${CUDA_VERSION:-12.8}
-NVSHMEM_VERSION=${NVSHMEM_VERSION:-3.3.24}
+NVSHMEM_VERSION=${NVSHMEM_VERSION:-3.4.5}
 INSTALL_NCCL=${INSTALL_NCCL:-1}
 
 echo "CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX}"
@@ -437,7 +437,7 @@ function install_130 {
   echo "Starting installation for CUDA 13.0..."
 
   echo "📦 STEP 1: Installing CUDA toolkit..."
-  install_cuda "13.0.0" "cuda_13.0.0_580.65.06_linux" || error_exit "CUDA 13.0.0 toolkit installation failed"
+  install_cuda "13.0.2" "cuda_13.0.2_580.95.05_linux" || error_exit "CUDA 13.0.2 toolkit installation failed"
 
   echo "🧠 STEP 2: Installing cuDNN..."
   install_cudnn "13" "${CUDNN_VERSION}" || error_exit "cuDNN installation failed"
