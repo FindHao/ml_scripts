@@ -377,7 +377,7 @@ function install_126 {
 
 # CUDA 12.8 installation function
 function install_128 {
-  local CUDNN_VERSION=9.8.0.87
+  local CUDNN_VERSION=9.10.2.21
   echo "Starting installation for CUDA 12.8..."
 
   echo "📦 STEP 1: Installing CUDA toolkit..."
