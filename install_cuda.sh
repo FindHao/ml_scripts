@@ -321,8 +321,16 @@ function install_cuda {
   runfile="${runfile}.run"
 
   echo "Downloading CUDA installation file: ${runfile}"
-  # Use -c for resume support, --progress=dot:giga to show 1 dot per GB (less verbose)
-  if ! wget -c --progress=dot:giga -t 3 "https://developer.download.nvidia.com/compute/cuda/${version}/local_installers/${runfile}" -O "${runfile}"; then
+  # In CI mode, use quiet download; otherwise show progress bar
+  local wget_opts="-c -t 3"
+  if [ "${CI_MODE}" = "1" ]; then
+    # CI mode: quiet download with only final summary
+    wget_opts="${wget_opts} -q --show-progress"
+  else
+    # Interactive mode: show simple progress bar
+    wget_opts="${wget_opts} --progress=bar:force:noscroll"
+  fi
+  if ! wget ${wget_opts} "https://developer.download.nvidia.com/compute/cuda/${version}/local_installers/${runfile}" -O "${runfile}"; then
     error_exit "CUDA installation file download failed: ${runfile}"
   fi
 
