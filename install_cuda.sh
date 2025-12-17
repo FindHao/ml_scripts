@@ -1,6 +1,5 @@
 #!/bin/bash
 # Usage: CUDA_INSTALL_PREFIX=/home/yhao/opt ./install_cuda.sh 12.8
-# CI Usage: CI_MODE=1 CUDA_INSTALL_PREFIX=/tmp/cuda ./install_cuda.sh 12.8
 # Notice: Part of this script is synced with https://github.com/pytorch/pytorch/blob/main/.ci/docker/common/install_cuda.sh
 set -ex
 
@@ -24,16 +23,12 @@ CUDA_VERSION=${CUDA_VERSION:-12.8}
 NVSHMEM_VERSION=${NVSHMEM_VERSION:-3.4.5}
 INSTALL_NCCL=${INSTALL_NCCL:-1}
 
-# CI mode settings
-# Set CI_MODE=1 to enable CI-specific optimizations (disk cleanup, etc.)
-CI_MODE=${CI_MODE:-0}
 # Minimum required disk space in GB (can be overridden)
 REQUIRED_DISK_SPACE_GB=${REQUIRED_DISK_SPACE_GB:-15}
 
 echo "CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX}"
 echo "CUDA_VERSION=${CUDA_VERSION}"
 echo "INSTALL_NCCL=${INSTALL_NCCL}"
-echo "CI_MODE=${CI_MODE}"
 
 # Version configuration using associative arrays
 declare -A CUDA_FULL_VERSION=(
@@ -213,77 +208,6 @@ function print_disk_summary {
   echo "   Total: ${total_gb}GB | Used: ${used_gb}GB | Available: ${available_gb}GB | Usage: ${use_percent}%"
 }
 
-# CI mode: Free up disk space by removing unnecessary pre-installed software
-# This is useful for GitHub Actions runners which have limited disk space
-function ci_free_disk_space {
-  if [ "${CI_MODE}" != "1" ]; then
-    echo "CI_MODE not enabled, skipping disk cleanup"
-    return 0
-  fi
-
-  echo "🧹 ===== CI Mode: Freeing up disk space ====="
-
-  # Print disk space before cleanup
-  print_disk_summary "Disk space BEFORE cleanup" "/"
-  local before_available
-  before_available=$(get_disk_info "/" | awk '{print $3}')
-
-  echo ""
-  echo "Removing unnecessary software packages..."
-
-  # List of directories to remove (common on GitHub Actions runners)
-  local dirs_to_remove=(
-    "/usr/share/dotnet"
-    "/usr/local/lib/android"
-    "/opt/ghc"
-    "/opt/hostedtoolcache/CodeQL"
-    "/usr/local/share/boost"
-    "/usr/share/swift"
-    "/usr/local/graalvm"
-    "/usr/local/.ghcup"
-    "/opt/hostedtoolcache/Python"
-    "/opt/hostedtoolcache/Ruby"
-    "/opt/hostedtoolcache/go"
-    "/opt/hostedtoolcache/node"
-  )
-
-  local removed_count=0
-  for dir in "${dirs_to_remove[@]}"; do
-    if [ -d "${dir}" ]; then
-      echo "  Removing ${dir}..."
-      sudo rm -rf "${dir}" 2>/dev/null || rm -rf "${dir}" 2>/dev/null || true
-      ((removed_count++)) || true
-    fi
-  done
-
-  echo "  Removed ${removed_count} directories"
-
-  # Clean apt cache if apt is available
-  if command_exists apt-get; then
-    echo "  Cleaning apt cache..."
-    sudo apt-get clean 2>/dev/null || true
-    sudo apt-get autoremove -y 2>/dev/null || true
-  fi
-
-  # Clean docker if available
-  if command_exists docker; then
-    echo "  Cleaning Docker images..."
-    docker system prune -af 2>/dev/null || true
-  fi
-
-  echo ""
-  # Print disk space after cleanup
-  print_disk_summary "Disk space AFTER cleanup" "/"
-  local after_available
-  after_available=$(get_disk_info "/" | awk '{print $3}')
-
-  # Calculate freed space
-  local freed_gb=$((after_available - before_available))
-  echo ""
-  echo "✅ Freed approximately ${freed_gb}GB of disk space"
-  echo ""
-}
-
 # Check if file or directory exists
 function check_exists {
   if [ ! -e "$1" ]; then
@@ -296,9 +220,6 @@ check_exists "${CUDA_INSTALL_PREFIX}"
 
 # Check dependencies
 check_dependencies
-
-# CI mode: Free up disk space before checking disk space requirements
-ci_free_disk_space
 
 # Check disk space
 check_disk_space "${REQUIRED_DISK_SPACE_GB}"

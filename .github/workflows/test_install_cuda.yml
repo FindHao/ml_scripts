@@ -13,7 +13,7 @@ on:
 
 jobs:
     test-install-cuda:
-        runs-on: 'ubuntu-latest'
+        runs-on: 'ubuntu-slim'
         timeout-minutes: 360
         strategy:
             fail-fast: false
@@ -35,7 +35,6 @@ jobs:
             - name: Run install_cuda.sh (CUDA ${{ matrix.cuda_version }})
               env:
                   CUDA_INSTALL_PREFIX: /tmp/test-cuda-install
-                  CI_MODE: 1
                   SKIP_PRUNE: 1
                   MAKEFLAGS: -j4
                   NVCC_GENCODE: -gencode arch=compute_75,code=sm_75
@@ -44,7 +43,7 @@ jobs:
                   # Only test CUDA Toolkit installation, no GPU driver install (no root, no real GPU)
                   # Use a supported version from the matrix
                   # NCCL installation is disabled to avoid compilation errors in CI environment
-                  # CI_MODE=1 enables automatic disk cleanup on GitHub Actions runners
+                  # Using ubuntu-24.04-slim runner which has ~75GB free space, no need for CI_MODE disk cleanup
                   bash install_cuda.sh ${{ matrix.cuda_version }} || (cat /tmp/${USER}/cuda_install/error.log || true; exit 1)
 
             - name: Check summary output
