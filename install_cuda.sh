@@ -135,7 +135,7 @@ function check_dependencies {
   echo "Checking dependencies..."
   local missing_deps=()
 
-  for cmd in wget curl git make; do
+  for cmd in wget git make; do
     if ! command_exists "$cmd"; then
       missing_deps+=("$cmd")
     fi
@@ -159,7 +159,7 @@ function check_disk_space {
   available_kb=$(df "${target_dir}" | awk 'NR==2 {print $4}')
   local available_gb=$((available_kb / 1024 / 1024))
 
-  if [ ${available_gb} -lt ${required_gb} ]; then
+  if [ "${available_gb}" -lt "${required_gb}" ]; then
     error_exit "Insufficient disk space: need ${required_gb}GB, only ${available_gb}GB available at ${target_dir}"
   fi
 
@@ -170,7 +170,7 @@ function check_disk_space {
 function check_network {
   echo "Checking network connectivity to NVIDIA servers..."
 
-  local test_url="https://developer.download.nvidia.com"
+  local test_url="https://developer.nvidia.com/cuda/toolkit"
   local http_code
 
   http_code=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 "${test_url}" 2>/dev/null || echo "000")
@@ -201,10 +201,14 @@ function print_disk_summary {
 
   local disk_info
   disk_info=$(get_disk_info "${target_path}")
-  local total_gb=$(echo "${disk_info}" | awk '{print $1}')
-  local used_gb=$(echo "${disk_info}" | awk '{print $2}')
-  local available_gb=$(echo "${disk_info}" | awk '{print $3}')
-  local use_percent=$(echo "${disk_info}" | awk '{print $4}')
+  local total_gb
+  local used_gb
+  local available_gb
+  local use_percent
+  total_gb=$(echo "${disk_info}" | awk '{print $1}')
+  used_gb=$(echo "${disk_info}" | awk '{print $2}')
+  available_gb=$(echo "${disk_info}" | awk '{print $3}')
+  use_percent=$(echo "${disk_info}" | awk '{print $4}')
 
   echo "💾 ${label}:"
   echo "   Total: ${total_gb}GB | Used: ${used_gb}GB | Available: ${available_gb}GB | Usage: ${use_percent}%"
@@ -251,9 +255,6 @@ function install_cuda {
 
   echo "CUDA installation file download complete, preparing to install..."
   chmod +x "${runfile}"
-
-  # Create installation progress marker
-  touch "${USER_TMPDIR}/cuda_${version}_download_complete"
 
   echo "Executing CUDA installation script..."
   if ! ./"${runfile}" --toolkit --silent --toolkitpath="${CUDA_INSTALL_PREFIX}/cuda-${major_minor}"; then
@@ -390,8 +391,8 @@ function install_cusparselt {
   echo "${cusparselt_version}" >"${USER_TMPDIR}/cusparselt_version.txt"
 
   echo "Downloading cuSparseLt: ${CUSPARSELT_NAME}.tar.xz"
-  # Use -C - for resume support, --retry 3 for retry
-  if ! curl -C - --retry 3 -OLs "https://developer.download.nvidia.com/compute/cusparselt/redist/libcusparse_lt/linux-${arch_path}/${CUSPARSELT_NAME}.tar.xz"; then
+  # Use -c for resume support, -t 3 for retry
+  if ! wget -c -t 3 -q "https://developer.download.nvidia.com/compute/cusparselt/redist/libcusparse_lt/linux-${arch_path}/${CUSPARSELT_NAME}.tar.xz"; then
     popd
     rm -rf tmp_cusparselt
     error_exit "cuSparseLt download failed"
@@ -517,6 +518,9 @@ function install_cuda_version {
 
   if [ "$(id -u)" -eq 0 ]; then
     ldconfig
+  else
+    echo "⚠️  Note: Running as non-root user, ldconfig was not executed."
+    echo "   You may need to set LD_LIBRARY_PATH to use the installed libraries."
   fi
 
   echo "✅ CUDA ${version} installation completed"
@@ -530,12 +534,12 @@ echo "🔧 ===== Parsing command line arguments ====="
 # Generate VALID_VERSIONS from the configuration arrays to keep them in sync
 VALID_VERSIONS=("${!CUDA_FULL_VERSION[@]}")
 # Sort the versions for consistent ordering
-IFS=$'\n' VALID_VERSIONS=($(sort -V <<<"${VALID_VERSIONS[*]}")); unset IFS
+mapfile -t VALID_VERSIONS < <(printf '%s\n' "${VALID_VERSIONS[@]}" | sort -V)
 
 # Parse command line arguments
 while test $# -gt 0; do
   echo "Processing argument: $1"
-  if [[ " ${VALID_VERSIONS[@]} " =~ " $1 " ]]; then
+  if [[ " ${VALID_VERSIONS[*]} " =~ " $1 " ]]; then
     CUDA_VERSION=$1
     echo "Setting CUDA version to: $CUDA_VERSION"
   else

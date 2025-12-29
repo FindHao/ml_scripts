@@ -13,8 +13,8 @@ on:
 
 jobs:
     test-install-cuda:
-        runs-on: ['self-hosted', 'Linux', 'X64']
-        timeout-minutes: 360
+        runs-on: ubuntu-slim
+        timeout-minutes: 60
         strategy:
             fail-fast: false
             matrix:
@@ -22,7 +22,7 @@ jobs:
 
         steps:
             - name: Checkout code
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: Set up test install prefix
               run: |
@@ -38,6 +38,8 @@ jobs:
                   SKIP_PRUNE: 1
                   MAKEFLAGS: -j4
                   NVCC_GENCODE: -gencode arch=compute_75,code=sm_75
+                  # Disable NCCL in CI: NCCL compilation is slow and times out (>20min)
+                  INSTALL_NCCL: 0
               run: |
                   # Only test CUDA Toolkit installation, no GPU driver install (no root, no real GPU)
                   # Use a supported version from the matrix
