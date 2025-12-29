@@ -22,6 +22,7 @@ CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX%/}
 CUDA_VERSION=${CUDA_VERSION:-12.8}
 NVSHMEM_VERSION=${NVSHMEM_VERSION:-3.4.5}
 INSTALL_NCCL=${INSTALL_NCCL:-1}
+NCCL_VERSION=${NCCL_VERSION:-v2.28.9-1}
 
 # Minimum required disk space in GB (can be overridden)
 REQUIRED_DISK_SPACE_GB=${REQUIRED_DISK_SPACE_GB:-15}
@@ -29,6 +30,7 @@ REQUIRED_DISK_SPACE_GB=${REQUIRED_DISK_SPACE_GB:-15}
 echo "CUDA_INSTALL_PREFIX=${CUDA_INSTALL_PREFIX}"
 echo "CUDA_VERSION=${CUDA_VERSION}"
 echo "INSTALL_NCCL=${INSTALL_NCCL}"
+echo "NCCL_VERSION=${NCCL_VERSION}"
 
 # Version configuration using associative arrays
 declare -A CUDA_FULL_VERSION=(
@@ -323,22 +325,11 @@ function install_nccl {
   fi
 
   echo "Installing NCCL for CUDA ${CUDA_VERSION}..."
-  local NCCL_VERSION=""
-
-  echo "Getting NCCL version information..."
-  if [[ ${CUDA_VERSION:0:2} == "12" ]]; then
-    NCCL_VERSION=$(curl -sL https://github.com/pytorch/pytorch/raw/refs/heads/main/.ci/docker/ci_commit_pins/nccl-cu12.txt)
-  elif [[ ${CUDA_VERSION:0:2} == "13" ]]; then
-    NCCL_VERSION=$(curl -sL https://github.com/pytorch/pytorch/raw/refs/heads/main/.ci/docker/ci_commit_pins/nccl-cu13.txt)
-  else
-    error_exit "Unsupported CUDA version: ${CUDA_VERSION}"
-  fi
-
   if [[ -z "${NCCL_VERSION}" ]]; then
-    error_exit "Failed to get NCCL version information"
+    error_exit "NCCL_VERSION is empty"
   fi
 
-  echo "Retrieved NCCL version: ${NCCL_VERSION}"
+  echo "Using NCCL version: ${NCCL_VERSION}"
   echo "${NCCL_VERSION}" >"${USER_TMPDIR}/nccl_version.txt"
 
   # NCCL license: https://docs.nvidia.com/deeplearning/nccl/#licenses
