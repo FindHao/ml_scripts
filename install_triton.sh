@@ -4,7 +4,12 @@
 
 conda create -n pta python=3.13
 conda activate pta
+
+
+# option 1
 conda install libstdcxx-ng lld zstd zlib libgcc-ng ninja ccache cmake -y -c conda-forge
+# option 2
+conda install -c conda-forge gcc=13.2.0
 # optional
 conda install clang=21 clangxx=21 -y -c conda-forge
 export CMAKE_PREFIX_PATH="$CONDA_PREFIX"
